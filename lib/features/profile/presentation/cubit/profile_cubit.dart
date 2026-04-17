@@ -5,8 +5,8 @@ class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit()
       : super(
           const ProfileState(
-            name: 'Alex Thompson',
-            email: 'alex.thompson@gmail.com',
+            name: 'Sekh Gulam Mainuddin',
+            email: 'example@gmail.com',
             isSyncing: true,
             profileImageUrl: 'https://example.com/profile.jpg',
           ),

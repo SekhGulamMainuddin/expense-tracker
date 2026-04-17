@@ -94,20 +94,15 @@ class _AppIdentitySection extends StatelessWidget {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.network(
-              'https://placeholder.com/logo', // Replace with actual logo
-              errorBuilder: (context, _, __) => const Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 40,
-                color: Color(0xFF2B8CEE),
-              ),
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/branding/launcher_icon.png',
             ),
           ),
         ),
         const SizedBox(height: 24),
         Text(
-          'Luminous Slate',
+          'Expense Tracker',
           style: GoogleFonts.manrope(
             fontSize: 30,
             fontWeight: FontWeight.w800,

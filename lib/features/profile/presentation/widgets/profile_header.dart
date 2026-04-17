@@ -34,14 +34,6 @@ class ProfileHeader extends StatelessWidget {
                     backgroundImage: NetworkImage(state.profileImageUrl),
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF2B8CEE),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.edit, size: 14, color: Colors.white),
-                ),
               ],
             ),
             const SizedBox(height: 16),
