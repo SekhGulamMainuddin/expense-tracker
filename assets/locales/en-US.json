@@ -1,0 +1,13 @@
+{
+  "app.title": "Expense Tracker",
+  "overview.hero": "Track every rupee with clarity",
+  "overview.subtitle": "A clean starter dashboard is ready for budgets, categories, and transaction history.",
+  "overview.title": "Monthly spending snapshot",
+  "overview.body": "You are on track this month. Add transactions, budgets, and reports on top of this base architecture.",
+  "overview.cta": "Open starter notes",
+  "overview.sheet_title": "Starter notes",
+  "overview.sheet_body": "This project already includes MVVM plus Cubit structure, GoRouter navigation, shared overlays, ScreenUtil, localization, launcher icon tooling, and native splash tooling.",
+  "overview.error": "Unable to load your dashboard preview.",
+  "common.retry": "Retry",
+  "common.ok": "OK"
+}
