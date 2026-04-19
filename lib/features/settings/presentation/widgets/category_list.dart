@@ -8,13 +8,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/styles/app_texts.dart';
 
+import 'package:expense_tracker/core/di/service_locator.dart';
+
 class CategoryList extends StatelessWidget {
   const CategoryList({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsCubit, SettingsState>(
+      bloc: getIt<SettingsCubit>(),
       builder: (context, state) {
+        if (state is! SettingsLoaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
         return Column(
           children: [
             CategoryTile(
@@ -23,16 +29,17 @@ class CategoryList extends StatelessWidget {
               icon: Icons.restaurant,
               color: Colors.orange,
               isExpanded: state.expandedCategories.contains('Food'),
-              onTap: () =>
-                  context.read<SettingsCubit>().toggleCategory('Food'),
+              onTap: () => getIt<SettingsCubit>().toggleCategory('Food'),
             ),
             SizedBox(height: 12.h),
-            const CategoryTile(
+            CategoryTile(
               title: 'Travel',
               subtitle: '4 Subcategories',
               icon: Icons.flight,
               color: Colors.blue,
-              isExpanded: false,
+              isExpanded: state.expandedCategories.contains('Travel'),
+              onTap: () =>
+                  context.read<SettingsCubit>().toggleCategory('Travel'),
             ),
             SizedBox(height: 12.h),
             _addCategoryButton(context),
@@ -59,10 +66,10 @@ class CategoryList extends StatelessWidget {
               SizedBox(width: 8.w),
               AppTextBodyLg(
                 'Add New Category',
-                
+
                 style: context.theme.textTheme.bodyLarge!.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),

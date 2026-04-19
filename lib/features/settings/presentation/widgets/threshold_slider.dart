@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/styles/app_texts.dart';
 
+import 'package:expense_tracker/core/di/service_locator.dart';
+
 class ThresholdSlider extends StatelessWidget {
   const ThresholdSlider({
     super.key,
@@ -22,7 +24,10 @@ class ThresholdSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsCubit, SettingsState>(
+      bloc: getIt<SettingsCubit>(),
       builder: (context, state) {
+        if (state is! SettingsLoaded) return const SizedBox.shrink();
+
         final val = type == 'safe'
             ? state.safeHaven
             : (type == 'caution' ? state.mildCaution : state.dangerThreshold);
@@ -37,20 +42,18 @@ class ThresholdSlider extends StatelessWidget {
                     SizedBox(width: 8.w),
                     AppTextLabelMd(
                       label,
-                      
                       style: AppTextStyles.labelMd(context).copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
                 AppTextLabelMd(
                   '${val.toInt()}%',
-                  
                   color: color,
                   style: AppTextStyles.labelMd(context).copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -59,8 +62,7 @@ class ThresholdSlider extends StatelessWidget {
               min: 0,
               max: 100,
               activeColor: color,
-              onChanged: (v) =>
-                  context.read<SettingsCubit>().updateThreshold(type, v),
+              onChanged: (v) => getIt<SettingsCubit>().updateThreshold(type, v),
             ),
           ],
         );

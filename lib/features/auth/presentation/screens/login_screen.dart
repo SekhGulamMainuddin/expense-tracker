@@ -1,23 +1,48 @@
 import 'package:expense_tracker/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:expense_tracker/features/auth/presentation/cubit/login_state.dart';
+import 'package:expense_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:expense_tracker/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/styles/app_dimensions.dart';
 import '../../../../core/styles/app_texts.dart';
 
-class LoginScreen extends StatelessWidget {
+import 'package:expense_tracker/core/di/service_locator.dart';
+
+class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
 
   const LoginScreen({super.key});
 
   @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _loginCubit = getIt<LoginCubit>();
+
+  @override
+  void dispose() {
+    _loginCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => LoginCubit(),
+    return BlocListener<LoginCubit, LoginState>(
+      bloc: _loginCubit,
+      listener: (context, state) {
+        if (state is LoginFailure) {
+          context.showAppSnackBar(state.errorMessage);
+        }
+        if (state is LoginSuccess) {
+          context.go(HomeScreen.routeName);
+        }
+      },
       child: Scaffold(
         body: Stack(
           children: [
@@ -31,20 +56,14 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       const _AppIdentitySection(),
                       SizedBox(height: 48.h),
-                      BlocConsumer<LoginCubit, LoginState>(
-                        listener: (context, state) {
-                          if (state.isSuccess) {
-                            // Success logic
-                          }
-                        },
+                      BlocBuilder<LoginCubit, LoginState>(
+                        bloc: _loginCubit,
                         builder: (context, state) {
                           return Column(
                             children: [
                               _GoogleSignInButton(
-                                isLoading: state.isAuthenticating,
-                                onPressed: () => context
-                                    .read<LoginCubit>()
-                                    .signInWithGoogle(),
+                                isLoading: state is LoginLoading,
+                                onPressed: () => _loginCubit.signInWithGoogle(),
                               ),
                             ],
                           );
@@ -60,38 +79,38 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildBackgroundAccents(BuildContext context) {
-    final theme = context.theme;
-    return Stack(
-      children: [
-        Positioned(
-          top: -100.h,
-          left: -100.w,
-          child: Container(
-            width: 384.w,
-            height: 384.h,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.primary.withOpacity(0.05),
-            ),
+Widget _buildBackgroundAccents(BuildContext context) {
+  final theme = context.theme;
+  return Stack(
+    children: [
+      Positioned(
+        top: -100.h,
+        left: -100.w,
+        child: Container(
+          width: 384.w,
+          height: 384.h,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.colorScheme.primary.withOpacity(0.05),
           ),
         ),
-        Positioned(
-          bottom: 200.h,
-          right: -100.w,
-          child: Container(
-            width: 320.w,
-            height: 320.h,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.primary.withOpacity(0.1),
-            ),
+      ),
+      Positioned(
+        bottom: 200.h,
+        right: -100.w,
+        child: Container(
+          width: 320.w,
+          height: 320.h,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.colorScheme.primary.withOpacity(0.1),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }
 
 class _AppIdentitySection extends StatelessWidget {
@@ -162,26 +181,26 @@ class _GoogleSignInButton extends StatelessWidget {
         ),
         child: isLoading
             ? SizedBox(
-                height: 20.h,
-                width: 20.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.primary,
-                ),
-              )
+          height: 20.h,
+          width: 20.w,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: cs.primary,
+          ),
+        )
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Assets.images.googleLogo.svg(height: 20.h),
-                  SizedBox(width: 12.w),
-                  AppTextBodyMd(
-                    'Continue with Google',
-                    style: context.theme.textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Assets.images.googleLogo.svg(height: 20.h),
+            SizedBox(width: 12.w),
+            AppTextBodyMd(
+              'Continue with Google',
+              style: context.theme.textTheme.bodyMedium!.copyWith(
+                fontWeight: FontWeight.w600,
               ),
+            ),
+          ],
+        ),
       ),
     );
   }

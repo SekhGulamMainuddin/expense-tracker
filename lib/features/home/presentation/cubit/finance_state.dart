@@ -4,7 +4,7 @@ class FinanceState {
   final double expenses;
   final List<Map<String, dynamic>> transactions;
 
-  const FinanceState({
+  FinanceState({
     required this.balance,
     required this.income,
     required this.expenses,

@@ -1,30 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/navigation/main_screen.dart';
 import 'package:expense_tracker/features/add_expense/presentation/screens/add_expense_screen.dart';
 import 'package:expense_tracker/features/auth/presentation/screens/login_screen.dart';
 import 'package:expense_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:expense_tracker/features/profile/presentation/screens/profile_screen.dart';
 import 'package:expense_tracker/features/settings/presentation/screens/settings_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 final class AppRouter {
   AppRouter._internal() {
     router = GoRouter(
-      initialLocation: HomeScreen.routeName,
+      initialLocation: getIt<FirebaseAuth>().currentUser != null
+          ? HomeScreen.routeName
+          : LoginScreen.routeName,
       navigatorKey: parentNavigatorKey,
-      redirect: (context, state) {
-        final isGoingToLogin = state.matchedLocation == LoginScreen.routeName;
-
-        if (!isLoggedIn && !isGoingToLogin) {
-          return LoginScreen.routeName;
-        }
-
-        if (isLoggedIn && isGoingToLogin) {
-          return HomeScreen.routeName;
-        }
-
-        return null;
-      },
       routes: [
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
@@ -80,7 +71,4 @@ final class AppRouter {
   static late final GoRouter router;
 
   static final parentNavigatorKey = GlobalKey<NavigatorState>();
-
-  // Mock flag for authentication status
-  static bool isLoggedIn = false;
 }

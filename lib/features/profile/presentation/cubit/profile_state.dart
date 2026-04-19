@@ -1,22 +1,43 @@
-class ProfileState {
+sealed class ProfileState {}
+
+final class ProfileInitial extends ProfileState {}
+
+final class ProfileLoading extends ProfileState {}
+
+final class ProfileLoaded extends ProfileState {
+  final bool isDriveConnected;
+  final bool isSyncing;
   final String name;
   final String email;
-  final bool isSyncing;
   final String profileImageUrl;
 
-  const ProfileState({
+  ProfileLoaded({
+    required this.isDriveConnected,
     required this.name,
     required this.email,
-    required this.isSyncing,
     required this.profileImageUrl,
+    this.isSyncing = false,
   });
 
-  ProfileState copyWith({bool? isSyncing}) {
-    return ProfileState(
-      name: name,
-      email: email,
-      profileImageUrl: profileImageUrl,
+  ProfileLoaded copyWith({
+    bool? isDriveConnected,
+    bool? isSyncing,
+    String? name,
+    String? email,
+    String? profileImageUrl,
+  }) {
+    return ProfileLoaded(
+      isDriveConnected: isDriveConnected ?? this.isDriveConnected,
       isSyncing: isSyncing ?? this.isSyncing,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
     );
   }
+}
+
+final class ProfileFailure extends ProfileState {
+  final String errorMessage;
+
+  ProfileFailure(this.errorMessage);
 }

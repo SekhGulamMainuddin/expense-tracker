@@ -3,7 +3,7 @@ class AddExpenseState {
   final String selectedCategory;
   final String selectedSubCategory;
 
-  const AddExpenseState({
+  AddExpenseState({
     required this.amount,
     required this.selectedCategory,
     required this.selectedSubCategory,

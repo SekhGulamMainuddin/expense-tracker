@@ -1,11 +1,13 @@
-class LoginState {
-  final bool isAuthenticating;
-  final String? errorMessage;
-  final bool isSuccess;
+sealed class LoginState {}
 
-  const LoginState({
-    this.isAuthenticating = false,
-    this.errorMessage,
-    this.isSuccess = false,
-  });
+final class LoginInitial extends LoginState {}
+
+final class LoginLoading extends LoginState {}
+
+final class LoginSuccess extends LoginState {}
+
+final class LoginFailure extends LoginState {
+  final String errorMessage;
+
+  LoginFailure(this.errorMessage);
 }

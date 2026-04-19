@@ -1,9 +1,13 @@
-class SubcategoryState {
-  final bool isSubmitting;
-  final bool success;
+sealed class SubcategoryState {}
 
-  const SubcategoryState({
-    this.isSubmitting = false,
-    this.success = false,
-  });
+final class SubcategoryInitial extends SubcategoryState {}
+
+final class SubcategoryLoading extends SubcategoryState {}
+
+final class SubcategorySuccess extends SubcategoryState {}
+
+final class SubcategoryFailure extends SubcategoryState {
+  final String errorMessage;
+
+  SubcategoryFailure(this.errorMessage);
 }

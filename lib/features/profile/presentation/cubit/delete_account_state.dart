@@ -2,7 +2,7 @@ class DeleteAccountState {
   final bool isDeleting;
   final bool isSuccess;
 
-  const DeleteAccountState({
+  DeleteAccountState({
     this.isDeleting = false,
     this.isSuccess = false,
   });

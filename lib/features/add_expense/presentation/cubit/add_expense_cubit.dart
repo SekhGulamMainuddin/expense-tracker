@@ -4,12 +4,12 @@ import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expe
 class AddExpenseCubit extends Cubit<AddExpenseState> {
   AddExpenseCubit()
       : super(
-          const AddExpenseState(
-            amount: '0.00',
-            selectedCategory: 'Food',
-            selectedSubCategory: 'Lunch',
-          ),
-        );
+    AddExpenseState(
+      amount: '0.00',
+      selectedCategory: 'Food',
+      selectedSubCategory: 'Lunch',
+    ),
+  );
 
   void keyPressed(String value) {
     final current = state.amount;

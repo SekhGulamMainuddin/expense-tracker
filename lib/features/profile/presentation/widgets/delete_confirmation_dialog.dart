@@ -10,7 +10,8 @@ import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/styles/app_texts.dart';
 
 class DeleteConfirmationDialog extends StatelessWidget {
-  const DeleteConfirmationDialog({super.key});
+  final VoidCallback onConfirm;
+  const DeleteConfirmationDialog({super.key, required this.onConfirm});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
       child: BlocListener<DeleteAccountCubit, DeleteAccountState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            Navigator.pop(context);
+            context.closeAlertDialog();
+            onConfirm();
           }
         },
         child: ConstrainedBox(
@@ -36,14 +38,14 @@ class DeleteConfirmationDialog extends StatelessWidget {
                     SizedBox(height: 24.h),
                     AppTextHeadlineSm(
                       'Delete Account?',
-                      
+
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 12.h),
                     AppTextBodyMd(
                       'This action is irreversible. All your transaction history, '
-                      'saved reports, and personalized insights will be permanently removed.',
-                      
+                          'saved reports, and personalized insights will be permanently removed.',
+
                       textAlign: TextAlign.center,
                       height: 1.5,
                       color: cs.onSurfaceVariant,
@@ -130,23 +132,23 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 ),
                 child: state.isDeleting
                     ? SizedBox(
-                        height: 20.h,
-                        width: 20.w,
-                        child: CircularProgressIndicator(
-                          color: cs.onError,
-                          strokeWidth: 2,
-                        ),
-                      )
+                  height: 20.h,
+                  width: 20.w,
+                  child: CircularProgressIndicator(
+                    color: cs.onError,
+                    strokeWidth: 2,
+                  ),
+                )
                     : AppTextLabelMd(
-                        'YES, DELETE',
-                        
-                        uppercase: true,
-                        style: AppTextStyles.labelMd(context).copyWith(
-                              letterSpacing: 1.1,
-                              fontWeight: FontWeight.w800,
-                            ),
-                        color: cs.onError,
-                      ),
+                  'YES, DELETE',
+
+                  uppercase: true,
+                  style: AppTextStyles.labelMd(context).copyWith(
+                    letterSpacing: 1.1,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  color: cs.onError,
+                ),
               ),
             ),
             SizedBox(height: 12.h),
@@ -160,12 +162,12 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 ),
                 child: AppTextLabelMd(
                   'CANCEL',
-                  
+
                   uppercase: true,
                   style: AppTextStyles.labelMd(context).copyWith(
-                        letterSpacing: 1.1,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    letterSpacing: 1.1,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ),
