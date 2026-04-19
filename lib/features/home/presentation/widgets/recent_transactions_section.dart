@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/home/presentation/cubit/finance_state.dart';
 import 'package:expense_tracker/features/home/presentation/widgets/transaction_tile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/styles/app_texts.dart';
 
 class RecentTransactionsSection extends StatelessWidget {
   const RecentTransactionsSection({super.key, required this.state});
@@ -10,6 +13,7 @@ class RecentTransactionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Padding(
       padding: EdgeInsets.all(24.r),
       child: Column(
@@ -17,23 +21,21 @@ class RecentTransactionsSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Recent Payments',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
-              ),
-              Text(
-                'See All',
-                style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+              const AppTextHeadlineSm('Recent Payments', ),
+              GestureDetector(
+                onTap: () {},
+                child: AppTextBodyMd(
+                  'See All',
+                  
+                  color: cs.primary,
+                ),
               ),
             ],
           ),
           SizedBox(height: 16.h),
-          ...state.transactions
-              .map((tx) => TransactionTile(transaction: tx))
-              .toList(),
+          ...state.transactions.map((tx) => TransactionTile(transaction: tx)),
         ],
       ),
     );
   }
 }
-

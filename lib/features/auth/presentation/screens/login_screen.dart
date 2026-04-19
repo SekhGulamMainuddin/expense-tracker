@@ -2,10 +2,12 @@ import 'package:expense_tracker/features/auth/presentation/cubit/login_cubit.dar
 import 'package:expense_tracker/features/auth/presentation/cubit/login_state.dart';
 import 'package:expense_tracker/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_dimensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/login';
@@ -29,7 +31,25 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       const _AppIdentitySection(),
                       SizedBox(height: 48.h),
-                      const _AuthenticationCanvas(),
+                      BlocConsumer<LoginCubit, LoginState>(
+                        listener: (context, state) {
+                          if (state.isSuccess) {
+                            // Success logic
+                          }
+                        },
+                        builder: (context, state) {
+                          return Column(
+                            children: [
+                              _GoogleSignInButton(
+                                isLoading: state.isAuthenticating,
+                                onPressed: () => context
+                                    .read<LoginCubit>()
+                                    .signInWithGoogle(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -80,80 +100,41 @@ class _AppIdentitySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
+    final cs = theme.colorScheme;
     return Column(
       children: [
-        // App Icon Mockup
         Container(
           width: 80.w,
           height: 80.h,
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: cs.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                blurRadius: 40.r,
-                spreadRadius: 10.r,
-              )
+                color: cs.shadow.withOpacity(0.35),
+                blurRadius: 24.r,
+                spreadRadius: 4.r,
+              ),
             ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16.r),
-            child: Assets.branding.launcherIcon.image(),
+            child: Assets.branding.launcherIcon.image(fit: BoxFit.cover),
           ),
         ),
         SizedBox(height: 24.h),
-        Text(
-          'Expense Tracker',
-          style: theme.textTheme.headlineLarge,
-        ),
+        const AppTextHeadlineSm('Expense Tracker', textAlign: TextAlign.center),
         SizedBox(height: 12.h),
         SizedBox(
           width: 280.w,
-          child: Text(
+          child: AppTextBodyMd(
             'Experience the next generation of financial intelligence and asset management.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+            height: 1.5,
+            color: cs.onSurfaceVariant,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _AuthenticationCanvas extends StatelessWidget {
-  const _AuthenticationCanvas();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.theme;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(32.r),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
-      ),
-      child: BlocListener<LoginCubit, LoginState>(
-        listener: (context, state) {
-          if (state.isSuccess) {
-            // Success logic
-          }
-        },
-        child: BlocBuilder<LoginCubit, LoginState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                _GoogleSignInButton(
-                  isLoading: state.isAuthenticating,
-                  onPressed: () => context.read<LoginCubit>().signInWithGoogle(),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
     );
   }
 }
@@ -166,34 +147,37 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-    return SizedBox(
-      width: double.infinity,
-      height: 56.h,
-      child: OutlinedButton(
+    final cs = context.theme.colorScheme;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
-        style: OutlinedButton.styleFrom(
-          backgroundColor: theme.colorScheme.surface,
-          side: BorderSide(color: theme.colorScheme.outline),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          backgroundColor: cs.surfaceContainerHighest,
+          foregroundColor: cs.onSurface,
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
         ),
         child: isLoading
             ? SizedBox(
                 height: 20.h,
                 width: 20.w,
-                child: const CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: cs.primary,
+                ),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Assets.images.googleLogo.svg(height: 20.h),
                   SizedBox(width: 12.w),
-                  Text(
+                  AppTextBodyMd(
                     'Continue with Google',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.5,
-                      fontSize: 16.sp,
+                    style: context.theme.textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -202,6 +186,3 @@ class _GoogleSignInButton extends StatelessWidget {
     );
   }
 }
-
-
-

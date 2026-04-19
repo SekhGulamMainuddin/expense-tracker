@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:expense_tracker/core/styles/app_palette.dart';
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/widgets/primary_button.dart';
 
@@ -26,18 +27,22 @@ class AppAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Dialog(
       insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-      backgroundColor: AppPalette.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      backgroundColor: cs.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
       child: Padding(
         padding: EdgeInsets.all(20.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (title != null) appTextS1(title!),
-            if (subtitle != null) ...[8.verticalSpace, appTextB2(subtitle!)],
+            if (title != null) AppTextHeadlineSm(title!),
+            if (subtitle != null) ...[
+              8.verticalSpace,
+              AppTextBodyMd(subtitle!, color: cs.onSurfaceVariant),
+            ],
             if (content != null) ...[16.verticalSpace, content!],
             if (buttonText != null && onPressed != null) ...[
               20.verticalSpace,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:expense_tracker/core/styles/app_palette.dart';
 import 'package:expense_tracker/core/widgets/app_modal_bottom_sheet.dart';
 
 final class BottomSheetConstants {

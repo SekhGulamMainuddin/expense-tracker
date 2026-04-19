@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/add_expense/presentation/screens/add_expense_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,21 +14,26 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Scaffold(
       body: navigationShell,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AddExpenseScreen.routeName),
         icon: Icon(Icons.add, size: 24.r),
-        label: Text(
+        label: AppTextBodyLg(
           'Add Expense',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+          style: context.theme.textTheme.bodyLarge!.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+          color: cs.onPrimaryContainer,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         key: bottomNavKey,
         currentIndex: navigationShell.currentIndex,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.grey,
+        backgroundColor: cs.surfaceContainer,
+        selectedItemColor: cs.primary,
+        unselectedItemColor: cs.onSurfaceVariant,
         onTap: (index) => navigationShell.goBranch(
           index,
           initialLocation: index == navigationShell.currentIndex,
@@ -45,10 +51,9 @@ class MainScreen extends StatelessWidget {
             label: 'Settings',
           ),
         ],
-        selectedLabelStyle: TextStyle(fontSize: 12.sp),
-        unselectedLabelStyle: TextStyle(fontSize: 12.sp),
+        selectedLabelStyle: context.theme.textTheme.labelSmall,
+        unselectedLabelStyle: context.theme.textTheme.labelSmall,
       ),
     );
   }
 }
-

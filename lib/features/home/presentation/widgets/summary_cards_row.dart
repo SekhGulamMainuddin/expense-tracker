@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class SummaryCardsRow extends StatelessWidget {
   const SummaryCardsRow({super.key});
@@ -12,49 +13,49 @@ class SummaryCardsRow extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Row(
         children: [
-          _summaryItem(context, 'Daily', '\$42.50', '-5%', Colors.red),
+          _summaryItem(context, 'Daily', '\$42.50', '-5%', context.theme.colorScheme.error),
           SizedBox(width: 12.w),
-          _summaryItem(context, 'Weekly', '\$310.20', '+2%', const Color(0xFF10B981)),
+          _summaryItem(context, 'Weekly', '\$310.20', '+2%', context.theme.colorScheme.secondary),
           SizedBox(width: 12.w),
-          _summaryItem(context, 'Monthly', '\$1,240', '-1%', Colors.red),
+          _summaryItem(context, 'Monthly', '\$1,240', '-1%', context.theme.colorScheme.error),
         ],
       ),
     );
   }
 
-  Widget _summaryItem(BuildContext context, String label, String value, String percent, Color pColor) {
-    final theme = context.theme;
+  Widget _summaryItem(
+    BuildContext context,
+    String label,
+    String value,
+    String percent,
+    Color pColor,
+  ) {
+    final cs = context.theme.colorScheme;
     return Expanded(
       child: Container(
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+          color: cs.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            AppTextLabelMd(
               label,
-              style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+              
+              uppercase: true,
+              color: cs.onSurfaceVariant,
             ),
-            SizedBox(height: 4.h),
-            Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            Text(
+            SizedBox(height: 6.h),
+            AppTextTitleMd(value, ),
+            AppTextLabelSm(
               percent,
-              style: TextStyle(
-                color: pColor,
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w600,
-              ),
+              
+              style: context.theme.textTheme.labelSmall!.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+              color: pColor,
             ),
           ],
         ),
@@ -62,5 +63,3 @@ class SummaryCardsRow extends StatelessWidget {
     );
   }
 }
-
-

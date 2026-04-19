@@ -22,7 +22,7 @@ class MainApp extends StatelessWidget {
             title: 'Expense Tracker',
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
-            themeMode: ThemeMode.dark,
+            themeMode: ThemeMode.system,
             locale: context.locale,
             supportedLocales: context.supportedLocales,
             localizationsDelegates: context.localizationDelegates,

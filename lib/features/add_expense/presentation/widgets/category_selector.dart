@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class CategorySelector extends StatelessWidget {
   const CategorySelector({super.key});
@@ -18,14 +19,16 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-          child: const Text(
+          child: AppTextLabelMd(
             'Category',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            uppercase: true,
+            color: cs.onSurfaceVariant,
           ),
         ),
         SizedBox(
@@ -38,12 +41,10 @@ class CategorySelector extends StatelessWidget {
               final category = _categories[index];
               return BlocBuilder<AddExpenseCubit, AddExpenseState>(
                 builder: (context, state) {
-                  final isSelected =
-                      state.selectedCategory == category['name'];
+                  final isSelected = state.selectedCategory == category['name'];
                   return GestureDetector(
-                    onTap: () => context
-                        .read<AddExpenseCubit>()
-                        .selectCategory(category['name']! as String),
+                    onTap: () =>
+                        context.read<AddExpenseCubit>().selectCategory(category['name']! as String),
                     child: _categoryItem(
                       context: context,
                       icon: category['icon']! as IconData,
@@ -66,7 +67,7 @@ class CategorySelector extends StatelessWidget {
     required String name,
     required bool isSelected,
   }) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.w),
       child: Column(
@@ -75,35 +76,33 @@ class CategorySelector extends StatelessWidget {
             width: 64.w,
             height: 64.h,
             decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withOpacity(0.3),
+              color: isSelected ? cs.primary : cs.surfaceContainerHigh,
               shape: BoxShape.circle,
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withOpacity(0.3),
-                        blurRadius: 10.r,
+                        color: cs.primary.withOpacity(0.35),
+                        blurRadius: 24.r,
                       ),
                     ]
                   : null,
             ),
             child: Icon(
               icon,
-              color: isSelected ? Colors.white : Colors.grey[600],
+              color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
               size: 24.r,
             ),
           ),
           SizedBox(height: 8.h),
-          Text(
+          AppTextLabelMd(
             name,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? theme.colorScheme.primary : Colors.grey,
-            ),
+            color: isSelected ? cs.primary : cs.onSurfaceVariant,
+            style: context.theme.textTheme.labelMedium!.copyWith(
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                ),
           ),
         ],
       ),
     );
   }
 }
-

@@ -1,7 +1,7 @@
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_list.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/budget_section.dart';
@@ -26,28 +26,22 @@ class SettingsScreen extends StatelessWidget {
             },
             icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary, size: 24.r),
           ),
-          title: Text(
-            'Settings',
-            style: GoogleFonts.manrope(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.sp,
-            ),
-          ),
+          title: const AppTextHeadlineSm('Settings', ),
         ),
         body: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 100.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle('Category Management'),
+              _sectionTitle(context, 'Category Management'),
               SizedBox(height: 16.h),
               const CategoryList(),
               SizedBox(height: 32.h),
-              _sectionTitle('Budget Limits'),
+              _sectionTitle(context, 'Budget Limits'),
               SizedBox(height: 16.h),
               const BudgetSection(),
               SizedBox(height: 32.h),
-              _sectionTitle('Global Preferences'),
+              _sectionTitle(context, 'Global Preferences'),
               SizedBox(height: 16.h),
               _preferencesTile(context),
             ],
@@ -57,31 +51,33 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.manrope(fontSize: 20.sp, fontWeight: FontWeight.w800),
-    );
+  Widget _sectionTitle(BuildContext context, String text) {
+    return AppTextHeadlineSm(text, );
   }
 
   Widget _preferencesTile(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20.r),
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: ListTile(
-        leading: Icon(Icons.currency_exchange, color: theme.colorScheme.primary, size: 24.r),
-        title: Text(
+        contentPadding: EdgeInsets.zero,
+        leading: Icon(Icons.currency_exchange, color: cs.primary, size: 24.r),
+        title: AppTextBodyLg(
           'Base Currency',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+          
+          style: context.theme.textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text('US Dollar (USD)', style: TextStyle(fontSize: 14.sp)),
-        trailing: Icon(Icons.chevron_right, size: 24.r),
+        subtitle: AppTextBodyMd(
+          'US Dollar (USD)',
+          
+          color: cs.onSurfaceVariant,
+        ),
+        trailing: Icon(Icons.chevron_right, size: 24.r, color: cs.onSurfaceVariant),
       ),
     );
   }
 }
-

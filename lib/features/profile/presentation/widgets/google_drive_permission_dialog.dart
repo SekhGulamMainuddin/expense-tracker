@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
+import 'package:expense_tracker/core/styles/app_palette.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/google_drive_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/google_drive_state.dart';
 
@@ -9,6 +13,7 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return BlocProvider(
       create: (context) => GoogleDriveCubit(),
       child: BlocListener<GoogleDriveCubit, GoogleDriveState>(
@@ -16,45 +21,40 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
           if (state.isSuccess) Navigator.pop(context, true);
         },
         child: Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
+          backgroundColor: cs.surfaceContainerHigh,
           clipBehavior: Clip.antiAlias,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: BoxConstraints(maxWidth: 400.w),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildHeroSection(),
+                _buildHeroSection(context),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 10),
+                  padding: EdgeInsets.fromLTRB(32.w, 32.h, 32.w, 10.h),
                   child: Column(
                     children: [
-                      Text(
+                      AppTextHeadlineSm(
                         'Backup to Google Drive',
-                        style: GoogleFonts.manrope(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Securely store and sync your financial records. Your data is encrypted and only accessible by you.',
+                        
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.manrope(
-                          fontSize: 14,
-                          color: const Color(0xFF64748B),
-                          height: 1.5,
-                        ),
                       ),
-                      const SizedBox(height: 32),
-                      _buildFeatureList(),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 12.h),
+                      AppTextBodyMd(
+                        'Securely store and sync your financial records. Your data is encrypted and only accessible by you.',
+                        
+                        textAlign: TextAlign.center,
+                        height: 1.5,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      SizedBox(height: 32.h),
+                      _buildFeatureList(context),
+                      SizedBox(height: 32.h),
                       _buildActionButtons(context),
                     ],
                   ),
                 ),
-                _buildFooter(),
+                _buildFooter(context),
               ],
             ),
           ),
@@ -63,74 +63,77 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildHeroSection() {
-    return Container(
-      height: 160,
+  Widget _buildHeroSection(BuildContext context) {
+    final cs = context.theme.colorScheme;
+    return SizedBox(
+      height: 160.h,
       width: double.infinity,
-      color: const Color(0xFFF8FAFC),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Simulated Light Orbs
-          Positioned(
-            left: 20,
-            top: 20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF2B8CEE).withOpacity(0.1),
+      child: ColoredBox(
+        color: cs.surfaceContainerLow,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              left: 20.w,
+              top: 20.h,
+              child: Container(
+                width: 100.r,
+                height: 100.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: cs.primary.withOpacity(0.12),
+                ),
               ),
             ),
-          ),
-          Positioned(
-            right: 20,
-            bottom: 20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFFB923C).withOpacity(0.1),
+            Positioned(
+              right: 20.w,
+              bottom: 20.h,
+              child: Container(
+                width: 100.r,
+                height: 100.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: cs.tertiary.withOpacity(0.12),
+                ),
               ),
             ),
-          ),
-          // Drive Icon
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
-              ],
+            Container(
+              padding: EdgeInsets.all(20.r),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: AppRadii.xl,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppPalette.ambientShadow.withOpacity(0.25),
+                    blurRadius: 20.r,
+                    offset: Offset(0, 10.h),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.cloud_queue_rounded, size: 48.r, color: cs.primary),
             ),
-            child: const Icon(Icons.cloud_queue_rounded, size: 48, color: Color(0xFF2B8CEE)),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildFeatureList() {
+  Widget _buildFeatureList(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Column(
       children: [
         _buildChecklistItem(
+          context,
           icon: Icons.shield_outlined,
-          color: const Color(0xFF2B8CEE),
+          color: cs.primary,
           title: 'End-to-End Encryption',
           subtitle: 'Private key security',
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         _buildChecklistItem(
+          context,
           icon: Icons.sync_rounded,
-          color: const Color(0xFFFB923C),
+          color: cs.tertiary,
           title: 'Real-time Sync',
           subtitle: 'Access from any device',
         ),
@@ -138,46 +141,49 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildChecklistItem({
+  Widget _buildChecklistItem(
+    BuildContext context, {
     required IconData icon,
     required Color color,
     required String title,
     required String subtitle,
   }) {
+    final cs = context.theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0).withOpacity(0.5)),
+        color: cs.surfaceContainerLow,
+        borderRadius: AppRadii.xl,
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.r),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(icon, color: color, size: 18.r),
           ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextLabelMd(
+                  title,
+                  
+                  style: context.theme.textTheme.labelMedium!.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
-              ),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
-              ),
-            ],
+                AppTextLabelSm(
+                  subtitle,
+                  
+                  color: cs.onSurfaceVariant,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -185,38 +191,51 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return BlocBuilder<GoogleDriveCubit, GoogleDriveState>(
       builder: (context, state) {
         return Column(
           children: [
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 56.h,
               child: ElevatedButton(
                 onPressed: state.isGranting ? null : () => context.read<GoogleDriveCubit>().grantAccess(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2B8CEE),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: cs.surfaceContainerHigh,
+                  foregroundColor: cs.onSurface,
+                  shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
                   elevation: 0,
                 ),
                 child: state.isGranting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.w,
+                        child: CircularProgressIndicator(color: cs.primary, strokeWidth: 2),
                       )
-                    : const Text('Grant Access', style: TextStyle(fontWeight: FontWeight.bold)),
+                    : AppTextBodyMd(
+                        'Grant Access',
+                        
+                        style: context.theme.textTheme.bodyMedium!.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextButton(
               onPressed: () => Navigator.pop(context),
               style: TextButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                foregroundColor: const Color(0xFF64748B),
+                minimumSize: Size(double.infinity, 56.h),
+                foregroundColor: cs.onSurfaceVariant,
               ),
-              child: const Text('Maybe Later', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: AppTextBodyMd(
+                'Maybe Later',
+                
+                style: context.theme.textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
             ),
           ],
         );
@@ -224,24 +243,23 @@ class GoogleDrivePermissionDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       width: double.infinity,
-      color: const Color(0xFFF8FAFC),
+      color: cs.surfaceContainerLow,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.lock_outline, size: 14, color: Color(0xFF94A3B8)),
-          const SizedBox(width: 8),
-          Text(
+          Icon(Icons.lock_outline, size: 14.r, color: cs.onSurfaceVariant),
+          SizedBox(width: 8.w),
+          AppTextLabelSm(
             'VERIFIED SECURE CONNECTION',
-            style: GoogleFonts.manrope(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-              color: const Color(0xFF94A3B8),
-            ),
+            
+            uppercase: true,
+            letterSpacing: 1.2,
+            color: cs.onSurfaceVariant,
           ),
         ],
       ),

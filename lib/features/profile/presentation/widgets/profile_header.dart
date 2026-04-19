@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_state.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/styles/app_palette.dart';
+import '../../../../core/styles/app_texts.dart';
 import '../../../../core/utils/ui_extensions.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -12,7 +13,7 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Column(
@@ -23,12 +24,12 @@ class ProfileHeader extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(4.r),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
+                    color: cs.surfaceContainerHigh,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 20.r,
+                        color: AppPalette.ambientShadow.withOpacity(0.45),
+                        blurRadius: 24.r,
                         offset: Offset(0, 10.h),
                       ),
                     ],
@@ -41,20 +42,14 @@ class ProfileHeader extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16.h),
-            Text(
+            AppTextHeadlineSm(
               state.name,
-              style: GoogleFonts.manrope(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-              ),
+              
             ),
-            Text(
+            AppTextBodyMd(
               state.email,
-              style: GoogleFonts.manrope(
-                color: const Color(0xFF94A3B8),
-                fontWeight: FontWeight.w500,
-                fontSize: 14.sp,
-              ),
+              
+              color: cs.onSurfaceVariant,
             ),
           ],
         );
@@ -62,4 +57,3 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 }
-

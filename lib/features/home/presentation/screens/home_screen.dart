@@ -7,11 +7,13 @@ import 'package:expense_tracker/features/home/presentation/widgets/summary_cards
 import 'package:expense_tracker/features/home/presentation/widgets/category_chart_section.dart';
 import 'package:expense_tracker/features/home/presentation/widgets/recent_transactions_section.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../profile/presentation/screens/profile_screen.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/styles/app_texts.dart';
+import '../../../../core/utils/ui_extensions.dart';
 
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
@@ -20,6 +22,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return BlocProvider(
       create: (_) => FinanceCubit(),
       child: Scaffold(
@@ -29,18 +32,12 @@ class HomeScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: () => context.push(ProfileScreen.routeName),
               child: CircleAvatar(
-                backgroundColor: Colors.grey[200],
-                child: Icon(Icons.person, color: Colors.grey, size: 20.r),
+                backgroundColor: cs.surfaceContainerHigh,
+                child: Icon(Icons.person, color: cs.onSurfaceVariant, size: 20.r),
               ),
             ),
           ),
-          title: Text(
-            'My Finances',
-            style: GoogleFonts.manrope(
-              fontWeight: FontWeight.w800,
-              fontSize: 18.sp,
-            ),
-          ),
+          title: const AppTextTitleMd('My Finances'),
         ),
         body: BlocBuilder<FinanceCubit, FinanceState>(
           builder: (context, state) {

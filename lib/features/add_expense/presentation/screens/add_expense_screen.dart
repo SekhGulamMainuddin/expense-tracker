@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/amount_display.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/category_selector.dart';
@@ -9,6 +8,7 @@ import 'package:expense_tracker/features/add_expense/presentation/widgets/sub_ca
 import 'package:expense_tracker/features/add_expense/presentation/widgets/numeric_keypad.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/styles/app_texts.dart';
 import '../../../../core/utils/ui_extensions.dart';
 
 class AddExpenseScreen extends StatelessWidget {
@@ -38,16 +38,10 @@ class AddExpenseScreen extends StatelessWidget {
     final theme = context.theme;
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.close, color: Colors.grey, size: 24.r),
+        icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant, size: 24.r),
         onPressed: () => context.pop(),
       ),
-      title: Text(
-        'Add Expense',
-        style: GoogleFonts.manrope(
-          fontWeight: FontWeight.bold,
-          fontSize: 20.sp,
-        ),
-      ),
+      title: const AppTextHeadlineSm('Add Expense'),
       centerTitle: true,
       actions: [
         IconButton(
@@ -58,4 +52,3 @@ class AddExpenseScreen extends StatelessWidget {
     );
   }
 }
-

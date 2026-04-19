@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class SubCategorySelector extends StatelessWidget {
   const SubCategorySelector({super.key});
@@ -13,7 +14,7 @@ class SubCategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Wrap(
@@ -24,24 +25,19 @@ class SubCategorySelector extends StatelessWidget {
                   builder: (context, state) {
                     final isSelected = state.selectedSubCategory == sub;
                     return ChoiceChip(
-                      label: Text(sub, style: TextStyle(fontSize: 12.sp)),
+                      label: AppTextLabelMd(
+                        sub,
+                        color:
+                            isSelected ? cs.primary : cs.onSurfaceVariant,
+                      ),
                       selected: isSelected,
                       onSelected: (_) =>
                           context.read<AddExpenseCubit>().selectSub(sub),
-                      selectedColor: theme.colorScheme.primary.withOpacity(0.1),
-                      labelStyle: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      shape: StadiumBorder(
-                        side: BorderSide(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : Colors.transparent,
-                        ),
-                      ),
+                      selectedColor: cs.primary.withOpacity(0.12),
+                      backgroundColor: cs.surfaceContainerHigh,
+                      side: BorderSide.none,
+                      shape: const StadiumBorder(),
+                      labelStyle: context.theme.textTheme.labelMedium,
                       showCheckmark: false,
                     );
                   },
@@ -51,4 +47,3 @@ class SubCategorySelector extends StatelessWidget {
     );
   }
 }
-

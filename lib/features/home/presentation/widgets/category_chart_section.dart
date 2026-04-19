@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class CategoryChartSection extends StatelessWidget {
   const CategoryChartSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Padding(
       padding: EdgeInsets.all(24.r),
       child: Column(
@@ -17,25 +17,19 @@ class CategoryChartSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Category Distribution',
-                style: GoogleFonts.manrope(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.sp,
-                ),
-              ),
-              TextButton(
+              const AppTextHeadlineSm('Category Distribution',),
+              IconButton(
                 onPressed: () {},
-                child: Text('View Details', style: TextStyle(fontSize: 14.sp)),
+                icon: Icon(Icons.arrow_forward_ios_rounded),
               ),
             ],
           ),
+          SizedBox(height: 16.h),
           Container(
             padding: EdgeInsets.all(20.r),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+              color: cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Row(
               children: [
@@ -45,17 +39,18 @@ class CategoryChartSection extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: 0.7,
                     strokeWidth: 10.w,
-                    color: theme.colorScheme.primary,
-                    backgroundColor: theme.colorScheme.secondary.withOpacity(0.1),
+                    color: cs.primary,
+                    backgroundColor: cs.primaryContainer.withOpacity(0.35),
                   ),
                 ),
                 SizedBox(width: 30.w),
                 Expanded(
                   child: Column(
                     children: [
-                      _chartLegend(theme.colorScheme.primary, 'Housing', '45%'),
-                      _chartLegend(const Color(0xFF10B981), 'Food', '30%'),
-                      _chartLegend(Colors.orange, 'Transport', '25%'),
+                      _chartLegend(context, cs.primary, 'Housing', '45%'),
+                      _chartLegend(
+                          context, const Color(0xFF10B981), 'Food', '30%'),
+                      _chartLegend(context, Colors.orange, 'Transport', '25%'),
                     ],
                   ),
                 ),
@@ -67,10 +62,11 @@ class CategoryChartSection extends StatelessWidget {
     );
   }
 
-
-  Widget _chartLegend(Color color, String label, String value) {
+  Widget _chartLegend(BuildContext context, Color color, String label,
+      String value) {
+    final cs = context.theme.colorScheme;
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         children: [
           Container(
@@ -80,18 +76,21 @@ class CategoryChartSection extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Expanded(
-            child: Text(
+            child: AppTextBodyMd(
               label,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
+
+              color: cs.onSurfaceVariant,
             ),
           ),
-          Text(
+          AppTextBodyMd(
             value,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+
+            style: context.theme.textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
     );
   }
 }
-

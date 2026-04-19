@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:expense_tracker/core/styles/app_palette.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 
 import '../utils/ui_extensions.dart';
@@ -13,9 +12,10 @@ class AppModalBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.theme.scaffoldBackgroundColor,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Padding(
@@ -24,7 +24,10 @@ class AppModalBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (title != null) ...[appTextS1(title!), 16.verticalSpace],
+            if (title != null) ...[
+              AppTextHeadlineSm(title!),
+              16.verticalSpace,
+            ],
             if (customWidget case final widget?) widget,
           ],
         ),

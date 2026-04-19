@@ -82,5 +82,5 @@ final class AppRouter {
   static final parentNavigatorKey = GlobalKey<NavigatorState>();
 
   // Mock flag for authentication status
-  static bool isLoggedIn = true;
+  static bool isLoggedIn = false;
 }

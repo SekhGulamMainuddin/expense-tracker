@@ -4,6 +4,9 @@ import 'package:expense_tracker/features/settings/presentation/cubit/settings_cu
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/styles/app_text_styles.dart';
+import '../../../../core/styles/app_texts.dart';
+
 class ThresholdSlider extends StatelessWidget {
   const ThresholdSlider({
     super.key,
@@ -32,22 +35,22 @@ class ThresholdSlider extends StatelessWidget {
                   children: [
                     CircleAvatar(radius: 4.r, backgroundColor: color),
                     SizedBox(width: 8.w),
-                    Text(
+                    AppTextLabelMd(
                       label,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      
+                      style: AppTextStyles.labelMd(context).copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
-                Text(
+                AppTextLabelMd(
                   '${val.toInt()}%',
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
-                  ),
+                  
+                  color: color,
+                  style: AppTextStyles.labelMd(context).copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
               ],
             ),
@@ -65,4 +68,3 @@ class ThresholdSlider extends StatelessWidget {
     );
   }
 }
-

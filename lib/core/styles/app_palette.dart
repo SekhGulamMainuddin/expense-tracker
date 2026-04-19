@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 
 /// Illuminated Ledger — chromatic tokens. Prefer [ColorScheme] via theme; these
 /// back precise hex values and tonal constants (shadows, gradients, washes).
@@ -79,19 +80,7 @@ final class AppPalette {
 
   // --- Ghost border ---
   static double ghostBorderOpacity(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark ? 0.10 : 0.12;
-
-  // --- Signature hero gradient (primary → primary-container @ low opacity feel) ---
-  static LinearGradient heroLedgerGradient(ColorScheme cs) {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        cs.primary.withOpacity(0.92),
-        cs.primaryContainer.withOpacity(0.35),
-      ],
-    );
-  }
+      context.theme.brightness == Brightness.dark ? 0.10 : 0.12;
 
   // --- Safe band washes (opacity per design doc) ---
   static Color safeBandWashGreen(ColorScheme cs) =>
@@ -105,11 +94,11 @@ final class AppPalette {
 
   /// Back-compat names used by legacy widgets (map to themed text colors).
   static Color textPrimary(BuildContext context) =>
-      Theme.of(context).colorScheme.onSurface;
+      context.theme.colorScheme.onSurface;
 
   static Color textSecondary(BuildContext context) =>
-      Theme.of(context).colorScheme.onSurfaceVariant;
+      context.theme.colorScheme.onSurfaceVariant;
 
   static Color textInverse(BuildContext context) =>
-      Theme.of(context).colorScheme.onPrimary;
+      context.theme.colorScheme.onPrimary;
 }

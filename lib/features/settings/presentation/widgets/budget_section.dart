@@ -10,21 +10,32 @@ class BudgetSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Container(
       padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         children: [
-          const BudgetInput(label: 'Daily Limit', value: '50'),
+          const BudgetInput(
+            label: 'Daily Limit',
+            value: '50',
+            budgetBand: 'safe',
+          ),
           SizedBox(height: 16.h),
-          const BudgetInput(label: 'Weekly Limit', value: '350'),
+          const BudgetInput(
+            label: 'Weekly Limit',
+            value: '350',
+            budgetBand: 'caution',
+          ),
           SizedBox(height: 16.h),
-          const BudgetInput(label: 'Monthly Limit', value: '1500'),
+          const BudgetInput(
+            label: 'Monthly Limit',
+            value: '1500',
+            budgetBand: 'danger',
+          ),
           Divider(height: 48.h),
           const ThresholdSlider(
             label: 'Safe Haven Zone',
@@ -46,4 +57,3 @@ class BudgetSection extends StatelessWidget {
     );
   }
 }
-

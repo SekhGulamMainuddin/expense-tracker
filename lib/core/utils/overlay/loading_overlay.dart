@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/core/styles/app_palette.dart';
 
 final class LoadingOverlayUtil {
   static final Map<String, DialogRoute<void>> routes = {};

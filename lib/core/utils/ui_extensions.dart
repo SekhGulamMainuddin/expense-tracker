@@ -12,6 +12,8 @@ extension BuildContextUiExtensions on BuildContext {
 
   ThemeData get theme => Theme.of(this);
 
+  bool get isLight => theme.brightness == Brightness.light;
+
   void switchBottomNavTab(int index) {
     StatefulNavigationShell.of(this).goBranch(
       index,

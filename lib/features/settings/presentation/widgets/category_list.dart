@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_tile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/utils/ui_extensions.dart';
+import '../../../../core/styles/app_texts.dart';
 
 class CategoryList extends StatelessWidget {
   const CategoryList({super.key});
@@ -42,29 +43,31 @@ class CategoryList extends StatelessWidget {
   }
 
   Widget _addCategoryButton(BuildContext context) {
-    final theme = context.theme;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.5),
-          width: 2.w,
-        ),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_circle, color: theme.colorScheme.primary, size: 24.r),
-          SizedBox(width: 8.w),
-          Text(
-            'Add New Category',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+    final cs = context.theme.colorScheme;
+    return Material(
+      color: cs.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(12.r),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12.r),
+        onTap: () {},
+        child: Padding(
+          padding: EdgeInsets.all(16.r),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.add_circle, color: cs.primary, size: 24.r),
+              SizedBox(width: 8.w),
+              AppTextBodyLg(
+                'Add New Category',
+                
+                style: context.theme.textTheme.bodyLarge!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
-

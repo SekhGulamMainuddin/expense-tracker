@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/widgets/profile_header.dart';
 import 'package:expense_tracker/features/profile/presentation/widgets/drive_integration_card.dart';
@@ -23,7 +24,6 @@ class ProfileScreen extends StatelessWidget {
         appBar: _buildAppBar(context),
         body: Stack(
           children: [
-            // Hero Glow Effect
             Positioned(
               top: -100.h,
               left: -50.w,
@@ -56,25 +56,18 @@ class ProfileScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface, size: 24.r),
+        icon: Icon(Icons.arrow_back, color: cs.onSurface, size: 24.r),
         onPressed: () => context.pop(),
       ),
-      title: Text(
-        'Profile',
-        style: GoogleFonts.manrope(
-          fontWeight: FontWeight.w800,
-          fontSize: 20.sp,
-          letterSpacing: -1,
-        ),
-      ),
+      title: const AppTextHeadlineSm('Profile', ),
     );
   }
 
   Widget _dangerZone(BuildContext context) {
-    final theme = context.theme;
+    final cs = context.theme.colorScheme;
     return Column(
       children: [
         OutlinedButton.icon(
@@ -84,23 +77,30 @@ class ProfileScreen extends StatelessWidget {
             );
           },
           icon: Icon(Icons.delete_forever, size: 18.r),
-          label: const Text('Delete Account'),
+          label: AppTextBodyMd(
+            'Delete Account',
+            
+            style: context.theme.textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            color: cs.error,
+          ),
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFEF4444),
-            side: const BorderSide(color: Color(0xFFFEE2E2)),
+            foregroundColor: cs.error,
+            side: BorderSide(color: cs.error.withOpacity(0.35)),
             padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.r),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
             minimumSize: Size(double.infinity, 56.h),
           ),
         ),
         SizedBox(height: 16.h),
-        Text(
+        AppTextLabelSm(
           'Permanently delete your account and all associated '
           'ledger data. This action cannot be undone.',
+          
           textAlign: TextAlign.center,
-          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 10.sp),
+          color: cs.onSurfaceVariant,
+          style: context.theme.textTheme.labelSmall!.copyWith(height: 1.45),
         ),
       ],
     );
