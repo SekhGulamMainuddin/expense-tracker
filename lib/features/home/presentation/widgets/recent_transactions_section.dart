@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/features/home/presentation/cubit/finance_state.dart';
 import 'package:expense_tracker/features/home/presentation/widgets/transaction_tile.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RecentTransactionsSection extends StatelessWidget {
   const RecentTransactionsSection({super.key, required this.state});
@@ -10,23 +11,23 @@ class RecentTransactionsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       child: Column(
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Recent Payments',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
               ),
               Text(
                 'See All',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: TextStyle(color: Colors.grey, fontSize: 14.sp),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ...state.transactions
               .map((tx) => TransactionTile(transaction: tx))
               .toList(),
@@ -35,3 +36,4 @@ class RecentTransactionsSection extends StatelessWidget {
     );
   }
 }
+

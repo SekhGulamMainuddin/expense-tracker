@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/widgets/profile_header.dart';
@@ -15,36 +16,36 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return BlocProvider(
       create: (_) => ProfileCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: _buildAppBar(context),
         body: Stack(
           children: [
             // Hero Glow Effect
             Positioned(
-              top: -100,
-              left: -50,
+              top: -100.h,
+              left: -50.w,
               child: Container(
-                width: 300,
-                height: 300,
+                width: 300.w,
+                height: 300.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF2B8CEE).withOpacity(0.08),
+                  color: theme.colorScheme.primary.withOpacity(0.08),
                 ),
               ),
             ),
             SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
               child: Column(
                 children: [
                   const ProfileHeader(),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40.h),
                   const DriveIntegrationCard(),
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40.h),
                   _dangerZone(context),
-                  const SizedBox(height: 100),
+                  SizedBox(height: 100.h),
                 ],
               ),
             ),
@@ -55,18 +56,17 @@ class ProfileScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final theme = context.theme;
     return AppBar(
-      backgroundColor: const Color(0xFFF8FAFC),
-      elevation: 0.5,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
+        icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface, size: 24.r),
         onPressed: () => context.pop(),
       ),
       title: Text(
         'Profile',
         style: GoogleFonts.manrope(
           fontWeight: FontWeight.w800,
-          color: const Color(0xFF0F172A),
+          fontSize: 20.sp,
           letterSpacing: -1,
         ),
       ),
@@ -74,6 +74,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _dangerZone(BuildContext context) {
+    final theme = context.theme;
     return Column(
       children: [
         OutlinedButton.icon(
@@ -82,27 +83,26 @@ class ProfileScreen extends StatelessWidget {
               content: const DeleteConfirmationDialog(),
             );
           },
-          icon: const Icon(Icons.delete_forever, size: 18),
+          icon: Icon(Icons.delete_forever, size: 18.r),
           label: const Text('Delete Account'),
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFEF4444),
             side: const BorderSide(color: Color(0xFFFEE2E2)),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            minimumSize: const Size(double.infinity, 56),
+            minimumSize: Size(double.infinity, 56.h),
           ),
         ),
-        const SizedBox(height: 16),
-        const Text(
+        SizedBox(height: 16.h),
+        Text(
           'Permanently delete your account and all associated '
           'ledger data. This action cannot be undone.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 10.sp),
         ),
       ],
     );
   }
 }
-

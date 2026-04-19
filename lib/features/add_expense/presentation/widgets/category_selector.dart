@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class CategorySelector extends StatelessWidget {
   const CategorySelector({super.key});
@@ -18,18 +21,18 @@ class CategorySelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Text(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+          child: const Text(
             'Category',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
           ),
         ),
         SizedBox(
-          height: 100,
+          height: 100.h,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             itemCount: _categories.length,
             itemBuilder: (context, index) {
               final category = _categories[index];
@@ -42,6 +45,7 @@ class CategorySelector extends StatelessWidget {
                         .read<AddExpenseCubit>()
                         .selectCategory(category['name']! as String),
                     child: _categoryItem(
+                      context: context,
                       icon: category['icon']! as IconData,
                       name: category['name']! as String,
                       isSelected: isSelected,
@@ -57,25 +61,27 @@ class CategorySelector extends StatelessWidget {
   }
 
   Widget _categoryItem({
+    required BuildContext context,
     required IconData icon,
     required String name,
     required bool isSelected,
   }) {
+    final theme = context.theme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: 8.w),
       child: Column(
         children: [
           Container(
-            width: 64,
-            height: 64,
+            width: 64.w,
+            height: 64.h,
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF2B8CEE) : Colors.grey[200],
+              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary.withOpacity(0.3),
               shape: BoxShape.circle,
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF2B8CEE).withOpacity(0.3),
-                        blurRadius: 10,
+                        color: theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 10.r,
                       ),
                     ]
                   : null,
@@ -83,15 +89,16 @@ class CategorySelector extends StatelessWidget {
             child: Icon(
               icon,
               color: isSelected ? Colors.white : Colors.grey[600],
+              size: 24.r,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             name,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? const Color(0xFF2B8CEE) : Colors.grey,
+              color: isSelected ? theme.colorScheme.primary : Colors.grey,
             ),
           ),
         ],
@@ -99,3 +106,4 @@ class CategorySelector extends StatelessWidget {
     );
   }
 }
+

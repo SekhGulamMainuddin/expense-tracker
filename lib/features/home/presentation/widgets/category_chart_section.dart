@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class CategoryChartSection extends StatelessWidget {
   const CategoryChartSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       child: Column(
         children: [
           Row(
@@ -17,39 +21,39 @@ class CategoryChartSection extends StatelessWidget {
                 'Category Distribution',
                 style: GoogleFonts.manrope(
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 20.sp,
                 ),
               ),
               TextButton(
                 onPressed: () {},
-                child: const Text('View Details'),
+                child: Text('View Details', style: TextStyle(fontSize: 14.sp)),
               ),
             ],
           ),
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.r),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[200]!),
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
             ),
             child: Row(
               children: [
-                const SizedBox(
-                  width: 80,
-                  height: 80,
+                SizedBox(
+                  width: 80.w,
+                  height: 80.h,
                   child: CircularProgressIndicator(
                     value: 0.7,
-                    strokeWidth: 10,
-                    color: Color(0xFF2B8CEE),
-                    backgroundColor: Color(0xFFF1F5F9),
+                    strokeWidth: 10.w,
+                    color: theme.colorScheme.primary,
+                    backgroundColor: theme.colorScheme.secondary.withOpacity(0.1),
                   ),
                 ),
-                const SizedBox(width: 30),
+                SizedBox(width: 30.w),
                 Expanded(
                   child: Column(
                     children: [
-                      _chartLegend(const Color(0xFF2B8CEE), 'Housing', '45%'),
+                      _chartLegend(theme.colorScheme.primary, 'Housing', '45%'),
                       _chartLegend(const Color(0xFF10B981), 'Food', '30%'),
                       _chartLegend(Colors.orange, 'Transport', '25%'),
                     ],
@@ -63,29 +67,31 @@ class CategoryChartSection extends StatelessWidget {
     );
   }
 
+
   Widget _chartLegend(Color color, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: EdgeInsets.symmetric(vertical: 2.h),
       child: Row(
         children: [
           Container(
-            width: 8,
-            height: 8,
+            width: 8.w,
+            height: 8.h,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
           ),
         ],
       ),
     );
   }
 }
+

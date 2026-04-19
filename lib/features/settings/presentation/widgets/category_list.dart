@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_tile.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class CategoryList extends StatelessWidget {
   const CategoryList({super.key});
@@ -22,7 +25,7 @@ class CategoryList extends StatelessWidget {
               onTap: () =>
                   context.read<SettingsCubit>().toggleCategory('Food'),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             const CategoryTile(
               title: 'Travel',
               subtitle: '4 Subcategories',
@@ -30,33 +33,38 @@ class CategoryList extends StatelessWidget {
               color: Colors.blue,
               isExpanded: false,
             ),
-            const SizedBox(height: 12),
-            _addCategoryButton(),
+            SizedBox(height: 12.h),
+            _addCategoryButton(context),
           ],
         );
       },
     );
   }
 
-  Widget _addCategoryButton() {
+  Widget _addCategoryButton(BuildContext context) {
+    final theme = context.theme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         border: Border.all(
-          color: Colors.grey.shade300,
-          width: 2,
+          color: theme.colorScheme.outline.withOpacity(0.5),
+          width: 2.w,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.add_circle, color: Colors.grey),
-          SizedBox(width: 8),
-          Text('Add New Category'),
+          Icon(Icons.add_circle, color: theme.colorScheme.primary, size: 24.r),
+          SizedBox(width: 8.w),
+          Text(
+            'Add New Category',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+          ),
         ],
       ),
     );
   }
 }
+

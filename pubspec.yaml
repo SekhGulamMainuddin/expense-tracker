@@ -23,6 +23,7 @@ dependencies:
   another_flushbar: ^1.12.30
   google_fonts: ^8.0.2
   drift: ^2.32.1
+  flutter_svg: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -33,7 +34,6 @@ dev_dependencies:
   flutter_gen_runner: ^5.10.0
   flutter_native_splash: ^2.4.7
   flutter_launcher_icons: ^0.14.4
-  flutter_svg: ^2.1.0
 
 flutter_gen:
   line_length: 140

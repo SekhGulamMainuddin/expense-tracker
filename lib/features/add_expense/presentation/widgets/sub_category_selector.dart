@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class SubCategorySelector extends StatelessWidget {
   const SubCategorySelector({super.key});
@@ -10,31 +13,32 @@ class SubCategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Wrap(
-        spacing: 8,
+        spacing: 8.w,
+        runSpacing: 8.h,
         children: _subCategories
             .map((sub) => BlocBuilder<AddExpenseCubit, AddExpenseState>(
                   builder: (context, state) {
                     final isSelected = state.selectedSubCategory == sub;
                     return ChoiceChip(
-                      label: Text(sub),
+                      label: Text(sub, style: TextStyle(fontSize: 12.sp)),
                       selected: isSelected,
                       onSelected: (_) =>
                           context.read<AddExpenseCubit>().selectSub(sub),
-                      selectedColor: const Color(0xFF2B8CEE).withOpacity(0.1),
+                      selectedColor: theme.colorScheme.primary.withOpacity(0.1),
                       labelStyle: TextStyle(
                         color: isSelected
-                            ? const Color(0xFF2B8CEE)
+                            ? theme.colorScheme.primary
                             : Colors.grey,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
                       ),
                       shape: StadiumBorder(
                         side: BorderSide(
                           color: isSelected
-                              ? const Color(0xFF2B8CEE)
+                              ? theme.colorScheme.primary
                               : Colors.transparent,
                         ),
                       ),
@@ -47,3 +51,4 @@ class SubCategorySelector extends StatelessWidget {
     );
   }
 }
+

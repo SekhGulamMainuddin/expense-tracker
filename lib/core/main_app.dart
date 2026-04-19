@@ -21,6 +21,8 @@ class MainApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Expense Tracker',
             theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            themeMode: ThemeMode.dark,
             locale: context.locale,
             supportedLocales: context.supportedLocales,
             localizationsDelegates: context.localizationDelegates,

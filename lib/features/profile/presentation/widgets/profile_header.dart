@@ -3,12 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class ProfileHeader extends StatelessWidget {
   const ProfileHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Column(
@@ -17,30 +21,30 @@ class ProfileHeader extends StatelessWidget {
               alignment: Alignment.bottomRight,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  padding: EdgeInsets.all(4.r),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
+                        blurRadius: 20.r,
+                        offset: Offset(0, 10.h),
                       ),
                     ],
                   ),
                   child: CircleAvatar(
-                    radius: 56,
+                    radius: 56.r,
                     backgroundImage: NetworkImage(state.profileImageUrl),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Text(
               state.name,
               style: GoogleFonts.manrope(
-                fontSize: 24,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -49,6 +53,7 @@ class ProfileHeader extends StatelessWidget {
               style: GoogleFonts.manrope(
                 color: const Color(0xFF94A3B8),
                 fontWeight: FontWeight.w500,
+                fontSize: 14.sp,
               ),
             ),
           ],
@@ -57,3 +62,4 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 }
+

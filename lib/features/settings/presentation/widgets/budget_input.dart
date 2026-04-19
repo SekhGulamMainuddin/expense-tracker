@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class BudgetInput extends StatelessWidget {
   const BudgetInput({
@@ -12,32 +15,34 @@ class BudgetInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 10,
+          style: theme.textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w800,
-            color: Colors.grey,
+            fontSize: 10.sp,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextField(
           controller: TextEditingController(text: value),
           decoration: InputDecoration(
             prefixText: '\$ ',
-            filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: theme.brightness == Brightness.light 
+                ? const Color(0xFFF8FAFC) 
+                : theme.colorScheme.surface,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: BorderSide.none,
             ),
           ),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
         ),
       ],
     );
   }
 }
+

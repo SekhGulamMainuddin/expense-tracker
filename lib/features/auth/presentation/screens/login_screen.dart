@@ -1,8 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:expense_tracker/features/auth/presentation/cubit/login_state.dart';
+import 'package:expense_tracker/gen/assets.gen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/login';
@@ -14,20 +17,19 @@ class LoginScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => LoginCubit(),
       child: Scaffold(
-        backgroundColor: Colors.white,
         body: Stack(
           children: [
-            _buildBackgroundAccents(),
-            const SafeArea(
+            _buildBackgroundAccents(context),
+            SafeArea(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _AppIdentitySection(),
-                      SizedBox(height: 48),
-                      _AuthenticationCanvas(),
+                      const _AppIdentitySection(),
+                      SizedBox(height: 48.h),
+                      const _AuthenticationCanvas(),
                     ],
                   ),
                 ),
@@ -39,30 +41,31 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBackgroundAccents() {
+  Widget _buildBackgroundAccents(BuildContext context) {
+    final theme = context.theme;
     return Stack(
       children: [
         Positioned(
-          top: -100,
-          left: -100,
+          top: -100.h,
+          left: -100.w,
           child: Container(
-            width: 384,
-            height: 384,
+            width: 384.w,
+            height: 384.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF2B8CEE).withOpacity(0.05),
+              color: theme.colorScheme.primary.withOpacity(0.05),
             ),
           ),
         ),
         Positioned(
-          bottom: 200,
-          right: -100,
+          bottom: 200.h,
+          right: -100.w,
           child: Container(
-            width: 320,
-            height: 320,
+            width: 320.w,
+            height: 320.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF2B8CEE).withOpacity(0.1),
+              color: theme.colorScheme.primary.withOpacity(0.1),
             ),
           ),
         ),
@@ -76,52 +79,41 @@ class _AppIdentitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Column(
       children: [
         // App Icon Mockup
         Container(
-          width: 80,
-          height: 80,
+          width: 80.w,
+          height: 80.h,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2B8CEE).withOpacity(0.1),
-                blurRadius: 40,
-                spreadRadius: 10,
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                blurRadius: 40.r,
+                spreadRadius: 10.r,
               )
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              'assets/branding/launcher_icon.png',
-            ),
+            borderRadius: BorderRadius.circular(16.r),
+            child: Assets.branding.launcherIcon.image(),
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         Text(
           'Expense Tracker',
-          style: GoogleFonts.manrope(
-            fontSize: 30,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -1.5,
-            color: const Color(0xFF0F172A),
-          ),
+          style: theme.textTheme.headlineLarge,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         SizedBox(
-          width: 280,
+          width: 280.w,
           child: Text(
             'Experience the next generation of financial intelligence and asset management.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF64748B),
-              height: 1.5,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
           ),
         ),
       ],
@@ -134,20 +126,19 @@ class _AuthenticationCanvas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(32.r),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
       ),
       child: BlocListener<LoginCubit, LoginState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            // Note: The actual redirect should happen in the router via an auth state listener,
-            // but for this UI demonstration, we simulate success state.
-            // context.go(HomeScreen.routeName);
+            // Success logic
           }
         },
         child: BlocBuilder<LoginCubit, LoginState>(
@@ -175,38 +166,34 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 56.h,
       child: OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: theme.colorScheme.surface,
+          side: BorderSide(color: theme.colorScheme.outline),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         ),
         child: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+            ? SizedBox(
+                height: 20.h,
+                width: 20.w,
+                child: const CircularProgressIndicator(strokeWidth: 2),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                    height: 20,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.g_mobiledata, color: Colors.blue),
-                  ),
-                  const SizedBox(width: 12),
+                  Assets.images.googleLogo.svg(height: 20.h),
+                  SizedBox(width: 12.w),
                   Text(
                     'Continue with Google',
-                    style: GoogleFonts.manrope(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
                       letterSpacing: -0.5,
+                      fontSize: 16.sp,
                     ),
                   ),
                 ],
@@ -215,3 +202,6 @@ class _GoogleSignInButton extends StatelessWidget {
     );
   }
 }
+
+
+

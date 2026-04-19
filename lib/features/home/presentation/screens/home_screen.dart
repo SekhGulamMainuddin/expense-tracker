@@ -11,6 +11,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../profile/presentation/screens/profile_screen.dart';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 class HomeScreen extends StatelessWidget {
   static const routeName = '/home';
 
@@ -21,27 +23,29 @@ class HomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => FinanceCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF6F7F8),
         appBar: AppBar(
-          leading: GestureDetector(
-            onTap: () => context.push(ProfileScreen.routeName),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              child: const Icon(Icons.person, color: Colors.grey),
+          leading: Padding(
+            padding: EdgeInsets.only(left: 16.w),
+            child: GestureDetector(
+              onTap: () => context.push(ProfileScreen.routeName),
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[200],
+                child: Icon(Icons.person, color: Colors.grey, size: 20.r),
+              ),
             ),
           ),
           title: Text(
             'My Finances',
             style: GoogleFonts.manrope(
               fontWeight: FontWeight.w800,
-              fontSize: 18,
+              fontSize: 18.sp,
             ),
           ),
         ),
         body: BlocBuilder<FinanceCubit, FinanceState>(
           builder: (context, state) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 40),
+              padding: EdgeInsets.only(bottom: 40.h),
               child: Column(
                 children: [
                   BalanceHeroCard(state: state),

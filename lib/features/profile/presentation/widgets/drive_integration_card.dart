@@ -3,55 +3,59 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class DriveIntegrationCard extends StatelessWidget {
   const DriveIntegrationCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Container(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24.r),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(color: theme.colorScheme.outline),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.02),
-                blurRadius: 10,
+                blurRadius: 10.r,
               ),
             ],
           ),
           child: Stack(
             children: [
               Positioned(
-                right: -20,
-                top: -20,
+                right: -20.w,
+                top: -20.h,
                 child: Icon(
                   Icons.cloud_queue,
-                  size: 100,
+                  size: 100.r,
                   color: Colors.black.withOpacity(0.03),
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _titleRow(),
-                  const SizedBox(height: 16),
+                  _titleRow(context),
+                  SizedBox(height: 16.h),
                   Text(
                     'Your financial documents and ledger exports are '
                     'automatically synchronized with your Cloud Storage '
                     'for seamless accessibility.',
                     style: GoogleFonts.manrope(
                       color: const Color(0xFF64748B),
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _statusRow(state),
+                  SizedBox(height: 20.h),
+                  _statusRow(context, state),
                 ],
               ),
             ],
@@ -61,43 +65,45 @@ class DriveIntegrationCard extends StatelessWidget {
     );
   }
 
-  Widget _titleRow() {
+  Widget _titleRow(BuildContext context) {
+    final theme = context.theme;
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
-            color: const Color(0xFF2B8CEE).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
+            color: theme.colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16.r),
           ),
-          child: const Icon(Icons.add_to_drive, color: Color(0xFF2B8CEE)),
+          child: Icon(Icons.add_to_drive, color: theme.colorScheme.primary, size: 24.r),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16.w),
         Text(
           'Google Drive Connected',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
+            fontSize: 16.sp,
           ),
         ),
       ],
     );
   }
 
-  Widget _statusRow(ProfileState state) {
+  Widget _statusRow(BuildContext context, ProfileState state) {
+    final theme = context.theme;
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: const Color(0xFFD1FAE5),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
           ),
           child: Text(
             state.isSyncing ? 'Active Sync' : 'Sync Paused',
-            style: const TextStyle(
-              color: Color(0xFF065F46),
-              fontSize: 11,
+            style: TextStyle(
+              color: const Color(0xFF065F46),
+              fontSize: 11.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -105,11 +111,11 @@ class DriveIntegrationCard extends StatelessWidget {
         const Spacer(),
         TextButton(
           onPressed: () {},
-          child: const Text(
+          child: Text(
             'Manage Permissions',
             style: TextStyle(
-              color: Color(0xFF2B8CEE),
-              fontSize: 12,
+              color: theme.colorScheme.primary,
+              fontSize: 12.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -118,3 +124,4 @@ class DriveIntegrationCard extends StatelessWidget {
     );
   }
 }
+

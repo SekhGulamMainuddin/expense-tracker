@@ -7,6 +7,9 @@ import 'package:expense_tracker/features/add_expense/presentation/widgets/amount
 import 'package:expense_tracker/features/add_expense/presentation/widgets/category_selector.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/sub_category_selector.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/numeric_keypad.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../core/utils/ui_extensions.dart';
 
 class AddExpenseScreen extends StatelessWidget {
   static const routeName = '/add-expense';
@@ -18,7 +21,6 @@ class AddExpenseScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => AddExpenseCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF6F7F8),
         appBar: _buildAppBar(context),
         body: const Column(
           children: [
@@ -27,33 +29,33 @@ class AddExpenseScreen extends StatelessWidget {
             SubCategorySelector(),
           ],
         ),
-        bottomNavigationBar: NumericKeypad(),
+        bottomNavigationBar: const NumericKeypad(),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final theme = context.theme;
     return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.grey),
+        icon: Icon(Icons.close, color: Colors.grey, size: 24.r),
         onPressed: () => context.pop(),
       ),
       title: Text(
         'Add Expense',
         style: GoogleFonts.manrope(
           fontWeight: FontWeight.bold,
-          color: Colors.black,
+          fontSize: 20.sp,
         ),
       ),
       centerTitle: true,
       actions: [
         IconButton(
-          icon: const Icon(Icons.check, color: Color(0xFF2B8CEE)),
+          icon: Icon(Icons.check, color: theme.colorScheme.primary, size: 24.r),
           onPressed: () {},
         ),
       ],
     );
   }
 }
+

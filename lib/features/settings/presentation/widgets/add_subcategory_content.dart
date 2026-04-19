@@ -5,6 +5,7 @@ import 'package:expense_tracker/features/settings/presentation/cubit/subcategory
 import 'package:expense_tracker/features/settings/presentation/cubit/subcategory_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/color_picker_row.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AddSubcategoryContent extends StatefulWidget {
   const AddSubcategoryContent({super.key, required this.parentCategory});
@@ -18,7 +19,14 @@ class AddSubcategoryContent extends StatefulWidget {
 class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
   final _nameController = TextEditingController();
   String _selectedIcon = 'local_bar';
-  Color _selectedColor = const Color(0xFF2B8CEE);
+  late Color _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with a default color or theme primary
+    _selectedColor = const Color(0xFF2B8CEE);
+  }
 
   @override
   void dispose() {
@@ -28,6 +36,7 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return BlocProvider(
       create: (_) => SubcategoryCubit(),
       child: BlocListener<SubcategoryCubit, SubcategoryState>(
@@ -39,64 +48,60 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                child: Text(
-                  'Add Subcategory for ${widget.parentCategory}',
-                  style: GoogleFonts.manrope(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
-                  ),
+              Text(
+                'Add Subcategory for ${widget.parentCategory}',
+                style: GoogleFonts.manrope(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Name Input
-              _fieldLabel('Subcategory Name'),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Fine Dining',
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    suffixIcon: const Icon(
-                      Icons.edit,
-                      size: 18,
-                      color: Color(0xFF64748B),
-                    ),
+              _fieldLabel(context, 'Subcategory Name'),
+              TextField(
+                controller: _nameController,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: 'e.g. Fine Dining',
+                  hintStyle: TextStyle(fontSize: 14.sp),
+                  filled: true,
+                  fillColor: theme.colorScheme.secondary.withOpacity(0.05),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: Icon(
+                    Icons.edit,
+                    size: 18.r,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Icon Grid
-              _fieldLabel('Select Icon'),
+              _fieldLabel(context, 'Select Icon'),
               IconGridSelector(
                 selectedIcon: _selectedIcon,
                 selectedColor: _selectedColor,
                 onIconSelected: (icon) =>
                     setState(() => _selectedIcon = icon),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Color Picker
-              _fieldLabel('Accent Color'),
+              _fieldLabel(context, 'Accent Color'),
               ColorPickerRow(
                 selectedColor: _selectedColor,
                 onColorSelected: (color) =>
                     setState(() => _selectedColor = color),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               // Action Buttons
-              _actionButtons(),
+              _actionButtons(context),
             ],
           ),
         ),
@@ -104,40 +109,42 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
     );
   }
 
-  Widget _fieldLabel(String text) {
+  Widget _fieldLabel(BuildContext context, String text) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(
-          fontSize: 10,
+        style: TextStyle(
+          fontSize: 10.sp,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF64748B),
+          color: theme.colorScheme.onSurfaceVariant,
           letterSpacing: 1.2,
         ),
       ),
     );
   }
 
-  Widget _actionButtons() {
+  Widget _actionButtons(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: const Color(0xFFF8FAFC).withOpacity(0.5),
-      padding: const EdgeInsets.all(32),
+      color: theme.colorScheme.secondary.withOpacity(0.02),
       child: Row(
         children: [
           Expanded(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Color(0xFF64748B),
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             flex: 2,
             child: BlocBuilder<SubcategoryCubit, SubcategoryState>(
@@ -155,24 +162,27 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _selectedColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     elevation: 4,
                   ),
                   child: state.isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
+                      ? SizedBox(
+                          height: 20.h,
+                          width: 20.w,
+                          child: const CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Add Subcategory',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                          ),
                         ),
                 );
               },
@@ -183,3 +193,4 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
     );
   }
 }
+

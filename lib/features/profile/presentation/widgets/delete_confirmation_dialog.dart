@@ -1,9 +1,9 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/delete_account_cubit.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/delete_account_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class DeleteConfirmationDialog extends StatelessWidget {
   const DeleteConfirmationDialog({super.key});
@@ -16,47 +16,45 @@ class DeleteConfirmationDialog extends StatelessWidget {
         listener: (context, state) {
           if (state.isSuccess) {
             Navigator.pop(context); // Close dialog
-            // Add navigation to login or splash screen here
           }
         },
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 340),
+          constraints: BoxConstraints(maxWidth: 340.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+                padding: EdgeInsets.fromLTRB(32.w, 40.h, 32.w, 32.h),
                 child: Column(
                   children: [
                     _buildWarningIcon(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     Text(
                       'Delete Account?',
                       style: GoogleFonts.manrope(
-                        fontSize: 22,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     Text(
                       'This action is irreversible. All your transaction history, '
                       'saved reports, and personalized insights will be permanently removed.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.manrope(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: const Color(0xFF64748B),
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
                     _buildActionButtons(context),
                   ],
                 ),
               ),
               // Decorative Bottom Gradient Line
               Container(
-                height: 6,
+                height: 6.h,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -81,31 +79,31 @@ class DeleteConfirmationDialog extends StatelessWidget {
       children: [
         // Glow effect
         Container(
-          width: 64,
-          height: 64,
+          width: 64.w,
+          height: 64.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
                 color: Colors.red.withOpacity(0.1),
-                blurRadius: 20,
-                spreadRadius: 10,
+                blurRadius: 20.r,
+                spreadRadius: 10.r,
               ),
             ],
           ),
         ),
         Container(
-          width: 64,
-          height: 64,
+          width: 64.w,
+          height: 64.h,
           decoration: BoxDecoration(
             color: const Color(0xFFFEF2F2),
             shape: BoxShape.circle,
             border: Border.all(color: const Color(0xFFFEE2E2)),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.warning_rounded,
-            color: Color(0xFFEF4444),
-            size: 32,
+            color: const Color(0xFFEF4444),
+            size: 32.r,
           ),
         ),
       ],
@@ -119,7 +117,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           children: [
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 56.h,
               child: ElevatedButton(
                 onPressed: state.isDeleting
                     ? null
@@ -130,41 +128,43 @@ class DeleteConfirmationDialog extends StatelessWidget {
                   elevation: 8,
                   shadowColor: const Color(0xFFEF4444).withOpacity(0.3),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
                 child: state.isDeleting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.w,
+                        child: const CircularProgressIndicator(
                           color: Colors.white,
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'YES, DELETE',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.2,
+                          fontSize: 14.sp,
                         ),
                       ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             SizedBox(
               width: double.infinity,
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   foregroundColor: const Color(0xFF64748B),
                 ),
-                child: const Text(
+                child: Text(
                   'CANCEL',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
@@ -175,3 +175,4 @@ class DeleteConfirmationDialog extends StatelessWidget {
     );
   }
 }
+

@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:expense_tracker/core/styles/app_palette.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 
+import '../utils/ui_extensions.dart';
+
 class AppModalBottomSheet extends StatelessWidget {
   const AppModalBottomSheet({super.key, this.title, this.customWidget});
 
@@ -13,7 +15,7 @@ class AppModalBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppPalette.surface,
+        color: context.theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Padding(

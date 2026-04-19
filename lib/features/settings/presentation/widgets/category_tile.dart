@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/add_subcategory_content.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CategoryTile extends StatelessWidget {
   const CategoryTile({
@@ -22,50 +23,55 @@ class CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
       ),
       child: Column(
         children: [
           ListTile(
             onTap: onTap,
             leading: Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: color),
+              child: Icon(icon, color: color, size: 24.r),
             ),
             title: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
             ),
             subtitle: Text(
               subtitle,
-              style: const TextStyle(fontSize: 12),
+              style: TextStyle(fontSize: 12.sp),
             ),
             trailing: Icon(
               isExpanded ? Icons.expand_less : Icons.expand_more,
+              size: 24.r,
             ),
           ),
           if (isExpanded)
             Container(
               width: double.infinity,
-              color: Colors.grey.shade50,
-              padding: const EdgeInsets.all(16),
+              color: theme.brightness == Brightness.light 
+                  ? Colors.grey.shade50 
+                  : theme.colorScheme.secondary.withOpacity(0.1),
+              padding: EdgeInsets.all(16.r),
               child: Wrap(
-                spacing: 8,
+                spacing: 8.w,
+                runSpacing: 8.h,
                 children: [
-                  _subCategoryChip('Groceries'),
-                  _subCategoryChip('Restaurants'),
-                  _subCategoryChip('Coffee'),
+                  _subCategoryChip(context, 'Groceries'),
+                  _subCategoryChip(context, 'Restaurants'),
+                  _subCategoryChip(context, 'Coffee'),
                   ActionChip(
-                    avatar: const Icon(Icons.add, size: 16),
-                    label: const Text('Add', style: TextStyle(fontSize: 11)),
+                    avatar: Icon(Icons.add, size: 16.r),
+                    label: Text('Add', style: TextStyle(fontSize: 11.sp)),
                     onPressed: () => context.parentContext.showAppBottomSheet(
                       isScrollControlled: true,
                       customWidget: AddSubcategoryContent(
@@ -81,14 +87,16 @@ class CategoryTile extends StatelessWidget {
     );
   }
 
-  Widget _subCategoryChip(String label) {
+  Widget _subCategoryChip(BuildContext context, String label) {
+    final theme = context.theme;
     return Chip(
-      label: Text(label, style: const TextStyle(fontSize: 11)),
-      deleteIcon: const Icon(Icons.close, size: 14),
+      label: Text(label, style: TextStyle(fontSize: 11.sp)),
+      deleteIcon: Icon(Icons.close, size: 14.r),
       onDeleted: () {},
-      backgroundColor: Colors.white,
-      shape: StadiumBorder(side: BorderSide(color: Colors.grey.shade200)),
+      backgroundColor: theme.colorScheme.surface,
+      shape: StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
     );
   }
 }
+
 

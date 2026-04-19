@@ -10,6 +10,8 @@ import 'package:expense_tracker/core/utils/overlay/loading_overlay.dart';
 extension BuildContextUiExtensions on BuildContext {
   BuildContext get parentContext => AppRouter.parentNavigatorKey.currentContext!;
 
+  ThemeData get theme => Theme.of(this);
+
   void switchBottomNavTab(int index) {
     StatefulNavigationShell.of(this).goBranch(
       index,

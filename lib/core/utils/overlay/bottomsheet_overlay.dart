@@ -26,7 +26,6 @@ final class BottomSheetUtil {
       isScrollControlled: isScrollControlled,
       isDismissible: isDismissible,
       enableDrag: isDismissible,
-      modalBarrierColor: AppPalette.overlay,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),

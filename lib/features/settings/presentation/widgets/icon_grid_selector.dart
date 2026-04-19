@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class IconGridSelector extends StatelessWidget {
   const IconGridSelector({
@@ -27,14 +28,14 @@ class IconGridSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 5,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 12.h,
+        crossAxisSpacing: 12.w,
       ),
       itemCount: _icons.length,
       itemBuilder: (context, index) {
@@ -44,21 +45,22 @@ class IconGridSelector extends StatelessWidget {
           onTap: () => onIconSelected(iconName),
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? selectedColor : const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(12),
+              color: isSelected ? selectedColor : theme.colorScheme.secondary.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12.r),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
                         color: selectedColor.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 8.r,
+                        offset: Offset(0, 4.h),
                       ),
                     ]
                   : null,
             ),
             child: Icon(
               _getIconData(iconName),
-              color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+              color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
+              size: 24.r,
             ),
           ),
         );
@@ -81,3 +83,4 @@ class IconGridSelector extends StatelessWidget {
     };
   }
 }
+

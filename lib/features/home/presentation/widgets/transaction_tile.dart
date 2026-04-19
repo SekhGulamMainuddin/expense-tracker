@@ -1,4 +1,6 @@
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TransactionTile extends StatelessWidget {
   const TransactionTile({super.key, required this.transaction});
@@ -10,25 +12,25 @@ class TransactionTile extends StatelessWidget {
     final bool isPositive = (transaction['amount'] as double) > 0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: context.theme.cardColor,
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 48.w,
+            height: 48.h,
             decoration: BoxDecoration(
               color: Colors.blue[50],
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Icon(Icons.shopping_bag, color: Color(0xFF2B8CEE)),
+            child: Icon(Icons.shopping_bag, color: const Color(0xFF2B8CEE), size: 24.r),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +41,7 @@ class TransactionTile extends StatelessWidget {
                 ),
                 Text(
                   transaction['subtitle'] as String,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -48,6 +50,7 @@ class TransactionTile extends StatelessWidget {
             '${isPositive ? '+' : '-'}\$${(transaction['amount'] as double).abs().toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 14.sp,
               color: isPositive ? const Color(0xFF10B981) : Colors.red,
             ),
           ),
@@ -56,3 +59,4 @@ class TransactionTile extends StatelessWidget {
     );
   }
 }
+

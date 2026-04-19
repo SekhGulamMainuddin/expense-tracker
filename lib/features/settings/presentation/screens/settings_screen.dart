@@ -6,6 +6,8 @@ import 'package:expense_tracker/features/settings/presentation/cubit/settings_cu
 import 'package:expense_tracker/features/settings/presentation/widgets/category_list.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/budget_section.dart';
 
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
 
@@ -13,43 +15,41 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return BlocProvider(
       create: (_) => SettingsCubit(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
-          backgroundColor: Colors.white.withOpacity(0.8),
-          elevation: 0,
           leading: IconButton(
             onPressed: () {
               context.switchBottomNavTab(0);
             },
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF2B8CEE)),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary, size: 24.r),
           ),
           title: Text(
             'Settings',
             style: GoogleFonts.manrope(
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              fontSize: 20.sp,
             ),
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
+          padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 100.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _sectionTitle('Category Management'),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               const CategoryList(),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               _sectionTitle('Budget Limits'),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               const BudgetSection(),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               _sectionTitle('Global Preferences'),
-              const SizedBox(height: 16),
-              _preferencesTile(),
+              SizedBox(height: 16.h),
+              _preferencesTile(context),
             ],
           ),
         ),
@@ -60,26 +60,28 @@ class SettingsScreen extends StatelessWidget {
   Widget _sectionTitle(String text) {
     return Text(
       text,
-      style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w800),
+      style: GoogleFonts.manrope(fontSize: 20.sp, fontWeight: FontWeight.w800),
     );
   }
 
-  Widget _preferencesTile() {
+  Widget _preferencesTile(BuildContext context) {
+    final theme = context.theme;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20.r),
       ),
-      child: const ListTile(
-        leading: Icon(Icons.currency_exchange, color: Color(0xFF2B8CEE)),
+      child: ListTile(
+        leading: Icon(Icons.currency_exchange, color: theme.colorScheme.primary, size: 24.r),
         title: Text(
           'Base Currency',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
         ),
-        subtitle: Text('US Dollar (USD)'),
-        trailing: Icon(Icons.chevron_right),
+        subtitle: Text('US Dollar (USD)', style: TextStyle(fontSize: 14.sp)),
+        trailing: Icon(Icons.chevron_right, size: 24.r),
       ),
     );
   }
 }
+

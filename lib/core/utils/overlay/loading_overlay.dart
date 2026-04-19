@@ -10,10 +10,7 @@ final class LoadingOverlayUtil {
     routes[id] = DialogRoute<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const ColoredBox(
-        color: AppPalette.overlay,
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      builder: (_) => Center(child: CircularProgressIndicator()),
     );
 
     Navigator.of(context).push(routes[id]!);

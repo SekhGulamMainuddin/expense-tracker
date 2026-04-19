@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ColorPickerRow extends StatelessWidget {
   const ColorPickerRow({
@@ -21,31 +22,29 @@ class ColorPickerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Row(
-        children: _colors.map((color) {
-          final isSelected = selectedColor == color;
-          return GestureDetector(
-            onTap: () => onColorSelected(color),
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: isSelected
-                    ? Border.all(color: color.withOpacity(0.2), width: 4)
-                    : null,
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+    return Row(
+      children: _colors.map((color) {
+        final isSelected = selectedColor == color;
+        return GestureDetector(
+          onTap: () => onColorSelected(color),
+          child: Container(
+            margin: EdgeInsets.only(right: 12.w),
+            width: 32.w,
+            height: 32.h,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: isSelected
+                  ? Border.all(color: color.withOpacity(0.2), width: 4.w)
                   : null,
             ),
-          );
-        }).toList(),
-      ),
+            child: isSelected
+                ? Icon(Icons.check, size: 16.r, color: Colors.white)
+                : null,
+          ),
+        );
+      }).toList(),
     );
   }
 }
+

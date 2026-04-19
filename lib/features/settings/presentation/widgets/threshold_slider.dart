@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ThresholdSlider extends StatelessWidget {
   const ThresholdSlider({
@@ -29,12 +30,12 @@ class ThresholdSlider extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(radius: 4, backgroundColor: color),
-                    const SizedBox(width: 8),
+                    CircleAvatar(radius: 4.r, backgroundColor: color),
+                    SizedBox(width: 8.w),
                     Text(
                       label,
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -45,6 +46,7 @@ class ThresholdSlider extends StatelessWidget {
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.bold,
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -63,3 +65,4 @@ class ThresholdSlider extends StatelessWidget {
     );
   }
 }
+
