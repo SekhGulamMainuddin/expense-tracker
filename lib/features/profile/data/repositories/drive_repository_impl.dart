@@ -15,7 +15,7 @@ class DriveRepositoryImpl implements DriveRepository {
   final AuthRepository _authRepository;
 
   Future<String?> _getAccessToken() async {
-    return _authRepository.getAccessToken();
+    return _authRepository.getDriveAccessToken();
   }
 
   @override

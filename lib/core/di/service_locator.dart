@@ -29,7 +29,7 @@ Future<void> setupServiceLocator() async {
       dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) async {
           final authRepository = getIt<AuthRepository>();
-          final token = await authRepository.getAccessToken();
+          final token = await authRepository.getDriveAccessToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
@@ -66,7 +66,7 @@ Future<void> setupServiceLocator() async {
   );
 
   // Cubits
-  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt()));
+  getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt(), getIt()));
   getIt.registerLazySingleton<FinanceCubit>(() => FinanceCubit());
   getIt.registerLazySingleton<ProfileCubit>(() => ProfileCubit(getIt(), getIt()));
   getIt.registerLazySingleton<SettingsCubit>(() => SettingsCubit(getIt()));

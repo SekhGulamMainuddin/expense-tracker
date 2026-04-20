@@ -62,9 +62,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           return Column(
                             children: [
                               _GoogleSignInButton(
-                                isLoading: state is LoginLoading,
+                                isLoading: state is LoginLoading || state is LoginSyncing,
                                 onPressed: () => _loginCubit.signInWithGoogle(),
                               ),
+                              if (state is LoginSyncing) ...[
+                                SizedBox(height: 16.h),
+                                AppTextLabelMd(
+                                  'Syncing Cloud Backup...',
+                                  color: context.theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ],
                             ],
                           );
                         },

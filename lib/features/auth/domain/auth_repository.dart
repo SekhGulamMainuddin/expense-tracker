@@ -6,6 +6,6 @@ abstract interface class AuthRepository {
   ResultVoid signOut();
   ResultVoid requestDrivePermission();
   Future<bool> isDrivePermissionGranted();
-  Future<String?> getAccessToken();
+  Future<String?> getDriveAccessToken();
   Stream<User?> get authStateChanges;
 }

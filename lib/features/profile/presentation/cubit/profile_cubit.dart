@@ -80,6 +80,24 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
+  Future<void> syncDataInBackground() async {
+    final isGranted = await _authRepository.isDrivePermissionGranted();
+    if (!isGranted) return;
+
+    try {
+      final dbFile = await AppDatabase.getDatabaseFile();
+      if (!await dbFile.exists()) return;
+
+      final bytes = await dbFile.readAsBytes();
+      await _driveRepository.uploadBinary(
+        fileName: AppDatabase.dbFileName,
+        bytes: bytes,
+      );
+    } catch (_) {
+      // Ignore background errors
+    }
+  }
+
   Future<void> restoreData() async {
     if (state is! ProfileLoaded) return;
     final currentState = state as ProfileLoaded;

@@ -87,7 +87,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String?> getAccessToken() async {
+  Future<String?> getDriveAccessToken() async {
     final account = _googleAccount;
     if (account == null) return null;
 
