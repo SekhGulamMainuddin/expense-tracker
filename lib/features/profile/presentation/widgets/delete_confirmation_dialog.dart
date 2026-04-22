@@ -1,75 +1,95 @@
-import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
+import 'package:expense_tracker/core/styles/app_text_styles.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/features/auth/presentation/screens/login_screen.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/delete_account_cubit.dart';
-import 'package:expense_tracker/features/profile/presentation/cubit/delete_account_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../core/styles/app_dimensions.dart';
-import '../../../../core/styles/app_text_styles.dart';
-import '../../../../core/styles/app_texts.dart';
+class DeleteConfirmationDialog extends StatefulWidget {
+  const DeleteConfirmationDialog({super.key});
 
-class DeleteConfirmationDialog extends StatelessWidget {
-  final VoidCallback onConfirm;
-  const DeleteConfirmationDialog({super.key, required this.onConfirm});
+  @override
+  State<DeleteConfirmationDialog> createState() => _DeleteConfirmationDialogState();
+}
+
+class _DeleteConfirmationDialogState extends State<DeleteConfirmationDialog> {
+  late final DeleteAccountCubit _deleteAccountCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _deleteAccountCubit = getIt<DeleteAccountCubit>();
+  }
+
+  @override
+  void dispose() {
+    _deleteAccountCubit.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
-    return BlocProvider(
-      create: (context) => DeleteAccountCubit(),
-      child: BlocListener<DeleteAccountCubit, DeleteAccountState>(
-        listener: (context, state) {
-          if (state.isSuccess) {
-            context.closeAlertDialog();
-            onConfirm();
-          }
-        },
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 340.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(32.w, 40.h, 32.w, 32.h),
-                child: Column(
-                  children: [
-                    _buildWarningIcon(cs),
-                    SizedBox(height: 24.h),
-                    AppTextHeadlineSm(
-                      'Delete Account?',
+    return BlocListener<DeleteAccountCubit, DeleteAccountState>(
+      bloc: _deleteAccountCubit,
+      listener: (context, state) {
+        if (state case DeleteAccountFailure(:final message)) {
+          context.showAppSnackBar(message);
+        }
 
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 12.h),
-                    AppTextBodyMd(
-                      'This action is irreversible. All your transaction history, '
-                          'saved reports, and personalized insights will be permanently removed.',
-
-                      textAlign: TextAlign.center,
-                      height: 1.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    SizedBox(height: 32.h),
-                    _buildActionButtons(context),
+        if (state is DeleteAccountSuccess) {
+          if (!mounted) return;
+          context.closeAlertDialog();
+          context.parentContext.go(LoginScreen.routeName);
+        }
+      },
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 340.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(32.w, 40.h, 32.w, 32.h),
+              child: Column(
+                children: [
+                  _buildWarningIcon(cs),
+                  SizedBox(height: 24.h),
+                  AppTextHeadlineSm(
+                    'Delete Account?',
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 12.h),
+                  AppTextBodyMd(
+                    'This action is irreversible. All your transaction history, '
+                    'saved reports, and personalized insights will be permanently removed.',
+                    textAlign: TextAlign.center,
+                    height: 1.5,
+                    color: cs.onSurfaceVariant,
+                  ),
+                  SizedBox(height: 32.h),
+                  _buildActionButtons(context),
+                ],
+              ),
+            ),
+            Container(
+              height: 6.h,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    cs.error.withOpacity(0.2),
+                    cs.error,
+                    cs.error.withOpacity(0.2),
                   ],
                 ),
               ),
-              Container(
-                height: 6.h,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      cs.error.withOpacity(0.2),
-                      cs.error,
-                      cs.error.withOpacity(0.2),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -113,6 +133,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
   Widget _buildActionButtons(BuildContext context) {
     final cs = context.theme.colorScheme;
     return BlocBuilder<DeleteAccountCubit, DeleteAccountState>(
+      bloc: _deleteAccountCubit,
       builder: (context, state) {
         return Column(
           children: [
@@ -120,9 +141,9 @@ class DeleteConfirmationDialog extends StatelessWidget {
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
-                onPressed: state.isDeleting
+                onPressed: state is DeleteAccountDeleting
                     ? null
-                    : () => context.read<DeleteAccountCubit>().deleteAccount(),
+                    : _deleteAccountCubit.deleteAccount,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.error,
                   foregroundColor: cs.onError,
@@ -130,25 +151,24 @@ class DeleteConfirmationDialog extends StatelessWidget {
                   shadowColor: cs.error.withOpacity(0.35),
                   shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
                 ),
-                child: state.isDeleting
+                child: state is DeleteAccountDeleting
                     ? SizedBox(
-                  height: 20.h,
-                  width: 20.w,
-                  child: CircularProgressIndicator(
-                    color: cs.onError,
-                    strokeWidth: 2,
-                  ),
-                )
+                        height: 20.h,
+                        width: 20.w,
+                        child: CircularProgressIndicator(
+                          color: cs.onError,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : AppTextLabelMd(
-                  'YES, DELETE',
-
-                  uppercase: true,
-                  style: AppTextStyles.labelMd(context).copyWith(
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  color: cs.onError,
-                ),
+                        'YES, DELETE',
+                        uppercase: true,
+                        style: AppTextStyles.labelMd(context).copyWith(
+                          letterSpacing: 1.1,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        color: cs.onError,
+                      ),
               ),
             ),
             SizedBox(height: 12.h),
@@ -162,7 +182,6 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 ),
                 child: AppTextLabelMd(
                   'CANCEL',
-
                   uppercase: true,
                   style: AppTextStyles.labelMd(context).copyWith(
                     letterSpacing: 1.1,

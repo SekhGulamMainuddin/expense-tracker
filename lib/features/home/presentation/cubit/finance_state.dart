@@ -1,13 +1,19 @@
-class FinanceState {
-  final double balance;
-  final double income;
-  final double expenses;
-  final List<Map<String, dynamic>> transactions;
+import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.dart';
 
-  FinanceState({
-    required this.balance,
-    required this.income,
-    required this.expenses,
-    required this.transactions,
-  });
+sealed class FinanceState {}
+
+final class FinanceInitial extends FinanceState {}
+
+final class FinanceLoading extends FinanceState {}
+
+final class FinanceLoaded extends FinanceState {
+  FinanceLoaded(this.snapshot);
+
+  final FinanceSnapshot snapshot;
+}
+
+final class FinanceFailure extends FinanceState {
+  FinanceFailure(this.message);
+
+  final String message;
 }

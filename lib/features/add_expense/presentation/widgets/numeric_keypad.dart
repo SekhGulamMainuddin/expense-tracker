@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expense_tracker/core/styles/app_palette.dart';
+import 'package:expense_tracker/core/styles/app_text_styles.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/styles/app_palette.dart';
-import '../../../../core/styles/app_text_styles.dart';
-import '../../../../core/utils/ui_extensions.dart';
-
 class NumericKeypad extends StatelessWidget {
-  const NumericKeypad({super.key});
+  const NumericKeypad({super.key, required this.cubit});
+
+  final AddExpenseCubit cubit;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class NumericKeypad extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         boxShadow: [
           BoxShadow(
-            color: AppPalette.ambientShadow.withOpacity(0.25),
+            color: AppPalette.ambientShadow.withValues(alpha: 0.25),
             blurRadius: 24.r,
             offset: Offset(0, -8.h),
           ),
@@ -35,8 +35,8 @@ class NumericKeypad extends StatelessWidget {
         crossAxisSpacing: 8.w,
         children: [
           ...['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0']
-              .map((val) => _DigitKey(label: val)),
-          const _BackspaceKey(),
+              .map((val) => _DigitKey(label: val, cubit: cubit)),
+          _BackspaceKey(cubit: cubit),
         ],
       ),
     );
@@ -44,9 +44,10 @@ class NumericKeypad extends StatelessWidget {
 }
 
 class _DigitKey extends StatefulWidget {
-  const _DigitKey({required this.label});
+  const _DigitKey({required this.label, required this.cubit});
 
   final String label;
+  final AddExpenseCubit cubit;
 
   @override
   State<_DigitKey> createState() => _DigitKeyState();
@@ -62,7 +63,7 @@ class _DigitKeyState extends State<_DigitKey> {
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
-      onTap: () => context.read<AddExpenseCubit>().keyPressed(widget.label),
+      onTap: () => widget.cubit.updateAmount(widget.label),
       child: AnimatedScale(
         scale: _pressed ? 1.08 : 1,
         duration: const Duration(milliseconds: 90),
@@ -75,7 +76,7 @@ class _DigitKeyState extends State<_DigitKey> {
             boxShadow: _pressed
                 ? [
                     BoxShadow(
-                      color: cs.primary.withOpacity(0.28),
+                      color: cs.primary.withValues(alpha: 0.28),
                       blurRadius: 18.r,
                       spreadRadius: 0,
                     ),
@@ -95,14 +96,20 @@ class _DigitKeyState extends State<_DigitKey> {
 }
 
 class _BackspaceKey extends StatelessWidget {
-  const _BackspaceKey();
+  const _BackspaceKey({required this.cubit});
+
+  final AddExpenseCubit cubit;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     return IconButton(
-      onPressed: () => context.read<AddExpenseCubit>().keyPressed('backspace'),
-      icon: Icon(Icons.backspace_outlined, size: 26.r, color: cs.onSurfaceVariant),
+      onPressed: () => cubit.updateAmount('backspace'),
+      icon: Icon(
+        Icons.backspace_outlined,
+        size: 26.r,
+        color: cs.onSurfaceVariant,
+      ),
     );
   }
 }

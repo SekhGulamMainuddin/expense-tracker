@@ -1,9 +1,15 @@
-class DeleteAccountState {
-  final bool isDeleting;
-  final bool isSuccess;
+part of 'delete_account_cubit.dart';
 
-  DeleteAccountState({
-    this.isDeleting = false,
-    this.isSuccess = false,
-  });
+sealed class DeleteAccountState {}
+
+final class DeleteAccountInitial extends DeleteAccountState {}
+
+final class DeleteAccountDeleting extends DeleteAccountState {}
+
+final class DeleteAccountSuccess extends DeleteAccountState {}
+
+final class DeleteAccountFailure extends DeleteAccountState {
+  DeleteAccountFailure(this.message);
+
+  final String message;
 }

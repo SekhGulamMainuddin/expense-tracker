@@ -1,64 +1,135 @@
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
+import 'package:http_parser/http_parser.dart';
+
 import '../models/drive_models.dart';
 
-part 'drive_remote_data_source.g.dart';
+class DriveRemoteDataSource {
+  DriveRemoteDataSource(this._dio);
 
-@RestApi()
-abstract class DriveRemoteDataSource {
-  factory DriveRemoteDataSource(Dio dio, {String baseUrl}) = _DriveRemoteDataSource;
+  final Dio _dio;
 
-  @GET('/files')
+  static const _driveBaseUrl = 'https://www.googleapis.com/drive/v3';
+  static const _uploadBaseUrl =
+      'https://www.googleapis.com/upload/drive/v3/files';
+
   Future<GoogleDriveListResponse> findFile({
-    @Query('spaces') String spaces = 'appDataFolder',
-    @Query('q') required String query,
-    @Query('fields') String fields = 'files(id,name)',
-    @Query('pageSize') int pageSize = 1,
-  });
+    String spaces = 'appDataFolder',
+    required String query,
+    String fields = 'files(id,name)',
+    int pageSize = 1,
+  }) async {
+    final response = await _dio.get(
+      '$_driveBaseUrl/files',
+      queryParameters: {
+        'spaces': spaces,
+        'q': query,
+        'fields': fields,
+        'pageSize': pageSize,
+      },
+    );
+    return GoogleDriveListResponse.fromJson(
+      Map<String, dynamic>.from(response.data as Map),
+    );
+  }
 
-  @GET('/files/{fileId}')
   Future<dynamic> downloadFile({
-    @Path('fileId') required String fileId,
-    @Query('alt') String alt = 'media',
-  });
+    required String fileId,
+    String alt = 'media',
+  }) async {
+    final response = await _dio.get(
+      '$_driveBaseUrl/files/$fileId',
+      queryParameters: {'alt': alt},
+    );
+    return response.data;
+  }
 
-  @DELETE('/files/{fileId}')
   Future<void> deleteFile({
-    @Path('fileId') required String fileId,
-  });
+    required String fileId,
+  }) async {
+    await _dio.delete('$_driveBaseUrl/files/$fileId');
+  }
 
-  @POST('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart')
-  @MultiPart()
   Future<GoogleDriveFile> uploadMultipartFile({
-    @Part(name: 'metadata', contentType: 'application/json') required String metadata,
-    @Part(name: 'media', contentType: 'application/json') required String body,
-  });
+    required String metadata,
+    required String body,
+  }) async {
+    final formData = FormData.fromMap({
+      'metadata': MultipartFile.fromString(
+        metadata,
+        contentType: MediaType.parse('application/json'),
+      ),
+      'media': MultipartFile.fromString(
+        body,
+        contentType: MediaType.parse('application/json'),
+      ),
+    });
 
-  @POST('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart')
-  @MultiPart()
+    final response = await _dio.post(
+      '$_uploadBaseUrl?uploadType=multipart',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return GoogleDriveFile.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
   Future<GoogleDriveFile> uploadMultipartBinary({
-    @Part(name: 'metadata', contentType: 'application/json') required String metadata,
-    @Part(name: 'media', contentType: 'application/octet-stream') required List<int> bytes,
-  });
+    required String metadata,
+    required List<int> bytes,
+  }) async {
+    final formData = FormData.fromMap({
+      'metadata': MultipartFile.fromString(
+        metadata,
+        contentType: MediaType.parse('application/json'),
+      ),
+      'media': MultipartFile.fromBytes(
+        bytes,
+        contentType: MediaType.parse('application/octet-stream'),
+      ),
+    });
 
-  @PATCH('https://www.googleapis.com/upload/drive/v3/files/{fileId}?uploadType=media')
+    final response = await _dio.post(
+      '$_uploadBaseUrl?uploadType=multipart',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return GoogleDriveFile.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
   Future<GoogleDriveFile> updateFileContent({
-    @Path('fileId') required String fileId,
-    @Body() required String body,
-    @Header('Content-Type') String contentType = 'application/json',
-  });
+    required String fileId,
+    required String body,
+    String contentType = 'application/json',
+  }) async {
+    final response = await _dio.patch(
+      '$_uploadBaseUrl/$fileId?uploadType=media',
+      data: body,
+      options: Options(contentType: contentType),
+    );
+    return GoogleDriveFile.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
 
-  @PATCH('https://www.googleapis.com/upload/drive/v3/files/{fileId}?uploadType=media')
   Future<GoogleDriveFile> updateBinaryContent({
-    @Path('fileId') required String fileId,
-    @Body() required List<int> bytes,
-    @Header('Content-Type') String contentType = 'application/octet-stream',
-  });
+    required String fileId,
+    required List<int> bytes,
+    String contentType = 'application/octet-stream',
+  }) async {
+    final response = await _dio.patch(
+      '$_uploadBaseUrl/$fileId?uploadType=media',
+      data: bytes,
+      options: Options(contentType: contentType),
+    );
+    return GoogleDriveFile.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
 
-  @GET('/files/{fileId}')
-  @DioResponseType(ResponseType.bytes)
   Future<List<int>> downloadBinary({
-    @Path('fileId') required String fileId,
-    @Query('alt') String alt = 'media',
-  });
+    required String fileId,
+    String alt = 'media',
+  }) async {
+    final response = await _dio.get<List<int>>(
+      '$_driveBaseUrl/files/$fileId',
+      queryParameters: {'alt': alt},
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return response.data ?? const <int>[];
+  }
 }

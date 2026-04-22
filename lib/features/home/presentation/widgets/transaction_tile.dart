@@ -1,19 +1,24 @@
+import 'package:expense_tracker/core/styles/app_text_styles.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/styles/app_text_styles.dart';
-import '../../../../core/styles/app_texts.dart';
-
 class TransactionTile extends StatelessWidget {
-  const TransactionTile({super.key, required this.transaction});
+  const TransactionTile({
+    super.key,
+    required this.transaction,
+    required this.currencySymbol,
+  });
 
-  final Map<String, dynamic> transaction;
+  final FinanceTransaction transaction;
+  final String currencySymbol;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
-    final bool isPositive = (transaction['amount'] as double) > 0;
 
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
@@ -30,10 +35,14 @@ class TransactionTile extends StatelessWidget {
                 width: 48.w,
                 height: 48.h,
                 decoration: BoxDecoration(
-                  color: cs.primaryContainer.withOpacity(0.55),
+                  color: Color(transaction.color).withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(Icons.shopping_bag, color: cs.primary, size: 24.r),
+                child: Icon(
+                  IconGridSelector.iconForName(transaction.icon),
+                  color: Color(transaction.color),
+                  size: 24.r,
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -41,25 +50,23 @@ class TransactionTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppTextBodyLg(
-                      transaction['title'] as String,
-                      
+                      transaction.title,
                       style: AppTextStyles.bodyLg(context).copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     AppTextBodyMd(
-                      transaction['subtitle'] as String,
-                      
+                      transaction.subtitle,
                       color: cs.onSurfaceVariant,
                     ),
                   ],
                 ),
               ),
               Text(
-                '${isPositive ? '+' : '-'}\$${(transaction['amount'] as double).abs().toStringAsFixed(2)}',
+                '-$currencySymbol${transaction.amount.toStringAsFixed(2)}',
                 style: AppTextStyles.bodyMd(context).copyWith(
                   fontWeight: FontWeight.w600,
-                  color: isPositive ? cs.secondary : cs.error,
+                  color: cs.error,
                 ),
               ),
             ],

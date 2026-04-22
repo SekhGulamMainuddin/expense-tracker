@@ -51,7 +51,9 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
           return BlocBuilder<SettingsCubit, SettingsState>(
             bloc: getIt<SettingsCubit>(),
             builder: (context, state) {
-              final themeMode = state is SettingsLoaded ? state.themeMode : ThemeMode.system;
+              final themeMode = state is SettingsLoaded
+                  ? state.snapshot.themeMode
+                  : ThemeMode.system;
               return MaterialApp.router(
                 debugShowCheckedModeBanner: false,
                 title: 'Expense Tracker',

@@ -124,11 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         OutlinedButton.icon(
           onPressed: () async {
             context.showAppAlertDialog(
-              content: DeleteConfirmationDialog(
-                onConfirm: () {
-                  getIt<ProfileCubit>().signOut();
-                },
-              ),
+              content: const DeleteConfirmationDialog(),
             );
           },
           icon: Icon(Icons.delete_forever, size: 18.r),

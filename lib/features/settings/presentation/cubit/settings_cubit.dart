@@ -1,72 +1,230 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
+
+import 'package:expense_tracker/core/error/result.dart';
+import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
+import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:drift/drift.dart' as drift;
-import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
-import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'settings_state.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
-  SettingsCubit(this._db) : super(SettingsInitial()) {
-    _loadSettings();
+  SettingsCubit(this._repository) : super(SettingsInitial()) {
+    unawaited(loadSettings());
   }
 
-  final AppDatabase _db;
+  final SettingsRepository _repository;
+  SettingsSnapshot? _snapshot;
 
-  Future<void> _loadSettings() async {
-    final themeQuery = await (_db.select(_db.keyValueStore)
-      ..where((tbl) => tbl.key.equals('themeMode')))
-        .getSingleOrNull();
-
-    ThemeMode mode = ThemeMode.system;
-    if (themeQuery != null) {
-      if (themeQuery.value == 'light') mode = ThemeMode.light;
-      if (themeQuery.value == 'dark') mode = ThemeMode.dark;
-    }
-    emit(SettingsLoaded(themeMode: mode));
+  Future<bool> loadSettings() async {
+    emit(SettingsLoading());
+    final result = await _repository.loadSettings();
+    return _applyLoadResult(result, emitFailureState: true);
   }
 
-  Future<void> updateThemeMode(ThemeMode mode) async {
-    if (state is! SettingsLoaded) return;
-    final loadedState = state as SettingsLoaded;
-
-    String value = 'system';
-    if (mode == ThemeMode.light) value = 'light';
-    if (mode == ThemeMode.dark) value = 'dark';
-
-    await _db.into(_db.keyValueStore).insertOnConflictUpdate(
-      KeyValueStoreData(key: 'themeMode', value: value),
+  Future<bool> updateThemeMode(ThemeMode mode) async {
+    final result = await _repository.updateThemeMode(_themeModeKey(mode));
+    return _applyMutationResult(
+      result,
+      onSuccess: () async {
+        final current = _requireSnapshot();
+        _snapshot = current.copyWith(themeMode: mode);
+        emit(SettingsLoaded(_snapshot!));
+        return true;
+      },
     );
-
-    emit(loadedState.copyWith(themeMode: mode));
   }
 
-  void toggleCategory(String category) {
-    if (state is! SettingsLoaded) return;
-    final loadedState = state as SettingsLoaded;
+  Future<bool> updateBaseCurrency(String currencyCode) async {
+    final result = await _repository.updateBaseCurrency(currencyCode);
+    return _applyMutationResult(
+      result,
+      onSuccess: () async {
+        final current = _requireSnapshot();
+        _snapshot = current.copyWith(baseCurrencyCode: currencyCode);
+        emit(SettingsLoaded(_snapshot!));
+        return true;
+      },
+    );
+  }
 
-    final current = List<String>.from(loadedState.expandedCategories);
-    if (current.contains(category)) {
-      current.remove(category);
-    } else {
-      current.add(category);
+  Future<bool> updateDailyLimit(double value) => _updateBudgetLimit(
+        storageKey: 'dailyLimit',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(dailyLimit: value),
+      );
+
+  Future<bool> updateWeeklyLimit(double value) => _updateBudgetLimit(
+        storageKey: 'weeklyLimit',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(weeklyLimit: value),
+      );
+
+  Future<bool> updateMonthlyLimit(double value) => _updateBudgetLimit(
+        storageKey: 'monthlyLimit',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(monthlyLimit: value),
+      );
+
+  Future<bool> updateSafeThreshold(double value) => _updateThreshold(
+        storageKey: 'safeThreshold',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(safeThreshold: value),
+      );
+
+  Future<bool> updateCautionThreshold(double value) => _updateThreshold(
+        storageKey: 'cautionThreshold',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(cautionThreshold: value),
+      );
+
+  Future<bool> updateDangerThreshold(double value) => _updateThreshold(
+        storageKey: 'dangerThreshold',
+        value: value,
+        updateSnapshot: (snapshot) => snapshot.copyWith(dangerThreshold: value),
+      );
+
+  Future<bool> addCategory({
+    required String title,
+    required String icon,
+    required int color,
+    int? parentId,
+  }) async {
+    final result = await _repository.addCategory(
+      title: title,
+      icon: icon,
+      color: color,
+      parentId: parentId,
+    );
+    return _applyMutationResult(
+      result,
+      onSuccess: () async => _refreshSnapshot(),
+    );
+  }
+
+  Future<bool> updateCategory({
+    required int id,
+    required String title,
+    required String icon,
+    required int color,
+    int? parentId,
+  }) async {
+    final result = await _repository.updateCategory(
+      id: id,
+      title: title,
+      icon: icon,
+      color: color,
+      parentId: parentId,
+    );
+    return _applyMutationResult(
+      result,
+      onSuccess: () async => _refreshSnapshot(),
+    );
+  }
+
+  Future<bool> deleteCategory(int id) async {
+    final result = await _repository.deleteCategory(id);
+    return _applyMutationResult(
+      result,
+      onSuccess: () async => _refreshSnapshot(),
+    );
+  }
+
+  Future<bool> _updateBudgetLimit({
+    required String storageKey,
+    required double value,
+    required SettingsSnapshot Function(SettingsSnapshot snapshot) updateSnapshot,
+  }) async {
+    final result = await _repository.updateBudgetLimit(storageKey, value);
+    return _applyMutationResult(
+      result,
+      onSuccess: () async {
+        final current = _requireSnapshot();
+        _snapshot = updateSnapshot(current);
+        emit(SettingsLoaded(_snapshot!));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> _updateThreshold({
+    required String storageKey,
+    required double value,
+    required SettingsSnapshot Function(SettingsSnapshot snapshot) updateSnapshot,
+  }) async {
+    final result = await _repository.updateThreshold(storageKey, value);
+    return _applyMutationResult(
+      result,
+      onSuccess: () async {
+        final current = _requireSnapshot();
+        _snapshot = updateSnapshot(current);
+        emit(SettingsLoaded(_snapshot!));
+        return true;
+      },
+    );
+  }
+
+  Future<bool> _refreshSnapshot() async {
+    final result = await _repository.loadSettings();
+    return _applyLoadResult(result, emitFailureState: false);
+  }
+
+  bool _applyLoadResult(
+    Result<SettingsSnapshot, Failure> result, {
+    required bool emitFailureState,
+  }) {
+    return result.fold(
+      (snapshot) {
+        _snapshot = snapshot;
+        emit(SettingsLoaded(snapshot));
+        return true;
+      },
+      (failure) {
+        if (emitFailureState) {
+          _emitFailure(failure.message);
+        } else {
+          emit(SettingsFailure(failure.message));
+          if (_snapshot != null) {
+            emit(SettingsLoaded(_snapshot!));
+          }
+        }
+        return false;
+      },
+    );
+  }
+
+  Future<bool> _applyMutationResult(
+    Result<void, Failure> result, {
+    required Future<bool> Function() onSuccess,
+  }) async {
+    if (result.isFailure) {
+      _emitFailure(result.failureOrNull!.message);
+      return false;
     }
-    emit(loadedState.copyWith(expandedCategories: current));
+
+    return onSuccess();
   }
 
-  void updateLimit(String type, double value) {
-    if (state is! SettingsLoaded) return;
-    final loadedState = state as SettingsLoaded;
-
-    if (type == 'daily') emit(loadedState.copyWith(dailyLimit: value));
-    if (type == 'weekly') emit(loadedState.copyWith(weeklyLimit: value));
-    if (type == 'monthly') emit(loadedState.copyWith(monthlyLimit: value));
+  void _emitFailure(String message) {
+    emit(SettingsFailure(message));
+    if (_snapshot != null) {
+      emit(SettingsLoaded(_snapshot!));
+    }
   }
 
-  void updateThreshold(String type, double value) {
-    if (state is! SettingsLoaded) return;
-    final loadedState = state as SettingsLoaded;
+  SettingsSnapshot _requireSnapshot() {
+    final snapshot = _snapshot;
+    if (snapshot != null) {
+      return snapshot;
+    }
+    throw StateError('Settings must be loaded before updating values.');
+  }
 
-    if (type == 'safe') emit(loadedState.copyWith(safeHaven: value));
-    if (type == 'caution') emit(loadedState.copyWith(mildCaution: value));
-    if (type == 'danger') emit(loadedState.copyWith(dangerThreshold: value));
+  String _themeModeKey(ThemeMode mode) {
+    return switch (mode) {
+      ThemeMode.light => 'light',
+      ThemeMode.dark => 'dark',
+      ThemeMode.system => 'system',
+    };
   }
 }

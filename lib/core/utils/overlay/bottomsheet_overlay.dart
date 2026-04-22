@@ -37,8 +37,17 @@ final class BottomSheetUtil {
 
   static void close({required BuildContext context, required String sheetId}) {
     final route = routes.remove(sheetId);
-    if (route != null) {
-      Navigator.of(context).removeRoute(route);
+    if (route == null) {
+      return;
+    }
+
+    final navigator = route.navigator;
+    if (navigator == null) {
+      return;
+    }
+
+    if (route.isCurrent) {
+      navigator.pop();
     }
   }
 }

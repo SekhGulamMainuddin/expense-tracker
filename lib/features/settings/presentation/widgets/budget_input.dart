@@ -1,31 +1,91 @@
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
+import 'package:expense_tracker/core/styles/app_palette.dart';
+import 'package:expense_tracker/core/styles/app_text_styles.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/styles/app_dimensions.dart';
-import '../../../../core/styles/app_palette.dart';
-import '../../../../core/styles/app_text_styles.dart';
-import '../../../../core/styles/app_texts.dart';
-import '../../../../core/utils/ui_extensions.dart';
-
-class BudgetInput extends StatelessWidget {
+class BudgetInput extends StatefulWidget {
   const BudgetInput({
     super.key,
     required this.label,
     required this.value,
+    required this.currencySymbol,
+    required this.onSubmitted,
     this.budgetBand,
   });
 
   final String label;
-  final String value;
+  final double value;
+  final String currencySymbol;
+  final ValueChanged<double> onSubmitted;
 
   /// Optional band for tonal wash behind the field: `'safe'` | `'caution'` | `'danger'`.
   final String? budgetBand;
 
   @override
+  State<BudgetInput> createState() => _BudgetInputState();
+}
+
+class _BudgetInputState extends State<BudgetInput> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _formatValue(widget.value));
+    _focusNode = FocusNode();
+    _focusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant BudgetInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final formattedValue = _formatValue(widget.value);
+    if (_controller.text != formattedValue && !_focusNode.hasFocus) {
+      _controller.text = formattedValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
+    _focusNode.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) {
+      _submitValue();
+    }
+  }
+
+  void _submitValue() {
+    final parsed = double.tryParse(_controller.text.trim());
+    if (parsed == null) {
+      _controller.text = _formatValue(widget.value);
+      return;
+    }
+
+    widget.onSubmitted(parsed);
+    _controller.text = _formatValue(parsed);
+  }
+
+  String _formatValue(double value) {
+    if (value % 1 == 0) {
+      return value.toInt().toString();
+    }
+    return value.toStringAsFixed(2);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     Color? wash;
-    switch (budgetBand) {
+    switch (widget.budgetBand) {
       case 'safe':
         wash = AppPalette.safeBandWashGreen(cs);
         break;
@@ -45,8 +105,7 @@ class BudgetInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         AppTextLabelMd(
-          label,
-          
+          widget.label,
           uppercase: true,
           color: cs.onSurfaceVariant,
         ),
@@ -59,10 +118,13 @@ class BudgetInput extends StatelessWidget {
             borderRadius: AppRadii.xl,
           ),
           child: TextField(
-            controller: TextEditingController(text: value),
+            controller: _controller,
+            focusNode: _focusNode,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: AppTextStyles.headlineLg(context),
+            onSubmitted: (_) => _submitValue(),
             decoration: InputDecoration(
-              prefixText: '\$ ',
+              prefixText: '${widget.currencySymbol} ',
               prefixStyle: AppTextStyles.headlineLg(context).copyWith(
                 color: cs.primary,
               ),

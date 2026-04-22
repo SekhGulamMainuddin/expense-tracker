@@ -25,6 +25,17 @@ class IconGridSelector extends StatelessWidget {
     'restaurant_menu',
     'fastfood',
     'kitchen',
+    'shopping_cart',
+    'directions_car',
+    'flight',
+    'local_taxi',
+    'checkroom',
+    'devices',
+    'bolt',
+    'wifi',
+    'receipt_long',
+    'shopping_bag',
+    'more_time',
     'more_horiz',
   ];
 
@@ -60,7 +71,7 @@ class IconGridSelector extends StatelessWidget {
                   : null,
             ),
             child: Icon(
-              _getIconData(iconName),
+              iconForName(iconName),
               color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
               size: 24.r,
             ),
@@ -70,7 +81,7 @@ class IconGridSelector extends StatelessWidget {
     );
   }
 
-  IconData _getIconData(String name) {
+  static IconData iconForName(String name) {
     return switch (name) {
       'local_bar' => Icons.local_bar,
       'lunch_dining' => Icons.lunch_dining,
@@ -81,8 +92,18 @@ class IconGridSelector extends StatelessWidget {
       'restaurant_menu' => Icons.restaurant_menu,
       'fastfood' => Icons.fastfood,
       'kitchen' => Icons.kitchen,
+      'shopping_cart' => Icons.shopping_cart,
+      'directions_car' => Icons.directions_car,
+      'flight' => Icons.flight,
+      'local_taxi' => Icons.local_taxi,
+      'checkroom' => Icons.checkroom,
+      'devices' => Icons.devices,
+      'bolt' => Icons.bolt,
+      'wifi' => Icons.wifi,
+      'receipt_long' => Icons.receipt_long,
+      'shopping_bag' => Icons.shopping_bag,
+      'more_time' => Icons.more_time,
       _ => Icons.more_horiz,
     };
   }
 }
-

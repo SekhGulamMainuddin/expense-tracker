@@ -1,62 +1,104 @@
-import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
+import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_tile.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/styles/app_texts.dart';
+class CategoryList extends StatefulWidget {
+  const CategoryList({
+    super.key,
+    required this.categories,
+    required this.onAddCategory,
+    required this.onAddSubcategory,
+    required this.onEditCategory,
+    required this.onDeleteCategory,
+    required this.onEditSubcategory,
+    required this.onDeleteSubcategory,
+  });
 
-import 'package:expense_tracker/core/di/service_locator.dart';
+  final List<SettingsCategory> categories;
+  final VoidCallback onAddCategory;
+  final void Function(SettingsCategory parentCategory) onAddSubcategory;
+  final void Function(SettingsCategory category) onEditCategory;
+  final void Function(SettingsCategory category) onDeleteCategory;
+  final void Function(SettingsCategory category) onEditSubcategory;
+  final ValueChanged<int> onDeleteSubcategory;
 
-class CategoryList extends StatelessWidget {
-  const CategoryList({super.key});
+  @override
+  State<CategoryList> createState() => _CategoryListState();
+}
+
+class _CategoryListState extends State<CategoryList> {
+  final Set<int> _expandedCategoryIds = {};
+
+  @override
+  void didUpdateWidget(covariant CategoryList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final rootIds = widget.categories.map((category) => category.id).toSet();
+    _expandedCategoryIds.removeWhere((id) => !rootIds.contains(id));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      bloc: getIt<SettingsCubit>(),
-      builder: (context, state) {
-        if (state is! SettingsLoaded) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return Column(
-          children: [
-            CategoryTile(
-              title: 'Food & Drinks',
-              subtitle: '12 Subcategories',
-              icon: Icons.restaurant,
-              color: Colors.orange,
-              isExpanded: state.expandedCategories.contains('Food'),
-              onTap: () => getIt<SettingsCubit>().toggleCategory('Food'),
-            ),
-            SizedBox(height: 12.h),
-            CategoryTile(
-              title: 'Travel',
-              subtitle: '4 Subcategories',
-              icon: Icons.flight,
-              color: Colors.blue,
-              isExpanded: state.expandedCategories.contains('Travel'),
-              onTap: () =>
-                  context.read<SettingsCubit>().toggleCategory('Travel'),
-            ),
-            SizedBox(height: 12.h),
-            _addCategoryButton(context),
-          ],
-        );
-      },
+    final cs = context.theme.colorScheme;
+
+    if (widget.categories.isEmpty) {
+      return _EmptyCategoryState(
+        onAddCategory: widget.onAddCategory,
+      );
+    }
+
+    return Column(
+      children: [
+        for (final category in widget.categories) ...[
+          CategoryTile(
+            category: category,
+            isExpanded: _expandedCategoryIds.contains(category.id),
+            onToggleExpanded: () {
+              setState(() {
+                if (_expandedCategoryIds.contains(category.id)) {
+                  _expandedCategoryIds.remove(category.id);
+                } else {
+                  _expandedCategoryIds.add(category.id);
+                }
+              });
+            },
+            onAddSubcategory: () => widget.onAddSubcategory(category),
+            onEditCategory: () => widget.onEditCategory(category),
+            onDeleteCategory: () => widget.onDeleteCategory(category),
+            onEditSubcategory: widget.onEditSubcategory,
+            onDeleteSubcategory: widget.onDeleteSubcategory,
+          ),
+          SizedBox(height: 12.h),
+        ],
+        _AddCategoryButton(
+          onTap: widget.onAddCategory,
+          backgroundColor: cs.surfaceContainerLow,
+        ),
+      ],
     );
   }
+}
 
-  Widget _addCategoryButton(BuildContext context) {
+class _AddCategoryButton extends StatelessWidget {
+  const _AddCategoryButton({
+    required this.onTap,
+    required this.backgroundColor,
+  });
+
+  final VoidCallback onTap;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     return Material(
-      color: cs.surfaceContainerLow,
+      color: backgroundColor,
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(12.r),
-        onTap: () {},
+        onTap: onTap,
         child: Padding(
           padding: EdgeInsets.all(16.r),
           child: Row(
@@ -66,7 +108,6 @@ class CategoryList extends StatelessWidget {
               SizedBox(width: 8.w),
               AppTextBodyLg(
                 'Add New Category',
-
                 style: context.theme.textTheme.bodyLarge!.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -74,6 +115,49 @@ class CategoryList extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _EmptyCategoryState extends StatelessWidget {
+  const _EmptyCategoryState({required this.onAddCategory});
+
+  final VoidCallback onAddCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.r),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppTextBodyLg(
+            'No categories yet',
+            style: context.theme.textTheme.bodyLarge!.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          AppTextBodyMd(
+            'Add a category to start organizing your spending.',
+            color: cs.onSurfaceVariant,
+          ),
+          SizedBox(height: 16.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton(
+              onPressed: onAddCategory,
+              child: const Text('Add Category'),
+            ),
+          ),
+        ],
       ),
     );
   }

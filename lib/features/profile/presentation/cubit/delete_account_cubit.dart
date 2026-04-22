@@ -1,15 +1,20 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/features/profile/presentation/cubit/delete_account_state.dart';
+import 'package:bloc/bloc.dart';
+import 'package:expense_tracker/features/profile/domain/repositories/delete_account_repository.dart';
+
+part 'delete_account_state.dart';
 
 class DeleteAccountCubit extends Cubit<DeleteAccountState> {
-  DeleteAccountCubit() : super(DeleteAccountState());
+  DeleteAccountCubit(this._deleteAccountRepository) : super(DeleteAccountInitial());
+
+  final DeleteAccountRepository _deleteAccountRepository;
 
   Future<void> deleteAccount() async {
-    emit(DeleteAccountState(isDeleting: true));
+    emit(DeleteAccountDeleting());
 
-    // Simulate network delay for account deletion
-    await Future.delayed(const Duration(seconds: 2));
-
-    emit(DeleteAccountState(isDeleting: false, isSuccess: true));
+    final result = await _deleteAccountRepository.deleteAccount();
+    result.fold(
+      (_) => emit(DeleteAccountSuccess()),
+      (failure) => emit(DeleteAccountFailure(failure.message)),
+    );
   }
 }

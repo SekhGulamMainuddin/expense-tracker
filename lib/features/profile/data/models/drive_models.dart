@@ -1,24 +1,40 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'drive_models.g.dart';
-
-@JsonSerializable()
 class GoogleDriveFile {
   final String id;
   final String name;
 
   GoogleDriveFile({required this.id, required this.name});
 
-  factory GoogleDriveFile.fromJson(Map<String, dynamic> json) => _$GoogleDriveFileFromJson(json);
-  Map<String, dynamic> toJson() => _$GoogleDriveFileToJson(this);
+  factory GoogleDriveFile.fromJson(Map<String, dynamic> json) {
+    return GoogleDriveFile(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
+        'name': name,
+      };
 }
 
-@JsonSerializable()
 class GoogleDriveListResponse {
   final List<GoogleDriveFile> files;
 
   GoogleDriveListResponse({required this.files});
 
-  factory GoogleDriveListResponse.fromJson(Map<String, dynamic> json) => _$GoogleDriveListResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$GoogleDriveListResponseToJson(this);
+  factory GoogleDriveListResponse.fromJson(Map<String, dynamic> json) {
+    final rawFiles = json['files'];
+    final files = rawFiles is List
+        ? rawFiles
+            .whereType<Map<String, dynamic>>()
+            .map(GoogleDriveFile.fromJson)
+            .toList()
+        : const <GoogleDriveFile>[];
+
+    return GoogleDriveListResponse(files: files);
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'files': files.map((file) => file.toJson()).toList(),
+      };
 }

@@ -13,6 +13,12 @@ This document serves as the single source of truth for all AI assistants (Antigr
     - **Factories**: Use `Factory` for screen-specific state (Login, AddExpense).
     - **Usage**: Access via `getIt<CubitType>()`. Pass explicitly to `bloc:` in `BlocBuilder`/`BlocListener`.
     - **Lifecycle**: If using a factory Cubit, use a `StatefulWidget` and call `cubit.close()` in `dispose()`.
+    // Scoped Cubits: Do not pass a Cubit object through widget constructors (prop drilling) if the same Cubit instance is required by multiple widgets within a specific subtree. Instead, use GetIt's scoping capabilities (e.g., `pushNewScope`) to inject the Cubit into a temporary scope that is automatically cleared when the parent widget or the widget hosting the Cubit is removed from the tree.
+
+## 1.1. Flutter Tooling
+- **Use FVM**: Prefer `fvm flutter` and `fvm dart` for all Flutter SDK commands in this repository.
+- **No Raw Flutter**: Do not use plain `flutter` or `dart` commands unless FVM is unavailable or the task explicitly requires a different SDK path.
+- **Consistency**: Keep package installs, analysis, code generation, and test commands aligned with the FVM-managed SDK.
 
 ## 2. Data Flow & Error Handling: Result Pattern
 - **Result Type**: All repository methods must return `ResultFuture<T>` or `ResultVoid` for asynchronous operations.

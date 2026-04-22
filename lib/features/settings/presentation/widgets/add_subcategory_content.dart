@@ -1,21 +1,28 @@
+import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/core/styles/app_dimensions.dart';
+import 'package:expense_tracker/core/styles/app_palette.dart';
+import 'package:expense_tracker/core/styles/app_texts.dart';
+import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/color_picker_row.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/subcategory_cubit.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/subcategory_state.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/color_picker_row.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../core/di/service_locator.dart';
-import '../../../../core/styles/app_dimensions.dart';
-import '../../../../core/styles/app_palette.dart';
-import '../../../../core/styles/app_texts.dart';
-import '../../../../core/utils/ui_extensions.dart';
-
 class AddSubcategoryContent extends StatefulWidget {
-  const AddSubcategoryContent({super.key, required this.parentCategory});
+  const AddSubcategoryContent({
+    super.key,
+    this.parentCategory,
+    this.parentId,
+    this.initialCategory,
+  });
 
-  final String parentCategory;
+  final String? parentCategory;
+  final int? parentId;
+  final SettingsCategory? initialCategory;
 
   @override
   State<AddSubcategoryContent> createState() => _AddSubcategoryContentState();
@@ -23,25 +30,44 @@ class AddSubcategoryContent extends StatefulWidget {
 
 class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
   final _nameController = TextEditingController();
-  final _subcategoryCubit = getIt<SubcategoryCubit>();
+  final _settingsCubit = getIt<SettingsCubit>();
   String _selectedIcon = 'local_bar';
   Color _selectedColor = AppPalette.vividBlue;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _subcategoryCubit.close();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final category = widget.initialCategory;
+    if (category != null) {
+      _nameController.text = category.title;
+      _selectedIcon = category.icon;
+      _selectedColor = Color(category.color);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    return BlocListener<SubcategoryCubit, SubcategoryState>(
-      bloc: _subcategoryCubit,
+    final isEditing = widget.initialCategory != null;
+    final title = isEditing
+        ? (widget.initialCategory!.parentId == null
+            ? 'Edit Category'
+            : 'Edit Subcategory')
+        : (widget.parentCategory == null
+            ? 'Add Category'
+            : 'Add Subcategory for ${widget.parentCategory}');
+
+    return BlocListener<SettingsCubit, SettingsState>(
+      bloc: _settingsCubit,
       listener: (context, state) {
-        if (state is SubcategorySuccess) Navigator.pop(context);
-        if (state is SubcategoryFailure) {
+        if (state is SettingsFailure) {
           context.showAppSnackBar(state.errorMessage);
         }
       },
@@ -50,14 +76,12 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppTextHeadlineSm(
-              'Add Subcategory for ${widget.parentCategory}',
-
-            ),
+            AppTextHeadlineSm(title),
             SizedBox(height: 24.h),
-            _fieldLabel(context, 'Subcategory Name'),
+            _fieldLabel(context, 'Category Name'),
             TextField(
               controller: _nameController,
+              textCapitalization: TextCapitalization.words,
               style: theme.textTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: 'e.g. Fine Dining',
@@ -89,7 +113,7 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
               onColorSelected: (color) => setState(() => _selectedColor = color),
             ),
             SizedBox(height: 32.h),
-            _actionButtons(context),
+            _actionButtons(context, isEditing),
           ],
         ),
       ),
@@ -102,7 +126,6 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
       child: AppTextLabelMd(
         text,
-
         uppercase: true,
         letterSpacing: 1.2,
         color: cs.onSurfaceVariant,
@@ -110,18 +133,18 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
     );
   }
 
-  Widget _actionButtons(BuildContext context) {
+  Widget _actionButtons(BuildContext context, bool isEditing) {
     final cs = context.theme.colorScheme;
+    final navigator = Navigator.of(context);
     return ColoredBox(
       color: cs.surfaceContainerLow.withOpacity(0.5),
       child: Row(
         children: [
           Expanded(
             child: TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: _isSubmitting ? null : () => Navigator.pop(context),
               child: AppTextBodyMd(
                 'Cancel',
-
                 color: cs.onSurfaceVariant,
                 style: context.theme.textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.w600,
@@ -132,46 +155,66 @@ class _AddSubcategoryContentState extends State<AddSubcategoryContent> {
           SizedBox(width: 16.w),
           Expanded(
             flex: 2,
-            child: BlocBuilder<SubcategoryCubit, SubcategoryState>(
-              bloc: _subcategoryCubit,
-              builder: (context, state) {
-                final isLoading = state is SubcategoryLoading;
-                return ElevatedButton(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                    _subcategoryCubit.addSubcategory(
-                      name: _nameController.text,
-                      icon: _selectedIcon,
-                      colorValue: _selectedColor.value,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
-                    elevation: 0,
-                  ),
-                  child: isLoading
-                      ? SizedBox(
-                    height: 20.h,
-                    width: 20.w,
-                    child: const CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : AppTextBodyMd(
-                    'Add Subcategory',
+            child: ElevatedButton(
+              onPressed: _isSubmitting
+                  ? null
+                  : () async {
+                      final title = _nameController.text.trim();
+                      if (title.isEmpty) {
+                        context.showAppSnackBar('Please enter a category name');
+                        return;
+                      }
 
-                    style: context.theme.textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w600,
+                      setState(() => _isSubmitting = true);
+                      final success = isEditing
+                          ? await _settingsCubit.updateCategory(
+                              id: widget.initialCategory!.id,
+                              title: title,
+                              icon: _selectedIcon,
+                              color: _selectedColor.toARGB32(),
+                              parentId: widget.initialCategory!.parentId,
+                            )
+                          : await _settingsCubit.addCategory(
+                              title: title,
+                              icon: _selectedIcon,
+                              color: _selectedColor.toARGB32(),
+                              parentId: widget.parentId,
+                            );
+                      if (!mounted) {
+                        return;
+                      }
+                      setState(() => _isSubmitting = false);
+                      if (success) {
+                        navigator.pop();
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedColor,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
+                elevation: 0,
+              ),
+              child: _isSubmitting
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.w,
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : AppTextBodyMd(
+                      isEditing
+                          ? 'Save Changes'
+                          : (widget.parentCategory == null
+                              ? 'Add Category'
+                              : 'Add Subcategory'),
+                      style: context.theme.textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      color: Colors.white,
                     ),
-                    color: Colors.white,
-                  ),
-                );
-              },
             ),
           ),
         ],
