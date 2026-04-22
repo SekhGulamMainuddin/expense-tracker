@@ -51,6 +51,9 @@ class KeyValueStoreDao extends DatabaseAccessor<AppDatabase> with _$KeyValueStor
     });
   }
 
+  /// Watches the entire table for any changes.
+  Stream<List<KeyValueStoreData>> watchAllEntries() => select(keyValueStore).watch();
+
   Future<void> deleteKey(String key) =>
       (delete(keyValueStore)..where((t) => t.key.equals(key))).go();
 }

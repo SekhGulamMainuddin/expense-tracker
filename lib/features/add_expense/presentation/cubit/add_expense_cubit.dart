@@ -7,19 +7,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expense_state.dart';
 
 class AddExpenseCubit extends Cubit<AddExpenseState> {
-  AddExpenseCubit(this._repository) : super(const AddExpenseLoading()) {
+  AddExpenseCubit(this._repository) : super(AddExpenseLoading()) {
     unawaited(loadFormData());
   }
 
   final AddExpenseRepository _repository;
 
   Future<void> loadFormData() async {
-    emit(const AddExpenseLoading());
+    emit(AddExpenseLoading());
     final result = await _repository.loadFormData();
     result.fold(
       (settings) {
         if (settings.categories.isEmpty) {
-          emit(const AddExpenseFailure('No categories available yet.'));
+          emit(AddExpenseFailure('No categories available yet.'));
           return;
         }
 
@@ -147,7 +147,7 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
 
     return result.fold(
       (_) {
-        emit(const AddExpenseSuccess());
+        emit(AddExpenseSuccess());
         return true;
       },
       (failure) {

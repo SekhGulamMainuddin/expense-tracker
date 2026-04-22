@@ -155,7 +155,16 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
         .toList();
   }
 
-  // --- 4. Add Expense (Safe Fallback) ---
+  // --- 4. Watch Streams (Reactive Triggers) ---
+
+  /// Emits whenever any row in the expenses table changes.
+  /// Used as a change trigger for the reactive dashboard.
+  Stream<List<Expense>> watchAllExpenses() => select(expenses).watch();
+
+  /// Emits whenever any row in the categories table changes.
+  Stream<List<Category>> watchAllCategories() => select(categories).watch();
+
+  // --- 5. Add Expense (Safe Fallback) ---
 
   /// Adds an expense with fallback title logic and enum currency.
   Future<int> addExpense({

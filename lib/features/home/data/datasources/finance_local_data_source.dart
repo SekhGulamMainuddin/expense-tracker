@@ -1,0 +1,223 @@
+import 'dart:async';
+
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/dao/expense_dao.dart';
+import 'package:expense_tracker/core/utils/date_helper.dart';
+import 'package:expense_tracker/features/home/domain/entities/finance_category_breakdown.dart';
+import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.dart';
+import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
+import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
+import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+
+class FinanceLocalDataSource {
+  FinanceLocalDataSource(this._expenseDao, this._settingsLocalDataSource);
+
+  final ExpenseDao _expenseDao;
+  final SettingsLocalDataSource _settingsLocalDataSource;
+
+  /// Watches both the expenses and categories tables for changes.
+  /// Whenever either table is modified, re-computes the full dashboard.
+  Stream<FinanceSnapshot> watchDashboard() {
+    late StreamController<FinanceSnapshot> controller;
+    StreamSubscription<void>? expenseSub;
+    StreamSubscription<void>? categorySub;
+    StreamSubscription<void>? settingsSub;
+
+    Future<void> reload() async {
+      try {
+        final snapshot = await loadDashboard();
+        if (!controller.isClosed) {
+          controller.add(snapshot);
+        }
+      } catch (e) {
+        if (!controller.isClosed) {
+          controller.addError(e);
+        }
+      }
+    }
+
+    controller = StreamController<FinanceSnapshot>(
+      onListen: () {
+        expenseSub = _expenseDao.watchAllExpenses().listen((_) => reload());
+        categorySub = _expenseDao.watchAllCategories().listen((_) => reload());
+        settingsSub = _settingsLocalDataSource.watchSettings().listen((_) => reload());
+      },
+      onCancel: () {
+        expenseSub?.cancel();
+        categorySub?.cancel();
+        settingsSub?.cancel();
+      },
+    );
+
+    return controller.stream;
+  }
+
+  Future<FinanceSnapshot> loadDashboard() async {
+    final settings = await _settingsLocalDataSource.loadSettings();
+    final now = DateTime.now();
+    final dailySpent = await _expenseDao.getTotalExpense(
+      DateHelper.startOfToday,
+      now,
+    );
+    final weeklySpent = await _expenseDao.getTotalExpense(
+      DateHelper.startOfThisWeek,
+      now,
+    );
+    final monthlySpent = await _expenseDao.getTotalExpense(
+      DateHelper.startOfThisMonth,
+      now,
+    );
+    final monthlyComparison = await _expenseDao.getMonthlyComparison();
+    final recentExpenses = await _expenseDao.getRecentTransactions(8, 0);
+    final monthlyExpenses = await _expenseDao.getExpensesInRange(
+      DateHelper.startOfThisMonth,
+      now,
+    );
+
+    final categoryMap = _flattenCategories(settings.categories);
+    final recentTransactions = recentExpenses
+        .map(
+          (expense) => _toTransaction(
+            expense: expense,
+            categories: categoryMap,
+          ),
+        )
+        .toList();
+    final breakdown = _buildCategoryBreakdown(
+      monthlyExpenses: monthlyExpenses,
+      categories: categoryMap,
+    );
+
+    return FinanceSnapshot(
+      currencyCode: settings.baseCurrencyCode,
+      currencySymbol: _currencySymbol(settings.baseCurrencyCode),
+      dailySpent: dailySpent,
+      weeklySpent: weeklySpent,
+      monthlySpent: monthlySpent,
+      dailyLimit: settings.dailyLimit,
+      weeklyLimit: settings.weeklyLimit,
+      monthlyLimit: settings.monthlyLimit,
+      monthlyComparison: monthlyComparison,
+      recentTransactions: recentTransactions,
+      categoryBreakdown: breakdown,
+    );
+  }
+
+  Map<int, SettingsCategory> _flattenCategories(List<SettingsCategory> roots) {
+    final result = <int, SettingsCategory>{};
+
+    void visit(SettingsCategory category) {
+      result[category.id] = category;
+      for (final child in category.children) {
+        visit(child);
+      }
+    }
+
+    for (final category in roots) {
+      visit(category);
+    }
+
+    return result;
+  }
+
+  FinanceTransaction _toTransaction({
+    required Expense expense,
+    required Map<int, SettingsCategory> categories,
+  }) {
+    final category = categories[expense.categoryId];
+    final amount = expense.amount.abs();
+    return FinanceTransaction(
+      id: expense.id,
+      title: expense.title ?? category?.title ?? 'Expense',
+      subtitle: _formatTransactionDate(expense.date),
+      amount: amount,
+      icon: category?.icon ?? 'more_horiz',
+      color: category?.color ?? 0xFF64748B,
+      date: expense.date,
+    );
+  }
+
+  List<FinanceCategoryBreakdown> _buildCategoryBreakdown({
+    required List<Expense> monthlyExpenses,
+    required Map<int, SettingsCategory> categories,
+  }) {
+    if (monthlyExpenses.isEmpty) {
+      return const [];
+    }
+
+    final totals = <int, double>{};
+    for (final expense in monthlyExpenses) {
+      totals[expense.categoryId] = (totals[expense.categoryId] ?? 0) + expense.amount.abs();
+    }
+
+    final totalSpent = totals.values.fold<double>(0, (sum, value) => sum + value);
+    if (totalSpent <= 0) {
+      return const [];
+    }
+
+    final items = totals.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return items.map((entry) {
+      final category = categories[entry.key];
+      return FinanceCategoryBreakdown(
+        categoryId: entry.key,
+        title: category?.title ?? 'Uncategorized',
+        icon: category?.icon ?? 'more_horiz',
+        color: category?.color ?? 0xFF64748B,
+        amount: entry.value,
+        percentage: entry.value / totalSpent,
+      );
+    }).take(5).toList();
+  }
+
+  String _currencySymbol(String currencyCode) {
+    return switch (currencyCode.toLowerCase()) {
+      'usd' => '\$',
+      'eur' => '€',
+      'inr' => '₹',
+      _ => currencyCode.toUpperCase(),
+    };
+  }
+
+  String _formatTransactionDate(DateTime date) {
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
+    final transactionDay = DateTime(date.year, date.month, date.day);
+
+    if (transactionDay == startOfToday) {
+      return 'Today, ${_formatTime(date)}';
+    }
+
+    if (transactionDay == startOfToday.subtract(const Duration(days: 1))) {
+      return 'Yesterday, ${_formatTime(date)}';
+    }
+
+    return '${_monthName(date.month)} ${date.day}, ${date.year}';
+  }
+
+  String _formatTime(DateTime date) {
+    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final suffix = date.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $suffix';
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+}

@@ -12,7 +12,7 @@ import 'package:expense_tracker/features/home/presentation/widgets/recent_transa
 import 'package:expense_tracker/features/home/presentation/widgets/summary_cards_row.dart';
 import 'package:expense_tracker/features/home/presentation/widgets/transaction_tile.dart';
 import 'package:expense_tracker/features/profile/presentation/screens/profile_screen.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,11 +26,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final financeCubit = getIt<FinanceCubit>();
-    Future<void> openAddExpense() async {
-      final added = await context.push<bool>(AddExpenseScreen.routeName) ?? false;
-      if (added) {
-        await financeCubit.refresh();
-      }
+    void openAddExpense() {
+      context.push(AddExpenseScreen.routeName);
     }
 
     return BlocConsumer<FinanceCubit, FinanceState>(
@@ -103,17 +100,6 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     BalanceHeroCard(snapshot: snapshot),
                     SummaryCardsRow(snapshot: snapshot),
-                    SizedBox(height: 24.h),
-                    _QuickActionsRow(
-                      onAddExpense: openAddExpense,
-                      onViewCategories: () {
-                        context.showAppBottomSheet(
-                          title: 'Category Breakdown',
-                          isScrollControlled: true,
-                          customWidget: _BreakdownSheet(snapshot: snapshot),
-                        );
-                      },
-                    ),
                     SizedBox(height: 12.h),
                     CategoryChartSection(
                       breakdown: snapshot.categoryBreakdown,
@@ -185,69 +171,6 @@ class _HomeFailureView extends StatelessWidget {
           FilledButton(
             onPressed: onRetry,
             child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow({
-    required this.onAddExpense,
-    required this.onViewCategories,
-  });
-
-  final VoidCallback onAddExpense;
-  final VoidCallback onViewCategories;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.theme.colorScheme;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16.r),
-              onTap: onAddExpense,
-              child: Container(
-                padding: EdgeInsets.all(16.r),
-                decoration: BoxDecoration(
-                  color: cs.primaryContainer,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle, color: cs.primary),
-                    SizedBox(width: 10.w),
-                    const AppTextBodyLg('Add Expense'),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16.r),
-              onTap: onViewCategories,
-              child: Container(
-                padding: EdgeInsets.all(16.r),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.pie_chart_outline, color: cs.onSurfaceVariant),
-                    SizedBox(width: 10.w),
-                    const AppTextBodyLg('View Chart'),
-                  ],
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -339,8 +262,8 @@ class _BreakdownTile extends StatelessWidget {
           CircleAvatar(
             radius: 18.r,
             backgroundColor: Color(item.color).withAlpha(36),
-            child: Icon(
-              IconGridSelector.iconForName(item.icon),
+            child: AppIcon(
+              item.icon,
               color: Color(item.color),
               size: 18.r,
             ),

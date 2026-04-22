@@ -5,12 +5,13 @@ import 'package:expense_tracker/features/settings/domain/entities/settings_categ
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/add_subcategory_content.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/budget_section.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_list.dart';
+import 'package:expense_tracker/features/settings/presentation/screens/category_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   static const routeName = '/settings';
@@ -192,20 +193,15 @@ class SettingsScreen extends StatelessWidget {
     return AppTextHeadlineSm(text);
   }
 
-  void _showCategoryEditor(
+  Future<void> _showCategoryEditor(
     BuildContext context,
     {
     SettingsCategory? parentCategory,
     SettingsCategory? initialCategory,
-  }) {
-    context.showAppBottomSheet(
-      title: initialCategory == null
-          ? (parentCategory == null ? 'Add Category' : 'Add Subcategory')
-          : (initialCategory.parentId == null
-              ? 'Edit Category'
-              : 'Edit Subcategory'),
-      isScrollControlled: true,
-      customWidget: AddSubcategoryContent(
+  }) async {
+    await context.push<bool>(
+      CategoryEditorScreen.routeName,
+      extra: CategoryEditorArgs(
         parentCategory: parentCategory?.title,
         parentId: parentCategory?.id,
         initialCategory: initialCategory,

@@ -4,6 +4,7 @@ import 'package:expense_tracker/features/add_expense/presentation/screens/add_ex
 import 'package:expense_tracker/features/auth/presentation/screens/login_screen.dart';
 import 'package:expense_tracker/features/home/presentation/screens/home_screen.dart';
 import 'package:expense_tracker/features/profile/presentation/screens/profile_screen.dart';
+import 'package:expense_tracker/features/settings/presentation/screens/category_editor_screen.dart';
 import 'package:expense_tracker/features/settings/presentation/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,19 @@ final class AppRouter {
           path: AddExpenseScreen.routeName,
           name: AddExpenseScreen.routeName,
           builder: (context, state) => const AddExpenseScreen(),
+        ),
+        GoRoute(
+          parentNavigatorKey: parentNavigatorKey,
+          path: CategoryEditorScreen.routeName,
+          name: CategoryEditorScreen.routeName,
+          builder: (context, state) {
+            final args = state.extra as CategoryEditorArgs?;
+            return CategoryEditorScreen(
+              parentCategory: args?.parentCategory,
+              parentId: args?.parentId,
+              initialCategory: args?.initialCategory,
+            );
+          },
         ),
         GoRoute(
           parentNavigatorKey: parentNavigatorKey,

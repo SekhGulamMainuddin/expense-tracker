@@ -1,8 +1,8 @@
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -74,8 +74,8 @@ class CategorySelector extends StatelessWidget {
                                 color: categoryColor.withValues(alpha: 0.14),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
-                                IconGridSelector.iconForName(category.icon),
+                              child: AppIcon(
+                                category.icon,
                                 color: categoryColor,
                                 size: 24.r,
                               ),

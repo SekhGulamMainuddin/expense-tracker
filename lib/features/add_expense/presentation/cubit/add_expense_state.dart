@@ -1,13 +1,9 @@
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 
-sealed class AddExpenseState {
-  const AddExpenseState();
-}
+sealed class AddExpenseState {}
 
-final class AddExpenseLoading extends AddExpenseState {
-  const AddExpenseLoading();
-}
+final class AddExpenseLoading extends AddExpenseState {}
 
 final class AddExpenseLoaded extends AddExpenseState {
   AddExpenseLoaded({
@@ -71,12 +67,10 @@ final class AddExpenseLoaded extends AddExpenseState {
   }
 }
 
-final class AddExpenseSuccess extends AddExpenseState {
-  const AddExpenseSuccess();
-}
+final class AddExpenseSuccess extends AddExpenseState {}
 
 final class AddExpenseFailure extends AddExpenseState {
-  const AddExpenseFailure(this.message);
+  AddExpenseFailure(this.message);
 
   final String message;
 }

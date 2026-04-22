@@ -1,7 +1,7 @@
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_category_breakdown.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -20,7 +20,6 @@ class CategoryChartSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
-    final total = breakdown.fold<double>(0, (sum, item) => sum + item.amount);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 24.r),
@@ -78,7 +77,6 @@ class CategoryChartSection extends StatelessWidget {
                                   _chartLegend(
                                     context,
                                     item,
-                                    total,
                                   ),
                               ],
                             ),
@@ -96,7 +94,6 @@ class CategoryChartSection extends StatelessWidget {
   Widget _chartLegend(
     BuildContext context,
     FinanceCategoryBreakdown item,
-    double total,
   ) {
     final cs = context.theme.colorScheme;
     return Padding(
@@ -110,8 +107,8 @@ class CategoryChartSection extends StatelessWidget {
               color: Color(item.color).withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              IconGridSelector.iconForName(item.icon),
+            child: AppIcon(
+              item.icon,
               size: 16.r,
               color: Color(item.color),
             ),

@@ -1,8 +1,8 @@
 import 'package:expense_tracker/core/styles/app_text_styles.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -38,8 +38,8 @@ class TransactionTile extends StatelessWidget {
                   color: Color(transaction.color).withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(
-                  IconGridSelector.iconForName(transaction.icon),
+                child: AppIcon(
+                  transaction.icon,
                   color: Color(transaction.color),
                   size: 24.r,
                 ),

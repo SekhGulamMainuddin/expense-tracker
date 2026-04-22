@@ -1,7 +1,7 @@
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -69,11 +69,7 @@ class CategoryTile extends StatelessWidget {
                               color: categoryColor.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(12.r),
                             ),
-                            child: Icon(
-                              IconGridSelector.iconForName(category.icon),
-                              color: categoryColor,
-                              size: 24.r,
-                            ),
+                            child: AppIcon(category.icon, color: categoryColor, size: 24.r),
                           ),
                           title: AppTextBodyLg(
                             category.title,
@@ -118,8 +114,8 @@ class CategoryTile extends StatelessWidget {
                                     avatar: CircleAvatar(
                                       backgroundColor:
                                           Color(child.color).withOpacity(0.16),
-                                      child: Icon(
-                                        IconGridSelector.iconForName(child.icon),
+                                      child: AppIcon(
+                                        child.icon,
                                         size: 14.r,
                                         color: Color(child.color),
                                       ),
