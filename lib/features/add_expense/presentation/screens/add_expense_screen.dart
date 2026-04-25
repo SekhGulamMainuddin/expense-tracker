@@ -6,7 +6,6 @@ import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expe
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/amount_display.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/category_selector.dart';
-import 'package:expense_tracker/features/add_expense/presentation/widgets/numeric_keypad.dart';
 import 'package:expense_tracker/features/add_expense/presentation/widgets/sub_category_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,17 +24,20 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   late final AddExpenseCubit _cubit;
   late final TextEditingController _titleController;
+  late final TextEditingController _amountController;
 
   @override
   void initState() {
     super.initState();
     _cubit = getIt<AddExpenseCubit>();
     _titleController = TextEditingController();
+    _amountController = TextEditingController(text: '0');
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _amountController.dispose();
     _cubit.close();
     super.dispose();
   }
@@ -49,7 +51,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       listener: (context, state) {
         if (state is AddExpenseLoaded) {
           if (_titleController.text != state.title) {
-            _titleController.text = state.title;
+            _titleController.value = TextEditingValue(
+              text: state.title,
+              selection: TextSelection.collapsed(offset: state.title.length),
+            );
+          }
+          if (_amountController.text != state.amount) {
+            _amountController.value = TextEditingValue(
+              text: state.amount,
+              selection: TextSelection.collapsed(offset: state.amount.length),
+            );
           }
           if (state.errorMessage != null) {
             context.showAppSnackBar(state.errorMessage!);
@@ -78,7 +89,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               onPressed: () => context.pop(false),
             ),
-            title: const AppTextHeadlineSm('add_expense.title'),
+            title: const AppTextHeadlineSm('add_expense.title_label'),
             centerTitle: true,
             actions: [
               IconButton(
@@ -87,7 +98,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         width: 18.r,
                         height: 18.r,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
+                           strokeWidth: 2,
                           color: theme.colorScheme.primary,
                         ),
                       )
@@ -109,73 +120,65 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     )
                   : loaded == null
                       ? const SizedBox.shrink()
-                      : Column(
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: EdgeInsets.fromLTRB(
-                                  20.w,
-                                  12.h,
-                                  20.w,
-                                  20.h,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    AmountDisplay(cubit: _cubit),
-                                    _ExpenseSummaryCard(state: loaded),
-                                    SizedBox(height: 20.h),
-                                    _ExpenseTitleField(
-                                      controller: _titleController,
-                                      cubit: _cubit,
-                                      enabled: !loaded.isSubmitting,
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    _ExpenseDateTile(
-                                      date: loaded.date,
-                                      onTap: loaded.isSubmitting
-                                          ? null
-                                          : () async {
-                                              final picked = await showDatePicker(
-                                                context: context,
-                                                initialDate: loaded.date,
-                                                firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                                                lastDate: DateTime.now().add(const Duration(days: 365)),
-                                              );
-                                              if (picked != null) {
-                                                _cubit.selectDate(picked);
-                                              }
-                                            },
-                                    ),
-                                    SizedBox(height: 24.h),
-                                    CategorySelector(
-                                      rootCategories: loaded.rootCategories,
-                                      selectedCategoryId: loaded.selectedCategoryId,
-                                      onCategorySelected: loaded.isSubmitting
-                                          ? null
-                                          : _cubit.selectCategory,
-                                    ),
-                                    SizedBox(height: 18.h),
-                                    SubCategorySelector(
-                                      subcategories: loaded.subcategories,
-                                      selectedSubcategoryId:
-                                          loaded.selectedSubcategoryId,
-                                      onSubcategorySelected: loaded.isSubmitting
-                                          ? null
-                                          : _cubit.selectSubcategory,
-                                    ),
-                                    SizedBox(height: 24.h),
-                                    _FormHint(
-                                      text: 'add_expense.hint',
-                                    ),
-                                    SizedBox(height: 20.h),
-                                  ],
-                                ),
+                      : SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(
+                            20.w,
+                            12.h,
+                            20.w,
+                            20.h,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AmountDisplay(
+                                cubit: _cubit,
+                                controller: _amountController,
                               ),
-                            ),
-                            NumericKeypad(cubit: _cubit),
-                          ],
+                              _ExpenseSummaryCard(state: loaded),
+                              SizedBox(height: 20.h),
+                              _ExpenseTitleField(
+                                controller: _titleController,
+                                cubit: _cubit,
+                                enabled: !loaded.isSubmitting,
+                              ),
+                              SizedBox(height: 20.h),
+                              _ExpenseDateTile(
+                                date: loaded.date,
+                                onTap: loaded.isSubmitting
+                                    ? null
+                                    : () async {
+                                        final picked = await showDatePicker(
+                                          context: context,
+                                          initialDate: loaded.date,
+                                          firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                                        );
+                                        if (picked != null) {
+                                          _cubit.selectDate(picked);
+                                        }
+                                      },
+                              ),
+                              SizedBox(height: 24.h),
+                              CategorySelector(
+                                rootCategories: loaded.rootCategories,
+                                selectedCategoryId: loaded.selectedCategoryId,
+                                onCategorySelected: loaded.isSubmitting
+                                    ? null
+                                    : _cubit.selectCategory,
+                              ),
+                              SizedBox(height: 18.h),
+                              SubCategorySelector(
+                                subcategories: loaded.subcategories,
+                                selectedSubcategoryId:
+                                    loaded.selectedSubcategoryId,
+                                onSubcategorySelected: loaded.isSubmitting
+                                    ? null
+                                    : _cubit.selectSubcategory,
+                              ),
+                              150.verticalSpace
+                            ],
+                          ),
                         ),
         );
       },
@@ -295,6 +298,7 @@ class _ExpenseSummaryCard extends StatelessWidget {
     final category = state.selectedCategory;
     final subcategory = state.selectedSubcategory;
     final categoryColor = category == null ? cs.primary : Color(category.color);
+    final subcategoryColor = subcategory == null ? cs.primary : Color(subcategory.color);
 
     return Container(
       padding: EdgeInsets.all(16.r),
@@ -359,8 +363,8 @@ class _ExpenseSummaryCard extends StatelessWidget {
               _SummaryChip(
                 icon: Icons.subdirectory_arrow_right,
                 label: subcategory?.title ?? context.tr('add_expense.no_subcategory'),
-                backgroundColor: cs.surfaceContainerHigh,
-                foregroundColor: cs.onSurfaceVariant,
+                backgroundColor: subcategoryColor.withValues(alpha: 0.14),
+                foregroundColor: subcategoryColor,
               ),
               _SummaryChip(
                 icon: Icons.calendar_month,
@@ -426,29 +430,6 @@ class _SummaryChip extends StatelessWidget {
             maxLines: 1,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FormHint extends StatelessWidget {
-  const _FormHint({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.theme.colorScheme;
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: cs.primaryContainer.withValues(alpha: 0.38),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
-      child: AppTextBodyMd(
-        text,
-        color: cs.onSurfaceVariant,
-        textAlign: TextAlign.center,
       ),
     );
   }

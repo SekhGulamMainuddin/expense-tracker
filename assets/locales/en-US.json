@@ -83,6 +83,7 @@
     "save_changes": "Save Changes"
   },
   "add_expense": {
+    "saving_to": "Saving to",
     "error_load": "Could not load expense form",
     "hint": "Use the keypad below to enter the amount and tap the checkmark when you are ready to save.",
     "title_label": "Expense Title",

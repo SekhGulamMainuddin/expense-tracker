@@ -46,27 +46,7 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
     final current = _loadedStateOrNull();
     if (current == null) return;
 
-    var next = current.amount;
-    if (value == 'backspace') {
-      if (next.length <= 1) {
-        next = '0';
-      } else {
-        next = next.substring(0, next.length - 1);
-      }
-    } else if (value == '.') {
-      if (next.contains('.')) {
-        return;
-      }
-      next = '$next.';
-    } else {
-      final dotIndex = next.indexOf('.');
-      if (dotIndex != -1 && next.length - dotIndex - 1 >= _maxDecimalPlaces) {
-        return;
-      }
-      next = next == '0' ? value : next + value;
-    }
-
-    emit(current.copyWith(amount: next, clearErrorMessage: true));
+    emit(current.copyWith(amount: value, clearErrorMessage: true));
   }
 
   void updateTitle(String value) {

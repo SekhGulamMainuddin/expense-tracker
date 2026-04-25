@@ -4,13 +4,19 @@ import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AmountDisplay extends StatelessWidget {
-  const AmountDisplay({super.key, required this.cubit});
+  const AmountDisplay({
+    super.key,
+    required this.cubit,
+    required this.controller,
+  });
 
   final AddExpenseCubit cubit;
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,6 @@ class AmountDisplay extends StatelessWidget {
     return BlocBuilder<AddExpenseCubit, AddExpenseState>(
       bloc: cubit,
       builder: (context, state) {
-        final amount = state is AddExpenseLoaded ? state.amount : '0';
         final currencySymbol = state is AddExpenseLoaded
             ? _currencySymbol(state.settings.baseCurrencyCode)
             : '\$';
@@ -35,8 +40,7 @@ class AmountDisplay extends StatelessWidget {
               SizedBox(height: 12.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     currencySymbol,
@@ -45,8 +49,35 @@ class AmountDisplay extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(width: 6.w),
-                  AppTextDisplayMd(amount),
+                  SizedBox(width: 8.w),
+                  IntrinsicWidth(
+                    child: TextField(
+                      controller: controller,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: AppTextStyles.displayMd(context).copyWith(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                      autofocus: true,
+                      onChanged: (val) {
+                        cubit.updateAmount(val);
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                      ],
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: false,
+                        disabledBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none
+                      ),
+                    ),
+                  ),
                 ],
               ),
               SizedBox(height: 10.h),
