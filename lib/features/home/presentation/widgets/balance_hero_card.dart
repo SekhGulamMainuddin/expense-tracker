@@ -146,7 +146,7 @@ class BalanceHeroCard extends StatelessWidget {
   }
 
   String _trendLabel(double value) {
-    if (value == 0) {
+    if (value.abs() < 0.5) {
       return 'Flat';
     }
     return value > 0 ? '+${value.toStringAsFixed(0)}%' : '${value.toStringAsFixed(0)}%';

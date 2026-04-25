@@ -3,6 +3,8 @@ import 'package:expense_tracker/features/settings/data/datasources/settings_loca
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
+
 final class SettingsRepositoryImpl implements SettingsRepository {
   SettingsRepositoryImpl(this._localDataSource);
 
@@ -108,5 +110,23 @@ final class SettingsRepositoryImpl implements SettingsRepository {
     } catch (e) {
       return Error(DatabaseFailure(e.toString()));
     }
+  }
+
+  @override
+  ResultVoid addCustomIcon({
+    required String name,
+    required String iconUrl,
+  }) async {
+    try {
+      await _localDataSource.addCustomIcon(name: name, iconUrl: iconUrl);
+      return const Success(null);
+    } catch (e) {
+      return Error(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Stream<List<CustomIconEntity>> watchCustomIcons() {
+    return _localDataSource.watchCustomIcons();
   }
 }

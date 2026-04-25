@@ -84,13 +84,13 @@ final class AppPalette {
 
   // --- Safe band washes (opacity per design doc) ---
   static Color safeBandWashGreen(ColorScheme cs) =>
-      cs.secondaryContainer.withOpacity(0.10);
+      cs.secondaryContainer.withValues(alpha: 0.10);
 
   static Color safeBandWashYellow(ColorScheme cs) =>
-      cs.tertiaryContainer.withOpacity(0.15);
+      cs.tertiaryContainer.withValues(alpha: 0.15);
 
   static Color safeBandWashRed(ColorScheme cs) =>
-      cs.errorContainer.withOpacity(0.20);
+      cs.errorContainer.withValues(alpha: 0.20);
 
   /// Back-compat names used by legacy widgets (map to themed text colors).
   static Color textPrimary(BuildContext context) =>

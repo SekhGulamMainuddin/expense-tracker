@@ -1,3 +1,4 @@
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/feather.dart';
@@ -7,6 +8,7 @@ import 'package:iconify_flutter/icons/heroicons_solid.dart';
 import 'package:iconify_flutter/icons/ph.dart';
 import 'package:iconify_flutter/icons/ri.dart';
 import 'package:iconify_flutter/icons/tabler.dart';
+import 'package:remixicon/remixicon.dart';
 
 typedef AppIconBuilder = Widget Function({
   required Color color,
@@ -17,6 +19,7 @@ class AppIconCatalog {
   static const allPackId = 'all';
   static const materialPackId = 'material';
   static const remixPackId = 'remix';
+  static const customPackId = 'custom';
   static const tablerPackId = 'tabler';
   static const phosphorPackId = 'phosphor';
   static const heroiconsOutlinePackId = 'heroicons_outline';
@@ -28,6 +31,7 @@ class AppIconCatalog {
     allPackId: 'All',
     materialPackId: 'Material',
     remixPackId: 'Remix',
+    customPackId: 'Custom',
     tablerPackId: 'Tabler',
     phosphorPackId: 'Phosphor',
     heroiconsOutlinePackId: 'Heroicons Outlined',
@@ -40,6 +44,7 @@ class AppIconCatalog {
     const IconPack(id: allPackId, label: 'All'),
     const IconPack(id: materialPackId, label: 'Material'),
     const IconPack(id: remixPackId, label: 'Remix'),
+    const IconPack(id: customPackId, label: 'Custom'),
     const IconPack(id: tablerPackId, label: 'Tabler'),
     const IconPack(id: phosphorPackId, label: 'Phosphor'),
     const IconPack(id: heroiconsOutlinePackId, label: 'Heroicons Outlined'),
@@ -85,7 +90,59 @@ class AppIconCatalog {
     _material('local_taxi', Icons.local_taxi, aliases: ['taxi']),
     _material('checkroom', Icons.checkroom, aliases: ['clothes']),
     _material('more_horiz', Icons.more_horiz, aliases: ['more']),
-    // Remix
+    // Remix (from package)
+    _remixPackage('bank', Remix.bank_line, aliases: ['finance', 'money', 'business']),
+    _remixPackage('wallet', Remix.wallet_3_line, aliases: ['money', 'cash', 'budget']),
+    _remixPackage('shopping_bag', Remix.shopping_bag_3_line, aliases: ['shop', 'store', 'buying']),
+    _remixPackage('shopping_cart', Remix.shopping_cart_2_line, aliases: ['buy', 'ecommerce']),
+    _remixPackage('restaurant', Remix.restaurant_2_line, aliases: ['food', 'dining', 'eat']),
+    _remixPackage('cup', Remix.cup_line, aliases: ['coffee', 'tea', 'drink']),
+    _remixPackage('cake', Remix.cake_3_line, aliases: ['dessert', 'food', 'bakery']),
+    _remixPackage('flight', Remix.flight_takeoff_line, aliases: ['travel', 'airplane', 'holiday']),
+    _remixPackage('car', Remix.car_line, aliases: ['vehicle', 'transport', 'drive']),
+    _remixPackage('heart_pulse', Remix.heart_pulse_line, aliases: ['fitness', 'gym', 'health', 'sport']),
+    _remixPackage('bus', Remix.bus_line, aliases: ['transport', 'public']),
+    _remixPackage('bike', Remix.bike_line, aliases: ['transport', 'exercise']),
+    _remixPackage('gas_station', Remix.gas_station_line, aliases: ['fuel', 'oil', 'car']),
+    _remixPackage('home', Remix.home_4_line, aliases: ['house', 'rent', 'mortgage']),
+    _remixPackage('lightbulb', Remix.lightbulb_line, aliases: ['electric', 'energy', 'idea']),
+    _remixPackage('water', Remix.water_flash_line, aliases: ['utility', 'bill']),
+    _remixPackage('router', Remix.router_line, aliases: ['internet', 'wifi', 'utility']),
+    _remixPackage('phone', Remix.smartphone_line, aliases: ['call', 'mobile', 'bill']),
+    _remixPackage('hospital', Remix.hospital_line, aliases: ['health', 'medical', 'doctor']),
+    _remixPackage('capsule', Remix.capsule_line, aliases: ['medicine', 'health']),
+    _remixPackage('basketball', Remix.basketball_line, aliases: ['sport', 'play']),
+    _remixPackage('football', Remix.football_line, aliases: ['sport', 'play']),
+    _remixPackage('gamepad', Remix.gamepad_line, aliases: ['play', 'entertainment', 'gaming']),
+    _remixPackage('movie', Remix.movie_2_line, aliases: ['entertainment', 'cinema', 'theatre']),
+    _remixPackage('music', Remix.music_2_line, aliases: ['song', 'audio', 'entertainment']),
+    _remixPackage('book', Remix.book_3_line, aliases: ['education', 'read', 'study']),
+    _remixPackage('graduation', Remix.graduation_cap_line, aliases: ['education', 'school']),
+    _remixPackage('briefcase', Remix.briefcase_4_line, aliases: ['work', 'job', 'business']),
+    _remixPackage('handbag', Remix.handbag_line, aliases: ['clothes', 'fashion', 'luxury']),
+    _remixPackage('t_shirt', Remix.t_shirt_2_line, aliases: ['clothes', 'fashion']),
+    _remixPackage('gift', Remix.gift_line, aliases: ['present', 'reward', 'bonus']),
+    _remixPackage('heart', Remix.heart_line, aliases: ['love', 'like', 'health']),
+    _remixPackage('star', Remix.star_line, aliases: ['favorite', 'rating']),
+    _remixPackage('flag', Remix.flag_line, aliases: ['goal', 'target']),
+    _remixPackage('notification', Remix.notification_3_line, aliases: ['bell', 'alarm']),
+    _remixPackage('coupon', Remix.coupon_3_line, aliases: ['discount', 'offer', 'voucher']),
+    _remixPackage('refund', Remix.refund_2_line, aliases: ['money', 'return']),
+    _remixPackage('exchange', Remix.exchange_funds_line, aliases: ['transfer', 'money']),
+    _remixPackage('stock', Remix.stock_line, aliases: ['invest', 'trading', 'profit']),
+    _remixPackage('coin', Remix.coin_line, aliases: ['money', 'cash', 'crypto']),
+    _remixPackage('savings', Remix.safe_2_line, aliases: ['bank', 'vault', 'save']),
+    _remixPackage('government', Remix.government_line, aliases: ['tax', 'legal', 'official']),
+    _remixPackage('hammer', Remix.hammer_line, aliases: ['tool', 'repair', 'maintenance']),
+    _remixPackage('paint_brush', Remix.paint_brush_line, aliases: ['art', 'decoration', 'hobby']),
+    _remixPackage('microscope', Remix.microscope_line, aliases: ['science', 'research']),
+    _remixPackage('cpu', Remix.cpu_line, aliases: ['tech', 'hardware']),
+    _remixPackage('cloud', Remix.cloud_line, aliases: ['weather', 'storage']),
+    _remixPackage('sun', Remix.sun_line, aliases: ['weather', 'day']),
+    _remixPackage('moon', Remix.moon_line, aliases: ['weather', 'night']),
+    _remixPackage('leaf', Remix.leaf_line, aliases: ['nature', 'eco', 'garden']),
+    _remixPackage('cat', Remix.footprint_line, aliases: ['pet', 'animal']),
+    // Remix (Iconify legacy)
     _remix('bank_fill', Ri.bank_fill, aliases: ['bank', 'finance']),
     _remix('bank_card_fill', Ri.bank_card_fill, aliases: ['card', 'payment']),
     _remix('calendar_fill', Ri.calendar_fill, aliases: ['date', 'schedule']),
@@ -176,36 +233,51 @@ class AppIconCatalog {
     _fontAwesome('phone', FaSolid.phone, aliases: ['call']),
     _fontAwesome('money_bill', FaSolid.money_bill, aliases: ['cash']),
     _fontAwesome('money_check', FaSolid.money_check, aliases: ['cash', 'payment']),
+
   ];
 
   static Widget render(
     String iconKey, {
     required Color color,
     required double size,
+    List<CustomIconEntity> customIcons = const [],
   }) {
-    final option = optionForKey(iconKey);
+    final option = optionForKey(iconKey, customIcons: customIcons);
     if (option == null) {
       return Icon(Icons.help_outline, size: size, color: color);
     }
     return option.build(color: color, size: size);
   }
 
-  static AppIconOption? optionForKey(String key) {
+  static AppIconOption? optionForKey(
+    String key, {
+    List<CustomIconEntity> customIcons = const [],
+  }) {
     final normalizedKey = normalizeKey(key);
     for (final option in options) {
       if (option.storageKey == normalizedKey || option.legacyKey == normalizedKey) {
         return option;
       }
     }
+
+    // Check custom icons
+    for (final custom in customIcons) {
+      final customKey = '$customPackId:${custom.name}';
+      if (customKey == normalizedKey || custom.name == normalizedKey) {
+        return _custom(custom.name, custom.iconUrl);
+      }
+    }
+
     return null;
   }
 
   static List<AppIconOption> filter({
     required String packId,
     required String query,
+    List<CustomIconEntity> customIcons = const [],
   }) {
     final normalizedQuery = _normalize(query);
-    return options.where((option) {
+    final results = options.where((option) {
       final matchesPack = packId == allPackId || option.packId == packId;
       if (!matchesPack) {
         return false;
@@ -214,7 +286,19 @@ class AppIconCatalog {
         return true;
       }
       return option.searchIndex.contains(normalizedQuery);
-    }).toList(growable: false);
+    }).toList(growable: true);
+
+    // Add custom icons if applicable
+    if (packId == allPackId || packId == customPackId) {
+      for (final custom in customIcons) {
+        final option = _custom(custom.name, custom.iconUrl);
+        if (normalizedQuery.isEmpty || option.searchIndex.contains(normalizedQuery)) {
+          results.add(option);
+        }
+      }
+    }
+
+    return results;
   }
 
   static String packLabel(String packId) {
@@ -248,6 +332,47 @@ class AppIconCatalog {
       iconName: name,
       aliases: aliases,
       build: ({required color, required size}) => Icon(icon, color: color, size: size),
+    );
+  }
+
+  static AppIconOption _remixPackage(
+    String name,
+    IconData icon, {
+    List<String> aliases = const [],
+  }) {
+    return AppIconOption(
+      packId: remixPackId,
+      packLabel: packLabel(remixPackId),
+      iconName: name,
+      aliases: aliases,
+      build: ({required color, required size}) => Icon(icon, color: color, size: size),
+    );
+  }
+
+  static AppIconOption _custom(
+    String name,
+    String url, {
+    List<String> aliases = const [],
+  }) {
+    return AppIconOption(
+      packId: customPackId,
+      packLabel: packLabel(customPackId),
+      iconName: name,
+      aliases: aliases,
+      build: ({required color, required size}) => ClipOval(
+        child: Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          color: null, // Don't tint images unless specified
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.image_not_supported_outlined,
+            size: size,
+            color: color,
+          ),
+        ),
+      ),
     );
   }
 

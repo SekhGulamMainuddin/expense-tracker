@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 300.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.colorScheme.primary.withOpacity(0.08),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -138,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           style: OutlinedButton.styleFrom(
             foregroundColor: cs.error,
-            side: BorderSide(color: cs.error.withOpacity(0.35)),
+            side: BorderSide(color: cs.error.withValues(alpha: 0.35)),
             padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
             shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
             minimumSize: Size(double.infinity, 56.h),

@@ -50,6 +50,7 @@ class _CategoryListState extends State<CategoryList> {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final category in widget.categories) ...[
           CategoryTile(
@@ -104,12 +105,20 @@ class _AddCategoryButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle, color: cs.primary, size: 24.r),
-              SizedBox(width: 8.w),
-              AppTextBodyLg(
+              Container(
+                padding: EdgeInsets.all(6.r),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.add, color: cs.primary, size: 18.r),
+              ),
+              SizedBox(width: 12.w),
+              AppTextBodyMd(
                 'Add New Category',
-                style: context.theme.textTheme.bodyLarge!.copyWith(
+                style: context.theme.textTheme.bodyMedium!.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
                 ),
               ),
             ],

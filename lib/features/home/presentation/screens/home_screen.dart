@@ -105,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                       breakdown: snapshot.categoryBreakdown,
                       currencySymbol: snapshot.currencySymbol,
                       onSeeAll: () {
-                        context.showAppBottomSheet(
+                        context.parentContext.showAppBottomSheet(
                           title: 'Category Breakdown',
                           isScrollControlled: true,
                           customWidget: _BreakdownSheet(snapshot: snapshot),
@@ -116,7 +116,7 @@ class HomeScreen extends StatelessWidget {
                       snapshot: snapshot,
                       currencySymbol: snapshot.currencySymbol,
                       onSeeAll: () {
-                        context.showAppBottomSheet(
+                        context.parentContext.showAppBottomSheet(
                           title: 'Recent Transactions',
                           isScrollControlled: true,
                           customWidget: _TransactionsSheet(snapshot: snapshot),

@@ -1,5 +1,6 @@
 import 'package:expense_tracker/core/error/result.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 
 abstract interface class SettingsRepository {
   ResultFuture<SettingsSnapshot> loadSettings();
@@ -28,4 +29,11 @@ abstract interface class SettingsRepository {
   });
 
   ResultVoid deleteCategory(int id);
+
+  ResultVoid addCustomIcon({
+    required String name,
+    required String iconUrl,
+  });
+
+  Stream<List<CustomIconEntity>> watchCustomIcons();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 
 class SettingsSnapshot {
   const SettingsSnapshot({
@@ -12,6 +13,7 @@ class SettingsSnapshot {
     required this.cautionThreshold,
     required this.dangerThreshold,
     required this.categories,
+    required this.customIcons,
   });
 
   final ThemeMode themeMode;
@@ -23,6 +25,7 @@ class SettingsSnapshot {
   final double cautionThreshold;
   final double dangerThreshold;
   final List<SettingsCategory> categories;
+  final List<CustomIconEntity> customIcons;
 
   SettingsSnapshot copyWith({
     ThemeMode? themeMode,
@@ -34,6 +37,7 @@ class SettingsSnapshot {
     double? cautionThreshold,
     double? dangerThreshold,
     List<SettingsCategory>? categories,
+    List<CustomIconEntity>? customIcons,
   }) {
     return SettingsSnapshot(
       themeMode: themeMode ?? this.themeMode,
@@ -45,6 +49,7 @@ class SettingsSnapshot {
       cautionThreshold: cautionThreshold ?? this.cautionThreshold,
       dangerThreshold: dangerThreshold ?? this.dangerThreshold,
       categories: categories ?? this.categories,
+      customIcons: customIcons ?? this.customIcons,
     );
   }
 }

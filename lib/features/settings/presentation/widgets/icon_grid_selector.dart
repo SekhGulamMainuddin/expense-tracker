@@ -1,9 +1,15 @@
+import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/icon_catalog.dart';
+import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
-import 'package:expense_tracker/core/widgets/app_icon.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/icon_catalog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class IconGridSelector extends StatefulWidget {
   const IconGridSelector({
@@ -49,48 +55,73 @@ class _IconGridSelectorState extends State<IconGridSelector> {
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     final selectedKey = AppIconCatalog.normalizeKey(widget.selectedIcon);
-    final results = AppIconCatalog.filter(
-      packId: _activePackId,
-      query: _searchController.text,
-    );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _searchController,
-          onChanged: (_) => setState(() {}),
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            hintText: 'Search icon by name',
-            prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
-            filled: true,
-            fillColor: cs.surfaceContainerLow,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.r),
-              borderSide: BorderSide.none,
-            ),
-            suffixIcon: _searchController.text.isEmpty
-                ? null
-                : IconButton(
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() {});
-                    },
-                    icon: Icon(
-                      Icons.clear,
-                      color: cs.onSurfaceVariant,
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      bloc: getIt<SettingsCubit>(),
+      buildWhen: (previous, current) => current is SettingsLoaded,
+      builder: (context, state) {
+        final customIcons = state is SettingsLoaded
+            ? state.snapshot.customIcons
+            : const <CustomIconEntity>[];
+        final results = AppIconCatalog.filter(
+          packId: _activePackId,
+          query: _searchController.text,
+          customIcons: customIcons,
+        );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (_) => setState(() {}),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: 'Search icon by name',
+                      prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
+                      filled: true,
+                      fillColor: cs.surfaceContainerLow,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: BorderSide.none,
+                      ),
+                      suffixIcon: _searchController.text.isEmpty
+                          ? null
+                          : IconButton(
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {});
+                              },
+                              icon: Icon(
+                                Icons.clear,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
                     ),
                   ),
-          ),
-        ),
+                ),
+                SizedBox(width: 12.w),
+                _AddCustomIconButton(
+                  onAdded: (name, url) async {
+                    await getIt<SettingsCubit>().addCustomIcon(name: name, iconUrl: url);
+                    setState(() {
+                      _activePackId = AppIconCatalog.customPackId;
+                      _searchController.clear();
+                    });
+                  },
+                ),
+              ],
+            ),
         SizedBox(height: 14.h),
         SizedBox(
           height: 40.h,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: AppIconCatalog.packs.length,
-            separatorBuilder: (_, __) => SizedBox(width: 8.w),
+            separatorBuilder: (_, _) => SizedBox(width: 8.w),
             itemBuilder: (context, index) {
               final pack = AppIconCatalog.packs[index];
               final isSelected = _activePackId == pack.id;
@@ -112,27 +143,38 @@ class _IconGridSelectorState extends State<IconGridSelector> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            AppTextLabelSm(
-              '${results.length} icons',
-              color: cs.onSurfaceVariant,
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: cs.secondaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: AppTextLabelSm(
+                '${results.length} ICONS FOUND',
+                color: cs.onSecondaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _activePackId = AppIconCatalog.allPackId;
-                  _searchController.clear();
-                });
-              },
-              child: const Text('Reset'),
-            ),
+            if (_searchController.text.isNotEmpty || _activePackId != AppIconCatalog.allPackId)
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _activePackId = AppIconCatalog.allPackId;
+                    _searchController.clear();
+                  });
+                },
+                icon: Icon(Icons.refresh, size: 14.r),
+                label: const Text('Reset Filters'),
+              ),
           ],
         ),
+        SizedBox(height: 12.h),
         SizedBox(
-          height: 420.h,
+          height: 380.h,
           child: results.isEmpty
               ? _EmptyState(
                   message: _searchController.text.isEmpty
-                      ? 'No icons available in this pack.'
+                      ? 'This icon pack is currently empty.'
                       : 'No icons match "${_searchController.text}".',
                 )
               : GridView.builder(
@@ -158,6 +200,8 @@ class _IconGridSelectorState extends State<IconGridSelector> {
         ),
       ],
     );
+  },
+);
   }
 
   String _packFromKey(String key) {
@@ -223,27 +267,35 @@ class _IconTile extends StatelessWidget {
                 width: 42.r,
                 height: 42.r,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.16)
-                      : cs.surfaceContainerHighest,
+                  color: option.packId == AppIconCatalog.customPackId 
+                      ? Colors.transparent 
+                      : (isSelected
+                          ? Colors.white.withValues(alpha: 0.16)
+                          : cs.surfaceContainerHighest),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: AppIcon(
                   option.storageKey,
-                  size: 22.r,
+                  size: option.packId == AppIconCatalog.customPackId ? 42.r : 22.r,
                   color: foregroundColor,
                 ),
               ),
               SizedBox(height: 8.h),
-              Text(
-                _prettyName(option.iconName),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.theme.textTheme.labelSmall?.copyWith(
-                  color: foregroundColor,
-                  fontWeight: FontWeight.w600,
+              SizedBox(
+                height: 24.h,
+                child: AutoSizeText(
+                  _prettyName(option.iconName),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  minFontSize: 8,
+                  stepGranularity: 0.1,
+                  wrapWords: false,
+                  style: context.theme.textTheme.labelSmall?.copyWith(
+                    color: foregroundColor,
+                    fontWeight: FontWeight.w600,
+                    height: 1.1,
+                  ),
                 ),
               ),
             ],
@@ -295,3 +347,122 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
+
+class _AddCustomIconButton extends StatelessWidget {
+  const _AddCustomIconButton({required this.onAdded});
+
+  final void Function(String name, String url) onAdded;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
+    return Container(
+      height: 54.h,
+      width: 54.w,
+      decoration: BoxDecoration(
+        color: cs.primaryContainer,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: IconButton(
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => _AddCustomIconDialog(onAdded: onAdded),
+        ),
+        icon: Icon(Icons.add_link, color: cs.onPrimaryContainer),
+        tooltip: 'Add Custom Icon URL',
+      ),
+    );
+  }
+}
+
+class _AddCustomIconDialog extends StatefulWidget {
+  const _AddCustomIconDialog({required this.onAdded});
+
+  final void Function(String name, String url) onAdded;
+
+  @override
+  State<_AddCustomIconDialog> createState() => _AddCustomIconDialogState();
+}
+
+class _AddCustomIconDialogState extends State<_AddCustomIconDialog> {
+  final _nameController = TextEditingController();
+  final _urlController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Custom Icon'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Icon Name',
+                hintText: 'e.g. Netflix',
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter a name';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: 16.h),
+            TextFormField(
+              controller: _urlController,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'Icon URL',
+                hintText: 'https://example.com/icon.png',
+              ),
+              validator: (value) {
+                final raw = value?.trim() ?? '';
+                if (raw.isEmpty) {
+                  return 'Please enter a URL';
+                }
+                final uri = Uri.tryParse(raw);
+                if (uri == null ||
+                    !uri.hasScheme ||
+                    !(uri.scheme == 'http' || uri.scheme == 'https') ||
+                    uri.host.isEmpty) {
+                  return 'Enter a valid http(s) URL';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              widget.onAdded(
+                _nameController.text.trim(),
+                _urlController.text.trim(),
+              );
+              Navigator.pop(context);
+            }
+          },
+          child: const Text('Add Icon'),
+        ),
+      ],
+    );
+  }
+}
+

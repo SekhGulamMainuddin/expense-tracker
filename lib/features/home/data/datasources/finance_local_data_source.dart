@@ -8,6 +8,7 @@ import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.d
 import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+import 'package:rxdart/rxdart.dart';
 
 class FinanceLocalDataSource {
   FinanceLocalDataSource(this._expenseDao, this._settingsLocalDataSource);
@@ -15,41 +16,17 @@ class FinanceLocalDataSource {
   final ExpenseDao _expenseDao;
   final SettingsLocalDataSource _settingsLocalDataSource;
 
-  /// Watches both the expenses and categories tables for changes.
-  /// Whenever either table is modified, re-computes the full dashboard.
+  /// Watches expenses, categories, and settings tables.
+  /// Three tables can fire simultaneously during a single mutation, so debounce
+  /// to coalesce bursts into one dashboard recomputation.
   Stream<FinanceSnapshot> watchDashboard() {
-    late StreamController<FinanceSnapshot> controller;
-    StreamSubscription<void>? expenseSub;
-    StreamSubscription<void>? categorySub;
-    StreamSubscription<void>? settingsSub;
-
-    Future<void> reload() async {
-      try {
-        final snapshot = await loadDashboard();
-        if (!controller.isClosed) {
-          controller.add(snapshot);
-        }
-      } catch (e) {
-        if (!controller.isClosed) {
-          controller.addError(e);
-        }
-      }
-    }
-
-    controller = StreamController<FinanceSnapshot>(
-      onListen: () {
-        expenseSub = _expenseDao.watchAllExpenses().listen((_) => reload());
-        categorySub = _expenseDao.watchAllCategories().listen((_) => reload());
-        settingsSub = _settingsLocalDataSource.watchSettings().listen((_) => reload());
-      },
-      onCancel: () {
-        expenseSub?.cancel();
-        categorySub?.cancel();
-        settingsSub?.cancel();
-      },
-    );
-
-    return controller.stream;
+    return Rx.merge<void>([
+      _expenseDao.watchAllExpenses().map<void>((_) {}),
+      _expenseDao.watchAllCategories().map<void>((_) {}),
+      _settingsLocalDataSource.watchSettings(),
+    ])
+        .debounceTime(const Duration(milliseconds: 80))
+        .asyncMap((_) => loadDashboard());
   }
 
   Future<FinanceSnapshot> loadDashboard() async {

@@ -15,8 +15,23 @@ class AuthRepositoryImpl implements AuthRepository {
   final GoogleSignIn _googleSignIn;
   GoogleSignInAccount? _googleAccount;
 
+  static const _driveScope = 'https://www.googleapis.com/auth/drive.appdata';
+
   @override
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
+  /// Restore the cached Google account silently on app start so scope lookups
+  /// work after a process restart.
+  Future<GoogleSignInAccount?> _ensureAccount() async {
+    if (_googleAccount != null) return _googleAccount;
+    if (_firebaseAuth.currentUser == null) return null;
+    try {
+      _googleAccount = await _googleSignIn.attemptLightweightAuthentication();
+    } catch (_) {
+      _googleAccount = null;
+    }
+    return _googleAccount;
+  }
 
   @override
   ResultFuture<UserCredential> signInWithGoogle() async {
@@ -35,22 +50,18 @@ class AuthRepositoryImpl implements AuthRepository {
     } on FirebaseAuthException catch (e) {
       return Error(AuthFailure(e.message ?? 'Authentication failed'));
     } catch (e) {
-      print("SEKH BRO $e");
       return Error(UnexpectedFailure(e.toString()));
     }
   }
 
-  static const _driveScope = 'https://www.googleapis.com/auth/drive.appdata';
-
   @override
   ResultVoid requestDrivePermission() async {
     try {
-      final account = _googleAccount;
+      final account = await _ensureAccount();
       if (account == null) {
         return Error(AuthFailure('Not signed in with Google'));
       }
 
-      // Try to get existing authorization silently first
       final existing = await account.authorizationClient.authorizationForScopes(
         [_driveScope],
       );
@@ -59,7 +70,6 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Success(null);
       }
 
-      // Not granted — request it
       final result = await account.authorizationClient.authorizeScopes([
         _driveScope,
       ]);
@@ -76,7 +86,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<bool> isDrivePermissionGranted() async {
-    final account = _googleAccount;
+    final account = await _ensureAccount();
     if (account == null) return false;
 
     final authz = await account.authorizationClient.authorizationForScopes([
@@ -88,7 +98,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<String?> getDriveAccessToken() async {
-    final account = _googleAccount;
+    final account = await _ensureAccount();
     if (account == null) return null;
 
     final authz = await account.authorizationClient.authorizationForScopes([
@@ -101,6 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   ResultVoid signOut() async {
     try {
+      _googleAccount = null;
       await Future.wait([_firebaseAuth.signOut(), _googleSignIn.disconnect()]);
       return const Success(null);
     } catch (e) {

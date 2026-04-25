@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:expense_tracker/features/auth/presentation/cubit/login_state.dart';
-import 'package:expense_tracker/features/profile/domain/repositories/drive_repository.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/core/phoenix.dart';
+import 'package:expense_tracker/features/auth/presentation/cubit/login_state.dart';
+import 'package:expense_tracker/features/profile/domain/repositories/drive_repository.dart';
 
 import '../../domain/auth_repository.dart';
 
@@ -18,12 +19,12 @@ class LoginCubit extends Cubit<LoginState> {
     final result = await _authRepository.signInWithGoogle();
 
     await result.fold(
-      (userCredential) async {
+      (_) async {
         final isGranted = await _authRepository.isDrivePermissionGranted();
         if (!isGranted) {
           final requestResult = await _authRepository.requestDrivePermission();
           await requestResult.fold(
-            (_) async => await _restoreBackup(),
+            (_) async => _restoreBackup(),
             (failure) async {
               await _authRepository.signOut();
               emit(LoginFailure('Google Drive permission is required for backup.'));
@@ -40,19 +41,19 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> _restoreBackup() async {
     emit(LoginSyncing());
     final result = await _driveRepository.downloadBinary(AppDatabase.dbFileName);
-    
+
     await result.fold(
       (bytes) async {
         if (bytes != null) {
-          await getIt<AppDatabase>().close();
+          await resetServiceLocator();
           final dbFile = await AppDatabase.getDatabaseFile();
           await dbFile.writeAsBytes(bytes);
-          await getIt.resetLazySingleton<AppDatabase>();
+          Phoenix.rebirth();
         }
         emit(LoginSuccess());
       },
-      (failure) async {
-        // Even if it fails (e.g., no connection), we let the user log in.
+      (_) async {
+        // Even if download fails (e.g., no connection), let the user log in.
         emit(LoginSuccess());
       },
     );

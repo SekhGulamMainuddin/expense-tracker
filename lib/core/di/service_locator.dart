@@ -31,27 +31,29 @@ import '../../features/auth/domain/auth_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 
-Future<void> setupServiceLocator() async {
-  // External
-  getIt.registerLazySingleton<Dio>(() => Dio());
+const _driveDioName = 'drive_dio';
 
-  // Named Dio for Google Drive
+Future<void> setupServiceLocator() async {
+  // External — named Dio for Google Drive (auto-injects bearer token).
   getIt.registerLazySingleton<Dio>(
-        () {
-      final dio = Dio(BaseOptions(baseUrl: 'https://www.googleapis.com/drive/v3'));
-      dio.interceptors.add(InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final authRepository = getIt<AuthRepository>();
-          final token = await authRepository.getDriveAccessToken();
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
-          }
-          return handler.next(options);
-        },
-      ));
+    () {
+      final dio = Dio(
+        BaseOptions(baseUrl: 'https://www.googleapis.com/drive/v3'),
+      );
+      dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) async {
+            final token = await getIt<AuthRepository>().getDriveAccessToken();
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+            return handler.next(options);
+          },
+        ),
+      );
       return dio;
     },
-    instanceName: 'drive_dio',
+    instanceName: _driveDioName,
   );
 
   getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
@@ -60,19 +62,18 @@ Future<void> setupServiceLocator() async {
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(
+    () => AuthRepositoryImpl(
       firebaseAuth: getIt(),
       googleSignIn: getIt(),
     ),
   );
 
-  // Drive Data Source & Repository
   getIt.registerLazySingleton<DriveRemoteDataSource>(
-        () => DriveRemoteDataSource(getIt(instanceName: 'drive_dio')),
+    () => DriveRemoteDataSource(getIt(instanceName: _driveDioName)),
   );
 
   getIt.registerLazySingleton<DriveRepository>(
-        () => DriveRepositoryImpl(
+    () => DriveRepositoryImpl(
       remoteDataSource: getIt(),
       authRepository: getIt(),
     ),
@@ -83,18 +84,18 @@ Future<void> setupServiceLocator() async {
   );
 
   getIt.registerLazySingleton<DeleteAccountRepository>(
-    () => DeleteAccountRepositoryImpl(
-      getIt(),
-      getIt(),
-      getIt(),
-    ),
+    () => DeleteAccountRepositoryImpl(getIt(), getIt(), getIt()),
   );
 
   getIt.registerLazySingleton<SettingsLocalDataSource>(
-    () => SettingsLocalDataSource(
-      getIt<AppDatabase>().expenseDao,
-      getIt<AppDatabase>().keyValueStoreDao,
-    ),
+    () {
+      final db = getIt<AppDatabase>();
+      return SettingsLocalDataSource(
+        db.expenseDao,
+        db.keyValueStoreDao,
+        db.customIconDao,
+      );
+    },
   );
 
   getIt.registerLazySingleton<SettingsRepository>(
@@ -130,4 +131,26 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<ProfileCubit>(() => ProfileCubit(getIt(), getIt()));
   getIt.registerFactory<DeleteAccountCubit>(() => DeleteAccountCubit(getIt()));
   getIt.registerLazySingleton<SettingsCubit>(() => SettingsCubit(getIt()));
+}
+
+/// Close all DB-backed cubits/singletons and rebuild the service locator.
+/// Use after a Drive restore or any operation that replaces the SQLite file
+/// so stale DAO references don't linger.
+Future<void> resetServiceLocator() async {
+  // Close stream-holding cubits before wiping them.
+  if (getIt.isRegistered<FinanceCubit>()) {
+    await getIt<FinanceCubit>().close();
+  }
+  if (getIt.isRegistered<SettingsCubit>()) {
+    await getIt<SettingsCubit>().close();
+  }
+  if (getIt.isRegistered<ProfileCubit>()) {
+    await getIt<ProfileCubit>().close();
+  }
+  if (getIt.isRegistered<AppDatabase>()) {
+    await getIt<AppDatabase>().close();
+  }
+
+  await getIt.reset();
+  await setupServiceLocator();
 }

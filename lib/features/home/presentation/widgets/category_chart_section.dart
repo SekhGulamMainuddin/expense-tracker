@@ -43,7 +43,7 @@ class CategoryChartSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: breakdown.isEmpty
-                ? _EmptyChartState(context: context)
+                ? const _EmptyChartState()
                 : Column(
                     children: [
                       Row(
@@ -156,13 +156,12 @@ class CategoryChartSection extends StatelessWidget {
 }
 
 class _EmptyChartState extends StatelessWidget {
-  const _EmptyChartState({required this.context});
-
-  final BuildContext context;
+  const _EmptyChartState();
 
   @override
   Widget build(BuildContext context) {
-    final cs = this.context.theme.colorScheme;
+    final theme = context.theme;
+    final cs = theme.colorScheme;
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -171,7 +170,7 @@ class _EmptyChartState extends StatelessWidget {
           SizedBox(height: 12.h),
           AppTextBodyLg(
             'No spending yet',
-            style: this.context.theme.textTheme.bodyLarge!.copyWith(
+            style: theme.textTheme.bodyLarge!.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),

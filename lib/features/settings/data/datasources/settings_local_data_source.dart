@@ -1,20 +1,30 @@
 import 'package:expense_tracker/core/database/dao/expense_dao.dart';
 import 'package:expense_tracker/core/database/dao/key_value_store_dao.dart';
+import 'package:expense_tracker/core/database/dao/custom_icon_dao.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:drift/drift.dart';
+import 'package:rxdart/rxdart.dart';
 
 class SettingsLocalDataSource {
   SettingsLocalDataSource(
     this._expenseDao,
     this._keyValueStoreDao,
+    this._customIconDao,
   );
 
   final ExpenseDao _expenseDao;
   final KeyValueStoreDao _keyValueStoreDao;
+  final CustomIconDao _customIconDao;
 
   /// Watches for any changes in settings.
-  Stream<void> watchSettings() => _keyValueStoreDao.watchAllEntries();
+  Stream<void> watchSettings() => Rx.merge([
+        _keyValueStoreDao.watchAllEntries(),
+        _customIconDao.watchAllCustomIcons(),
+      ]);
 
   static const _themeKey = 'themeMode';
   static const _currencyKey = 'baseCurrency';
@@ -31,6 +41,15 @@ class SettingsLocalDataSource {
     final rawCategories = await _expenseDao.getAllCategories();
     final categories = _buildCategoryTree(rawCategories);
 
+    final rawCustomIcons = await _customIconDao.getAllCustomIcons();
+    final customIcons = rawCustomIcons
+        .map((e) => CustomIconEntity(
+              id: e.id,
+              name: e.name,
+              iconUrl: e.iconUrl,
+            ))
+        .toList();
+
     return SettingsSnapshot(
       themeMode: await _readThemeMode(),
       baseCurrencyCode: await _keyValueStoreDao.getValue<String>(
@@ -45,7 +64,32 @@ class SettingsLocalDataSource {
       cautionThreshold: await _readDouble(_cautionThresholdKey, 5),
       dangerThreshold: await _readDouble(_dangerThresholdKey, 10),
       categories: categories,
+      customIcons: customIcons,
     );
+  }
+
+  Future<void> addCustomIcon({
+    required String name,
+    required String iconUrl,
+  }) {
+    return _customIconDao.addCustomIcon(
+      CustomIconsCompanion(
+        name: Value(name),
+        iconUrl: Value(iconUrl),
+      ),
+    );
+  }
+
+  Stream<List<CustomIconEntity>> watchCustomIcons() {
+    return _customIconDao.watchAllCustomIcons().map(
+          (list) => list
+              .map((e) => CustomIconEntity(
+                    id: e.id,
+                    name: e.name,
+                    iconUrl: e.iconUrl,
+                  ))
+              .toList(),
+        );
   }
 
   Future<void> updateThemeMode(String mode) {
@@ -233,13 +277,11 @@ class SettingsLocalDataSource {
     }
 
     var fallbackCategoryId = _resolveFallbackCategoryId(byId, idsToDelete, categoryId);
-    if (fallbackCategoryId == null) {
-      fallbackCategoryId = await _expenseDao.createCategory(
-        title: 'Uncategorized',
-        icon: 'more_horiz',
-        color: 0xFF64748B,
-      );
-    }
+    fallbackCategoryId ??= await _expenseDao.createCategory(
+      title: 'Uncategorized',
+      icon: 'more_horiz',
+      color: 0xFF64748B,
+    );
 
     await _expenseDao.reassignExpensesToCategory(idsToDelete, fallbackCategoryId);
 

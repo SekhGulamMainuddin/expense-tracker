@@ -26,8 +26,9 @@ final class DeleteAccountRepositoryImpl implements DeleteAccountRepository {
         // Best effort only. Local cleanup still continues.
       }
 
-      await _localDataSource.deleteLocalDatabase();
-      await getIt.resetLazySingleton<AppDatabase>();
+      // Close cubits + DB, then delete the file, then rebuild the locator.
+      await resetServiceLocator();
+      await _localDataSource.deleteLocalDatabaseFile();
 
       final signOutResult = await _authRepository.signOut();
       return signOutResult.fold(

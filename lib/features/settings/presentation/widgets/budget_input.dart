@@ -99,7 +99,7 @@ class _BudgetInputState extends State<BudgetInput> {
         wash = null;
     }
 
-    final ghost = cs.outlineVariant.withOpacity(AppPalette.ghostBorderOpacity(context));
+    final ghost = cs.outlineVariant.withValues(alpha: AppPalette.ghostBorderOpacity(context));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +136,7 @@ class _BudgetInputState extends State<BudgetInput> {
                 borderSide: BorderSide(color: ghost, width: 2.w),
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: cs.primary.withOpacity(0.65), width: 2.w),
+                borderSide: BorderSide(color: cs.primary.withValues(alpha: 0.65), width: 2.w),
               ),
               contentPadding: EdgeInsets.only(bottom: 8.h),
             ),

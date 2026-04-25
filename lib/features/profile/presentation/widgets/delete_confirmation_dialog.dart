@@ -82,9 +82,9 @@ class _DeleteConfirmationDialogState extends State<DeleteConfirmationDialog> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    cs.error.withOpacity(0.2),
+                    cs.error.withValues(alpha: 0.2),
                     cs.error,
-                    cs.error.withOpacity(0.2),
+                    cs.error.withValues(alpha: 0.2),
                   ],
                 ),
               ),
@@ -106,7 +106,7 @@ class _DeleteConfirmationDialogState extends State<DeleteConfirmationDialog> {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: cs.error.withOpacity(0.15),
+                color: cs.error.withValues(alpha: 0.15),
                 blurRadius: 20.r,
                 spreadRadius: 10.r,
               ),
@@ -117,7 +117,7 @@ class _DeleteConfirmationDialogState extends State<DeleteConfirmationDialog> {
           width: 64.w,
           height: 64.h,
           decoration: BoxDecoration(
-            color: cs.errorContainer.withOpacity(0.65),
+            color: cs.errorContainer.withValues(alpha: 0.65),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -148,7 +148,7 @@ class _DeleteConfirmationDialogState extends State<DeleteConfirmationDialog> {
                   backgroundColor: cs.error,
                   foregroundColor: cs.onError,
                   elevation: 0,
-                  shadowColor: cs.error.withOpacity(0.35),
+                  shadowColor: cs.error.withValues(alpha: 0.35),
                   shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
                 ),
                 child: state is DeleteAccountDeleting

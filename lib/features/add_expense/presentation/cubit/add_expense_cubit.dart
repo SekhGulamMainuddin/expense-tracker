@@ -40,6 +40,8 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
     );
   }
 
+  static const _maxDecimalPlaces = 2;
+
   void updateAmount(String value) {
     final current = _loadedStateOrNull();
     if (current == null) return;
@@ -50,19 +52,18 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
         next = '0';
       } else {
         next = next.substring(0, next.length - 1);
-        if (next.endsWith('.')) {
-          next = next.substring(0, next.length - 1);
-        }
       }
     } else if (value == '.') {
       if (next.contains('.')) {
         return;
       }
       next = '$next.';
-    } else if (next == '0') {
-      next = value;
     } else {
-      next = next + value;
+      final dotIndex = next.indexOf('.');
+      if (dotIndex != -1 && next.length - dotIndex - 1 >= _maxDecimalPlaces) {
+        return;
+      }
+      next = next == '0' ? value : next + value;
     }
 
     emit(current.copyWith(amount: next, clearErrorMessage: true));

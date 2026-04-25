@@ -98,7 +98,7 @@ final class AppTheme {
     final textTheme = _manropeTextTheme(scheme);
 
     final ghostSide = BorderSide(
-      color: scheme.outlineVariant.withOpacity(0.10),
+      color: scheme.outlineVariant.withValues(alpha: 0.10),
       width: 2.w,
     );
 
@@ -111,7 +111,7 @@ final class AppTheme {
       primaryTextTheme: textTheme,
       splashFactory: InkRipple.splashFactory,
       dividerTheme: DividerThemeData(
-        color: scheme.outlineVariant.withOpacity(0.08),
+        color: scheme.outlineVariant.withValues(alpha: 0.08),
         thickness: 1,
         space: 16.h,
       ),
@@ -122,7 +122,7 @@ final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: scheme.surfaceContainerHigh.withOpacity(0.94),
+        backgroundColor: scheme.surfaceContainerHigh.withValues(alpha: 0.94),
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
       ),
@@ -154,7 +154,7 @@ final class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: scheme.onSurface,
-          side: BorderSide(color: scheme.outlineVariant.withOpacity(0.20)),
+          side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.20)),
           minimumSize: Size(double.infinity, 56.h),
           shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
           textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),

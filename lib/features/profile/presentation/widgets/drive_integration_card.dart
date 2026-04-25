@@ -29,7 +29,7 @@ class DriveIntegrationCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.r),
             boxShadow: [
               BoxShadow(
-                color: AppPalette.ambientShadow.withOpacity(0.35),
+                color: AppPalette.ambientShadow.withValues(alpha: 0.35),
                 blurRadius: 24.r,
                 offset: Offset(0, 12.h),
               ),
@@ -43,7 +43,7 @@ class DriveIntegrationCard extends StatelessWidget {
                 child: Icon(
                   isConnected ? Icons.cloud_done : Icons.cloud_off,
                   size: 100.r,
-                  color: (isConnected ? cs.primary : cs.onSurface).withOpacity(0.04),
+                  color: (isConnected ? cs.primary : cs.onSurface).withValues(alpha: 0.04),
                 ),
               ),
               Column(
@@ -76,7 +76,7 @@ class DriveIntegrationCard extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
-            color: (isConnected ? cs.primary : cs.onSurfaceVariant).withOpacity(0.12),
+            color: (isConnected ? cs.primary : cs.onSurfaceVariant).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(
@@ -106,7 +106,7 @@ class DriveIntegrationCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: cs.secondaryContainer.withOpacity(0.55),
+              color: cs.secondaryContainer.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(9999),
             ),
             child: AppTextLabelSm(
@@ -118,7 +118,7 @@ class DriveIntegrationCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: cs.errorContainer.withOpacity(0.55),
+              color: cs.errorContainer.withValues(alpha: 0.55),
               borderRadius: BorderRadius.circular(9999),
             ),
             child: AppTextLabelSm(

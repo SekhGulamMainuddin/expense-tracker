@@ -111,49 +111,67 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       : Column(
                           children: [
                             Expanded(
-                              child: ListView(
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 padding: EdgeInsets.fromLTRB(
                                   20.w,
                                   12.h,
                                   20.w,
                                   20.h,
                                 ),
-                                children: [
-                                  AmountDisplay(cubit: _cubit),
-                                  _ExpenseSummaryCard(state: loaded),
-                                  SizedBox(height: 20.h),
-                                  _ExpenseTitleField(
-                                    controller: _titleController,
-                                    cubit: _cubit,
-                                    enabled: !loaded.isSubmitting,
-                                  ),
-                                  SizedBox(height: 20.h),
-                                  _ExpenseDateTile(
-                                    date: loaded.date,
-                                    onTap: loaded.isSubmitting
-                                        ? null
-                                        : () async {
-                                            final picked = await showDatePicker(
-                                              context: context,
-                                              initialDate: loaded.date,
-                                              firstDate: DateTime(2020),
-                                              lastDate: DateTime(2100),
-                                            );
-                                            if (picked != null) {
-                                              _cubit.selectDate(picked);
-                                            }
-                                          },
-                                  ),
-                                  SizedBox(height: 24.h),
-                                  CategorySelector(cubit: _cubit),
-                                  SizedBox(height: 18.h),
-                                  SubCategorySelector(cubit: _cubit),
-                                  SizedBox(height: 24.h),
-                                  _FormHint(
-                                    text:
-                                        'Use the keypad below to enter the amount and tap the checkmark when you are ready to save.',
-                                  ),
-                                ],
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    AmountDisplay(cubit: _cubit),
+                                    _ExpenseSummaryCard(state: loaded),
+                                    SizedBox(height: 20.h),
+                                    _ExpenseTitleField(
+                                      controller: _titleController,
+                                      cubit: _cubit,
+                                      enabled: !loaded.isSubmitting,
+                                    ),
+                                    SizedBox(height: 20.h),
+                                    _ExpenseDateTile(
+                                      date: loaded.date,
+                                      onTap: loaded.isSubmitting
+                                          ? null
+                                          : () async {
+                                              final picked = await showDatePicker(
+                                                context: context,
+                                                initialDate: loaded.date,
+                                                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                                                lastDate: DateTime.now().add(const Duration(days: 365)),
+                                              );
+                                              if (picked != null) {
+                                                _cubit.selectDate(picked);
+                                              }
+                                            },
+                                    ),
+                                    SizedBox(height: 24.h),
+                                    CategorySelector(
+                                      rootCategories: loaded.rootCategories,
+                                      selectedCategoryId: loaded.selectedCategoryId,
+                                      onCategorySelected: loaded.isSubmitting
+                                          ? null
+                                          : _cubit.selectCategory,
+                                    ),
+                                    SizedBox(height: 18.h),
+                                    SubCategorySelector(
+                                      subcategories: loaded.subcategories,
+                                      selectedSubcategoryId:
+                                          loaded.selectedSubcategoryId,
+                                      onSubcategorySelected: loaded.isSubmitting
+                                          ? null
+                                          : _cubit.selectSubcategory,
+                                    ),
+                                    SizedBox(height: 24.h),
+                                    _FormHint(
+                                      text:
+                                          'Use the keypad below to enter the amount and tap the checkmark when you are ready to save.',
+                                    ),
+                                    SizedBox(height: 20.h),
+                                  ],
+                                ),
                               ),
                             ),
                             NumericKeypad(cubit: _cubit),

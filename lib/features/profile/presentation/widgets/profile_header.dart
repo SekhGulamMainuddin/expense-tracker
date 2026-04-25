@@ -34,7 +34,7 @@ class ProfileHeader extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppPalette.ambientShadow.withOpacity(0.45),
+                        color: AppPalette.ambientShadow.withValues(alpha: 0.45),
                         blurRadius: 24.r,
                         offset: Offset(0, 10.h),
                       ),

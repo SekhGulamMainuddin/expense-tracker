@@ -100,7 +100,7 @@ Widget _buildBackgroundAccents(BuildContext context) {
           height: 384.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: theme.colorScheme.primary.withOpacity(0.05),
+            color: theme.colorScheme.primary.withValues(alpha: 0.05),
           ),
         ),
       ),
@@ -112,7 +112,7 @@ Widget _buildBackgroundAccents(BuildContext context) {
           height: 320.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: theme.colorScheme.primary.withOpacity(0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -137,7 +137,7 @@ class _AppIdentitySection extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: cs.shadow.withOpacity(0.35),
+                color: cs.shadow.withValues(alpha: 0.35),
                 blurRadius: 24.r,
                 spreadRadius: 4.r,
               ),

@@ -34,7 +34,7 @@ class AppModalBottomSheet extends StatelessWidget {
                   AppTextHeadlineSm(title!),
                   16.verticalSpace,
                 ],
-                if (customWidget case final widget?) widget,
+                ?customWidget,
               ],
             ),
           ),

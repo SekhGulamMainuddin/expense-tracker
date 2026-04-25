@@ -1,9 +1,84 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/styles/app_text_styles.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 /// Prefer these widgets for UI copy so typography stays on-system.
 /// Set [translate] false for dynamic / non-locale strings.
+
+class AppAutoSizeTextBodyLg extends StatelessWidget {
+  const AppAutoSizeTextBodyLg(
+    this.text, {
+    super.key,
+    this.style,
+    this.color,
+    this.textAlign,
+    this.maxLines = 1,
+    this.minFontSize = 10,
+  });
+
+  final String text;
+  final TextStyle? style;
+  final Color? color;
+  final TextAlign? textAlign;
+  final int maxLines;
+  final double minFontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = AppTextStyles.bodyLg(context);
+    return AutoSizeText(
+      context.tr(text),
+      textAlign: textAlign,
+      maxLines: maxLines,
+      minFontSize: minFontSize,
+      style: base.merge(style).copyWith(color: color ?? base.color),
+    );
+  }
+}
+
+class AppAutoSizeTextLabelSm extends StatelessWidget {
+  const AppAutoSizeTextLabelSm(
+    this.text, {
+    super.key,
+    this.style,
+    this.color,
+    this.textAlign,
+    this.maxLines = 1,
+    this.minFontSize = 8,
+    this.letterSpacing = 0.05,
+    this.uppercase = false,
+    this.fontWeight,
+  });
+
+  final String text;
+  final TextStyle? style;
+  final Color? color;
+  final TextAlign? textAlign;
+  final int maxLines;
+  final double minFontSize;
+  final double letterSpacing;
+  final bool uppercase;
+  final FontWeight? fontWeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final raw = context.tr(text);
+    final display = uppercase ? raw.toUpperCase() : raw;
+    final base = AppTextStyles.labelSm(context);
+    return AutoSizeText(
+      display,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      minFontSize: minFontSize,
+      style: base.merge(style).copyWith(
+            color: color ?? base.color,
+            letterSpacing: letterSpacing,
+            fontWeight: fontWeight ?? base.fontWeight,
+          ),
+    );
+  }
+}
 
 class AppTextDisplayLg extends StatelessWidget {
   const AppTextDisplayLg(
@@ -202,6 +277,7 @@ class AppTextLabelMd extends StatelessWidget {
     this.overflow,
     this.letterSpacing = 0.05,
     this.uppercase = false,
+    this.fontWeight,
   });
 
   final String text;
@@ -212,6 +288,7 @@ class AppTextLabelMd extends StatelessWidget {
   final TextOverflow? overflow;
   final double letterSpacing;
   final bool uppercase;
+  final FontWeight? fontWeight;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +303,7 @@ class AppTextLabelMd extends StatelessWidget {
       style: base.merge(style).copyWith(
             color: color ?? base.color,
             letterSpacing: letterSpacing,
+            fontWeight: fontWeight ?? base.fontWeight,
           ),
     );
   }
@@ -242,6 +320,7 @@ class AppTextLabelSm extends StatelessWidget {
     this.overflow,
     this.letterSpacing = 0.05,
     this.uppercase = false,
+    this.fontWeight,
   });
 
   final String text;
@@ -252,6 +331,7 @@ class AppTextLabelSm extends StatelessWidget {
   final TextOverflow? overflow;
   final double letterSpacing;
   final bool uppercase;
+  final FontWeight? fontWeight;
 
   @override
   Widget build(BuildContext context) {
@@ -266,6 +346,7 @@ class AppTextLabelSm extends StatelessWidget {
       style: base.merge(style).copyWith(
             color: color ?? base.color,
             letterSpacing: letterSpacing,
+            fontWeight: fontWeight ?? base.fontWeight,
           ),
     );
   }

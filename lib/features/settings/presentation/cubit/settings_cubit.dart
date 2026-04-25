@@ -27,9 +27,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     return _applyMutationResult(
       result,
       onSuccess: () async {
-        final current = _requireSnapshot();
-        _snapshot = current.copyWith(themeMode: mode);
-        emit(SettingsLoaded(_snapshot!));
+        _emitSnapshot(_requireSnapshot().copyWith(themeMode: mode));
         return true;
       },
     );
@@ -40,9 +38,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     return _applyMutationResult(
       result,
       onSuccess: () async {
-        final current = _requireSnapshot();
-        _snapshot = current.copyWith(baseCurrencyCode: currencyCode);
-        emit(SettingsLoaded(_snapshot!));
+        _emitSnapshot(_requireSnapshot().copyWith(baseCurrencyCode: currencyCode));
         return true;
       },
     );
@@ -130,6 +126,20 @@ class SettingsCubit extends Cubit<SettingsState> {
     );
   }
 
+  Future<bool> addCustomIcon({
+    required String name,
+    required String iconUrl,
+  }) async {
+    final result = await _repository.addCustomIcon(
+      name: name,
+      iconUrl: iconUrl,
+    );
+    return _applyMutationResult(
+      result,
+      onSuccess: () async => _refreshSnapshot(),
+    );
+  }
+
   Future<bool> _updateBudgetLimit({
     required String storageKey,
     required double value,
@@ -139,9 +149,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     return _applyMutationResult(
       result,
       onSuccess: () async {
-        final current = _requireSnapshot();
-        _snapshot = updateSnapshot(current);
-        emit(SettingsLoaded(_snapshot!));
+        _emitSnapshot(updateSnapshot(_requireSnapshot()));
         return true;
       },
     );
@@ -156,9 +164,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     return _applyMutationResult(
       result,
       onSuccess: () async {
-        final current = _requireSnapshot();
-        _snapshot = updateSnapshot(current);
-        emit(SettingsLoaded(_snapshot!));
+        _emitSnapshot(updateSnapshot(_requireSnapshot()));
         return true;
       },
     );
@@ -175,8 +181,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   }) {
     return result.fold(
       (snapshot) {
-        _snapshot = snapshot;
-        emit(SettingsLoaded(snapshot));
+        _emitSnapshot(snapshot);
         return true;
       },
       (failure) {
@@ -184,8 +189,9 @@ class SettingsCubit extends Cubit<SettingsState> {
           _emitFailure(failure.message);
         } else {
           emit(SettingsFailure(failure.message));
-          if (_snapshot != null) {
-            emit(SettingsLoaded(_snapshot!));
+          final snapshot = _snapshot;
+          if (snapshot != null) {
+            emit(SettingsLoaded(snapshot));
           }
         }
         return false;
@@ -205,10 +211,16 @@ class SettingsCubit extends Cubit<SettingsState> {
     return onSuccess();
   }
 
+  void _emitSnapshot(SettingsSnapshot snapshot) {
+    _snapshot = snapshot;
+    emit(SettingsLoaded(snapshot));
+  }
+
   void _emitFailure(String message) {
     emit(SettingsFailure(message));
-    if (_snapshot != null) {
-      emit(SettingsLoaded(_snapshot!));
+    final snapshot = _snapshot;
+    if (snapshot != null) {
+      emit(SettingsLoaded(snapshot));
     }
   }
 

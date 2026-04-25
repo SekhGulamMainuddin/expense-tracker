@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/phoenix.dart';
 import 'package:expense_tracker/features/profile/domain/repositories/drive_repository.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_state.dart';
 
@@ -115,17 +116,17 @@ class ProfileCubit extends Cubit<ProfileState> {
           return;
         }
 
-        // 1. Close current DB connection
-        await getIt<AppDatabase>().close();
+        // Reset the entire service locator so every DB-dependent singleton
+        // (DAOs, data sources, repositories, cubits) rebinds to a fresh
+        // AppDatabase after the file is swapped.
+        await resetServiceLocator();
 
-        // 2. Overwrite DB file
         final dbFile = await AppDatabase.getDatabaseFile();
         await dbFile.writeAsBytes(bytes);
 
-        // 3. Reset database singleton in DI to force a fresh connection
-        await getIt.resetLazySingleton<AppDatabase>();
-
-        emit(currentState.copyWith(isSyncing: false));
+        // Force the widget tree to remount so all BlocBuilders re-resolve
+        // getIt<...>() against the new singletons.
+        Phoenix.rebirth();
       }, (failure) async => emit(ProfileFailure(failure.message)));
     } catch (e) {
       emit(ProfileFailure('Restore failed: ${e.toString()}'));
