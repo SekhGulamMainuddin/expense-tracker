@@ -1,13 +1,16 @@
 import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/core/widgets/sticky_header_delegate.dart';
 import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/icon_catalog.dart';
 import 'package:expense_tracker/core/widgets/app_icon.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
@@ -16,11 +19,13 @@ class IconGridSelector extends StatefulWidget {
     super.key,
     required this.selectedIcon,
     required this.selectedColor,
+    required this.customIcons,
     required this.onIconSelected,
   });
 
   final String selectedIcon;
   final Color selectedColor;
+  final List<CustomIconEntity> customIcons;
   final ValueChanged<String> onIconSelected;
 
   @override
@@ -55,153 +60,165 @@ class _IconGridSelectorState extends State<IconGridSelector> {
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     final selectedKey = AppIconCatalog.normalizeKey(widget.selectedIcon);
+    final results = AppIconCatalog.filter(
+      packId: _activePackId,
+      query: _searchController.text,
+      customIcons: widget.customIcons,
+    );
 
-    return BlocBuilder<SettingsCubit, SettingsState>(
-      bloc: getIt<SettingsCubit>(),
-      buildWhen: (previous, current) => current is SettingsLoaded,
-      builder: (context, state) {
-        final customIcons = state is SettingsLoaded
-            ? state.snapshot.customIcons
-            : const <CustomIconEntity>[];
-        final results = AppIconCatalog.filter(
-          packId: _activePackId,
-          query: _searchController.text,
-          customIcons: customIcons,
-        );
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: StickyHeaderDelegate(
+            minHeight: 190.h,
+            maxHeight: 190.h,
+            backgroundColor: context.theme.scaffoldBackgroundColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (_) => setState(() {}),
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      hintText: 'Search icon by name',
-                      prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
-                      filled: true,
-                      fillColor: cs.surfaceContainerLow,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16.r),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: _searchController.text.isEmpty
-                          ? null
-                          : IconButton(
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {});
-                              },
-                              icon: Icon(
-                                Icons.clear,
-                                color: cs.onSurfaceVariant,
-                              ),
+                Container(
+                  color: context.theme.scaffoldBackgroundColor,
+                  padding: EdgeInsets.only(top: 8.h, left: 20.w, right: 20.w),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (_) => setState(() {}),
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            hintText: 'Search icon by name',
+                            prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
+                            filled: true,
+                            fillColor: cs.surfaceContainerLow,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.r),
+                              borderSide: BorderSide.none,
                             ),
-                    ),
+                            suffixIcon: _searchController.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() {});
+                                    },
+                                    icon: Icon(
+                                      Icons.clear,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      _AddCustomIconButton(
+                        onAdded: (name, url) async {
+                          await getIt<SettingsCubit>().addCustomIcon(name: name, iconUrl: url);
+                          setState(() {
+                            _activePackId = AppIconCatalog.customPackId;
+                            _searchController.clear();
+                          });
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: 12.w),
-                _AddCustomIconButton(
-                  onAdded: (name, url) async {
-                    await getIt<SettingsCubit>().addCustomIcon(name: name, iconUrl: url);
-                    setState(() {
-                      _activePackId = AppIconCatalog.customPackId;
-                      _searchController.clear();
-                    });
-                  },
+                SizedBox(height: 14.h),
+                SizedBox(
+                  height: 40.h,
+                  child: ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: AppIconCatalog.packs.length,
+                    separatorBuilder: (_, _) => SizedBox(width: 8.w),
+                    itemBuilder: (context, index) {
+                      final pack = AppIconCatalog.packs[index];
+                      final isSelected = _activePackId == pack.id;
+                      return ChoiceChip(
+                        label: Text(pack.label),
+                        selected: isSelected,
+                        onSelected: (_) => setState(() => _activePackId = pack.id),
+                        selectedColor: widget.selectedColor.withValues(alpha: 0.18),
+                        labelStyle: context.theme.textTheme.labelMedium?.copyWith(
+                          color: isSelected ? widget.selectedColor : cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        side: BorderSide(color: isSelected ? widget.selectedColor : cs.outlineVariant),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: cs.secondaryContainer.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: AppTextLabelSm(
+                        '${results.length} ICONS FOUND',
+                        color: cs.onSecondaryContainer,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (_searchController.text.isNotEmpty || _activePackId != AppIconCatalog.allPackId)
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _activePackId = AppIconCatalog.allPackId;
+                            _searchController.clear();
+                          });
+                        },
+                        icon: Icon(Icons.refresh, size: 14.r),
+                        label: const Text('Reset Filters'),
+                      ),
+                  ],
+                ),
                 ),
               ],
             ),
-        SizedBox(height: 14.h),
-        SizedBox(
-          height: 40.h,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: AppIconCatalog.packs.length,
-            separatorBuilder: (_, _) => SizedBox(width: 8.w),
-            itemBuilder: (context, index) {
-              final pack = AppIconCatalog.packs[index];
-              final isSelected = _activePackId == pack.id;
-              return ChoiceChip(
-                label: Text(pack.label),
-                selected: isSelected,
-                onSelected: (_) => setState(() => _activePackId = pack.id),
-                selectedColor: widget.selectedColor.withValues(alpha: 0.18),
-                labelStyle: context.theme.textTheme.labelMedium?.copyWith(
-                  color: isSelected ? widget.selectedColor : cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-                side: BorderSide(color: isSelected ? widget.selectedColor : cs.outlineVariant),
-              );
-            },
           ),
         ),
-        SizedBox(height: 12.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: cs.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: AppTextLabelSm(
-                '${results.length} ICONS FOUND',
-                color: cs.onSecondaryContainer,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (_searchController.text.isNotEmpty || _activePackId != AppIconCatalog.allPackId)
-              TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _activePackId = AppIconCatalog.allPackId;
-                    _searchController.clear();
-                  });
-                },
-                icon: Icon(Icons.refresh, size: 14.r),
-                label: const Text('Reset Filters'),
-              ),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        SizedBox(
-          height: 380.h,
-          child: results.isEmpty
-              ? _EmptyState(
-                  message: _searchController.text.isEmpty
-                      ? 'This icon pack is currently empty.'
-                      : 'No icons match "${_searchController.text}".',
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
+          sliver: results.isEmpty
+              ? SliverToBoxAdapter(
+                  child: _EmptyState(
+                    message: _searchController.text.isEmpty
+                        ? 'This icon pack is currently empty.'
+                        : 'No icons match "${_searchController.text}".',
+                  ),
                 )
-              : GridView.builder(
-                  padding: EdgeInsets.zero,
+              : SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     mainAxisSpacing: 12.h,
                     crossAxisSpacing: 12.w,
-                    mainAxisExtent: 94.h,
+                    mainAxisExtent: 100.h,
                   ),
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    final option = results[index];
-                    final isSelected = selectedKey == option.storageKey;
-                    return _IconTile(
-                      option: option,
-                      isSelected: isSelected,
-                      selectedColor: widget.selectedColor,
-                      onTap: () => widget.onIconSelected(option.storageKey),
-                    );
-                  },
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final option = results[index];
+                      final isSelected = selectedKey == option.storageKey;
+                      return _IconTile(
+                        option: option,
+                        isSelected: isSelected,
+                        selectedColor: widget.selectedColor,
+                        onTap: () => widget.onIconSelected(option.storageKey),
+                      );
+                    },
+                    childCount: results.length,
+                  ),
                 ),
         ),
       ],
     );
-  },
-);
   }
 
   String _packFromKey(String key) {

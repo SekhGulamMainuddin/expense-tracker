@@ -6,8 +6,9 @@ import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
-import 'package:expense_tracker/features/settings/presentation/widgets/color_picker_row.dart';
+import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/icon_grid_selector.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -143,51 +144,140 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
           ],
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _fieldLabel(context, 'settings.category_name'),
-                TextField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  style: theme.textTheme.bodyLarge,
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Fine Dining',
-                    hintStyle: theme.textTheme.bodyMedium,
-                    filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerLow,
-                    border: OutlineInputBorder(
-                      borderRadius: AppRadii.xl,
-                      borderSide: BorderSide.none,
-                    ),
-                    suffixIcon: Icon(
-                      Icons.edit,
-                      size: 18.r,
-                      color: theme.colorScheme.onSurfaceVariant,
+          child: BlocBuilder<SettingsCubit, SettingsState>(
+            bloc: _settingsCubit,
+            builder: (context, state) {
+              final customIcons = state is SettingsLoaded
+                  ? state.snapshot.customIcons
+                  : const <CustomIconEntity>[];
+
+              return CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 24.h),
+                    sliver: SliverList.list(
+                      children: [
+                        _fieldLabel(context, 'settings.category_name'),
+                        TextField(
+                          controller: _nameController,
+                          textCapitalization: TextCapitalization.words,
+                          style: theme.textTheme.bodyLarge,
+                          decoration: InputDecoration(
+                            hintText: 'e.g. Fine Dining',
+                            hintStyle: theme.textTheme.bodyMedium,
+                            filled: true,
+                            fillColor: theme.colorScheme.surfaceContainerLow,
+                            border: OutlineInputBorder(
+                              borderRadius: AppRadii.xl,
+                              borderSide: BorderSide.none,
+                            ),
+                            suffixIcon: Icon(
+                              Icons.edit,
+                              size: 18.r,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24.h),
+                        _fieldLabel(context, 'settings.accent_color'),
+                        _buildColorSelector(context),
+                        SizedBox(height: 24.h),
+                        _fieldLabel(context, 'settings.select_icon'),
+                      ],
                     ),
                   ),
-                ),
-                SizedBox(height: 24.h),
-                _fieldLabel(context, 'settings.select_icon'),
-                IconGridSelector(
-                  selectedIcon: _selectedIcon,
-                  selectedColor: _selectedColor,
-                  onIconSelected: (icon) => setState(() => _selectedIcon = icon),
-                ),
-                SizedBox(height: 24.h),
-                _fieldLabel(context, 'settings.accent_color'),
-                ColorPickerRow(
-                  selectedColor: _selectedColor,
-                  onColorSelected: (color) =>
-                      setState(() => _selectedColor = color),
-                ),
-                SizedBox(height: 32.h),
-                _actionButtons(context, isEditing),
-              ],
+                  IconGridSelector(
+                    selectedIcon: _selectedIcon,
+                    selectedColor: _selectedColor,
+                    customIcons: customIcons,
+                    onIconSelected: (icon) => setState(() => _selectedIcon = icon),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+              child: _actionButtons(context, isEditing),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColorSelector(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final newColor = await showColorPickerDialog(
+          context,
+          _selectedColor,
+          title: Text('Select Accent Color', style: Theme.of(context).textTheme.titleLarge),
+          width: 40.w,
+          height: 40.h,
+          spacing: 0,
+          runSpacing: 0,
+          borderRadius: 4.r,
+          wheelDiameter: 165.w,
+          enableOpacity: false,
+          showColorCode: true,
+          colorCodeHasColor: true,
+          pickersEnabled: const <ColorPickerType, bool>{
+            ColorPickerType.both: false,
+            ColorPickerType.primary: true,
+            ColorPickerType.accent: true,
+            ColorPickerType.bw: false,
+            ColorPickerType.custom: true,
+            ColorPickerType.wheel: true,
+          },
+        );
+        setState(() => _selectedColor = newColor);
+      },
+      child: Container(
+        height: 56.h,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: context.theme.colorScheme.surfaceContainerLow,
+          borderRadius: AppRadii.xl,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32.r,
+              height: 32.r,
+              decoration: BoxDecoration(
+                color: _selectedColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: context.theme.colorScheme.outlineVariant,
+                  width: 2.r,
+                ),
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Text(
+              'Custom Color',
+              style: context.theme.textTheme.bodyLarge,
+            ),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              color: context.theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );
