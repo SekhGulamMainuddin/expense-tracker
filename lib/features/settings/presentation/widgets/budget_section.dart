@@ -1,11 +1,14 @@
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/budget_section_cubit.dart';
+import 'package:expense_tracker/features/settings/presentation/cubit/budget_section_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/budget_input.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/threshold_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class BudgetSection extends StatelessWidget {
+class BudgetSection extends StatefulWidget {
   const BudgetSection({
     super.key,
     required this.snapshot,
@@ -26,61 +29,137 @@ class BudgetSection extends StatelessWidget {
   final ValueChanged<double> onDangerThresholdChanged;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = context.theme.colorScheme;
-    final currencySymbol = _currencySymbol(snapshot.baseCurrencyCode);
+  State<BudgetSection> createState() => _BudgetSectionState();
+}
 
-    return Container(
-      padding: EdgeInsets.all(24.r),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        children: [
-          BudgetInput(
-            label: 'Daily Limit',
-            value: snapshot.dailyLimit,
-            currencySymbol: currencySymbol,
-            budgetBand: 'safe',
-            onSubmitted: onDailyChanged,
-          ),
-          SizedBox(height: 16.h),
-          BudgetInput(
-            label: 'Weekly Limit',
-            value: snapshot.weeklyLimit,
-            currencySymbol: currencySymbol,
-            budgetBand: 'caution',
-            onSubmitted: onWeeklyChanged,
-          ),
-          SizedBox(height: 16.h),
-          BudgetInput(
-            label: 'Monthly Limit',
-            value: snapshot.monthlyLimit,
-            currencySymbol: currencySymbol,
-            budgetBand: 'danger',
-            onSubmitted: onMonthlyChanged,
-          ),
-          Divider(height: 48.h),
-          ThresholdSlider(
-            label: 'Safe Haven Zone',
-            color: const Color(0xFF10B981),
-            value: snapshot.safeThreshold,
-            onChanged: onSafeThresholdChanged,
-          ),
-          ThresholdSlider(
-            label: 'Mild Caution',
-            color: Colors.orange,
-            value: snapshot.cautionThreshold,
-            onChanged: onCautionThresholdChanged,
-          ),
-          ThresholdSlider(
-            label: 'Danger Threshold',
-            color: Colors.red,
-            value: snapshot.dangerThreshold,
-            onChanged: onDangerThresholdChanged,
-          ),
-        ],
+class _BudgetSectionState extends State<BudgetSection> {
+  late final BudgetSectionCubit _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = BudgetSectionCubit(widget.snapshot);
+  }
+
+  @override
+  void didUpdateWidget(BudgetSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.snapshot != oldWidget.snapshot) {
+      _cubit.updateSnapshot(widget.snapshot);
+    }
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
+  }
+
+  void _saveChanges() {
+    FocusScope.of(context).unfocus();
+    
+    // Allow focus loss to trigger BudgetInput's onSubmitted before checking changes
+    Future.microtask(() {
+      if (!mounted) return;
+      _cubit.saveChanges(
+        onDailyChanged: widget.onDailyChanged,
+        onWeeklyChanged: widget.onWeeklyChanged,
+        onMonthlyChanged: widget.onMonthlyChanged,
+        onSafeThresholdChanged: widget.onSafeThresholdChanged,
+        onCautionThresholdChanged: widget.onCautionThresholdChanged,
+        onDangerThresholdChanged: widget.onDangerThresholdChanged,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _cubit,
+      child: BlocBuilder<BudgetSectionCubit, BudgetSectionState>(
+        builder: (context, state) {
+          final cs = context.theme.colorScheme;
+          final currencySymbol = _currencySymbol(state.snapshot.baseCurrencyCode);
+
+          return Container(
+            padding: EdgeInsets.all(24.r),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                BudgetInput(
+                  label: 'Daily Limit',
+                  value: state.daily,
+                  currencySymbol: currencySymbol,
+                  budgetBand: 'safe',
+                  onChanged: _cubit.updateDaily,
+                  onSubmitted: _cubit.updateDaily,
+                ),
+                SizedBox(height: 16.h),
+                BudgetInput(
+                  label: 'Weekly Limit',
+                  value: state.weekly,
+                  currencySymbol: currencySymbol,
+                  budgetBand: 'caution',
+                  onChanged: _cubit.updateWeekly,
+                  onSubmitted: _cubit.updateWeekly,
+                ),
+                SizedBox(height: 16.h),
+                BudgetInput(
+                  label: 'Monthly Limit',
+                  value: state.monthly,
+                  currencySymbol: currencySymbol,
+                  budgetBand: 'danger',
+                  onChanged: _cubit.updateMonthly,
+                  onSubmitted: _cubit.updateMonthly,
+                ),
+                Divider(height: 48.h),
+                ThresholdSlider(
+                  label: 'Safe Haven Zone',
+                  color: const Color(0xFF10B981),
+                  value: state.safe,
+                  onChanged: _cubit.updateSafe,
+                ),
+                ThresholdSlider(
+                  label: 'Mild Caution',
+                  color: Colors.orange,
+                  value: state.caution,
+                  onChanged: _cubit.updateCaution,
+                ),
+                ThresholdSlider(
+                  label: 'Danger Threshold',
+                  color: Colors.red,
+                  value: state.danger,
+                  onChanged: _cubit.updateDanger,
+                ),
+                
+                if (state.hasChanges) ...[
+                  SizedBox(height: 24.h),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _cubit.discardChanges,
+                          child: const Text('Discard'),
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: _saveChanges,
+                          child: const Text('Save Changes'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ]
+              ],
+            ),
+          );
+        },
       ),
     );
   }

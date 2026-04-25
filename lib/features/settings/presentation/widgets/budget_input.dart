@@ -13,6 +13,7 @@ class BudgetInput extends StatefulWidget {
     required this.value,
     required this.currencySymbol,
     required this.onSubmitted,
+    this.onChanged,
     this.budgetBand,
   });
 
@@ -20,6 +21,7 @@ class BudgetInput extends StatefulWidget {
   final double value;
   final String currencySymbol;
   final ValueChanged<double> onSubmitted;
+  final ValueChanged<double>? onChanged;
 
   /// Optional band for tonal wash behind the field: `'safe'` | `'caution'` | `'danger'`.
   final String? budgetBand;
@@ -122,6 +124,12 @@ class _BudgetInputState extends State<BudgetInput> {
             focusNode: _focusNode,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: AppTextStyles.headlineLg(context),
+            onChanged: (text) {
+              final parsed = double.tryParse(text.trim());
+              if (parsed != null && widget.onChanged != null) {
+                widget.onChanged!(parsed);
+              }
+            },
             onSubmitted: (_) => _submitValue(),
             decoration: InputDecoration(
               prefixText: '${widget.currencySymbol} ',

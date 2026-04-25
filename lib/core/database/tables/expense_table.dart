@@ -10,6 +10,8 @@ class Expenses extends Table {
   TextColumn get title => text().nullable().withLength(max: 50)();
 
   RealColumn get amount => real()();
+  // Internal normalized value in INR for easy aggregations
+  RealColumn get baseAmount => real().withDefault(const Constant(0.0))();
 
   DateTimeColumn get date => dateTime()();
 

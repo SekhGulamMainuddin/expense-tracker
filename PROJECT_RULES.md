@@ -65,3 +65,6 @@ This document serves as the single source of truth for all AI assistants (Antigr
 - `lib/features/<name>/domain/`: Interfaces and entities.
 - `lib/features/<name>/data/`: Implementations and data sources.
 - `lib/features/<name>/presentation/`: Cubits and UI components.
+
+## State Management
+Prefer Cubit for all state management and try not to use setState. If things are simple then use setState but if it's even a slightly complex state, prefer Cubit.

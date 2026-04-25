@@ -33,18 +33,19 @@ class FinanceLocalDataSource {
 
   Future<FinanceSnapshot> loadDashboard({TimeRange range = TimeRange.monthly}) async {
     final settings = await _settingsLocalDataSource.loadSettings();
+    final baseCurrency = Currency.fromCode(settings.baseCurrencyCode);
     final now = DateTime.now();
     
-    // Limits and spendings for the top card (always showing these stats)
-    final dailySpent = await _expenseDao.getTotalExpense(
+    // spendings are returned in INR from DAO (sum of baseAmount)
+    final dailySpentInr = await _expenseDao.getTotalExpense(
       DateHelper.startOfToday,
       now,
     );
-    final weeklySpent = await _expenseDao.getTotalExpense(
+    final weeklySpentInr = await _expenseDao.getTotalExpense(
       DateHelper.startOfThisWeek,
       now,
     );
-    final monthlySpent = await _expenseDao.getTotalExpense(
+    final monthlySpentInr = await _expenseDao.getTotalExpense(
       DateHelper.startOfThisMonth,
       now,
     );
@@ -64,6 +65,7 @@ class FinanceLocalDataSource {
           (expense) => _toTransaction(
             expense: expense,
             categories: categoryMap,
+            targetCurrency: baseCurrency,
           ),
         )
         .toList();
@@ -71,14 +73,15 @@ class FinanceLocalDataSource {
     final breakdown = _buildCategoryBreakdown(
       expenses: rangeExpenses,
       categories: categoryMap,
+      targetCurrency: baseCurrency,
     );
 
     return FinanceSnapshot(
       currencyCode: settings.baseCurrencyCode,
-      currencySymbol: Currency.fromCode(settings.baseCurrencyCode).symbol,
-      dailySpent: dailySpent,
-      weeklySpent: weeklySpent,
-      monthlySpent: monthlySpent,
+      currencySymbol: baseCurrency.symbol,
+      dailySpent: Currency.inr.convertTo(dailySpentInr, baseCurrency),
+      weeklySpent: Currency.inr.convertTo(weeklySpentInr, baseCurrency),
+      monthlySpent: Currency.inr.convertTo(monthlySpentInr, baseCurrency),
       dailyLimit: settings.dailyLimit,
       weeklyLimit: settings.weeklyLimit,
       monthlyLimit: settings.monthlyLimit,
@@ -97,8 +100,8 @@ class FinanceLocalDataSource {
     int? offset,
   }) async {
     final settings = await _settingsLocalDataSource.loadSettings();
+    final baseCurrency = Currency.fromCode(settings.baseCurrencyCode);
     final categoryMap = _flattenCategories(settings.categories);
-
     final expenses = await _expenseDao.getFilteredTransactions(
       startDate: startDate,
       endDate: endDate,
@@ -108,35 +111,31 @@ class FinanceLocalDataSource {
     );
 
     return expenses
-        .map(
-          (e) => _toTransaction(
-            expense: e,
-            categories: categoryMap,
-          ),
-        )
+        .map((e) => _toTransaction(
+              expense: e,
+              categories: categoryMap,
+              targetCurrency: baseCurrency,
+            ))
         .toList();
   }
 
   (DateTime, DateTime) _getDatesForRange(TimeRange range, DateTime now) {
+    final today = DateTime(now.year, now.month, now.day);
     return switch (range) {
-      TimeRange.daily => (DateHelper.startOfToday, now),
+      TimeRange.daily => (today, now),
       TimeRange.weekly => (DateHelper.startOfThisWeek, now),
       TimeRange.monthly => (DateHelper.startOfThisMonth, now),
+      TimeRange.allTime => (DateTime(2000), now),
     };
   }
 
-  Map<int, SettingsCategory> _flattenCategories(List<SettingsCategory> roots) {
+  Map<int, SettingsCategory> _flattenCategories(List<SettingsCategory> list) {
     final result = <int, SettingsCategory>{};
-
-    void visit(SettingsCategory category) {
-      result[category.id] = category;
-      for (final child in category.children) {
-        visit(child);
+    for (final cat in list) {
+      result[cat.id] = cat;
+      for (final child in cat.children) {
+        result[child.id] = child;
       }
-    }
-
-    for (final category in roots) {
-      visit(category);
     }
 
     return result;
@@ -145,9 +144,12 @@ class FinanceLocalDataSource {
   FinanceTransaction _toTransaction({
     required Expense expense,
     required Map<int, SettingsCategory> categories,
+    required Currency targetCurrency,
   }) {
     final category = categories[expense.categoryId];
-    final amount = expense.amount.abs();
+    
+    // We convert baseAmount (INR) to the target currency
+    final amount = Currency.inr.convertTo(expense.baseAmount, targetCurrency).abs();
 
     String displayTitle = expense.title ?? '';
     if (displayTitle.isEmpty) {
@@ -167,9 +169,9 @@ class FinanceLocalDataSource {
     return FinanceTransaction(
       id: expense.id,
       title: displayTitle,
-      subtitle: _formatTransactionDate(expense.date),
+      subtitle: DateHelper.formatTransactionDate(expense.date),
       amount: amount,
-      icon: category?.icon ?? 'more_horiz',
+      icon: category?.icon ?? 'receipt_long',
       color: category?.color ?? 0xFF64748B,
       date: expense.date,
     );
@@ -178,79 +180,36 @@ class FinanceLocalDataSource {
   List<FinanceCategoryBreakdown> _buildCategoryBreakdown({
     required List<Expense> expenses,
     required Map<int, SettingsCategory> categories,
+    required Currency targetCurrency,
   }) {
-    if (expenses.isEmpty) {
-      return const [];
-    }
+    final spendingPerCategory = <int, double>{};
+    double totalSpend = 0;
 
-    final totals = <int, double>{};
     for (final expense in expenses) {
-      totals[expense.categoryId] = (totals[expense.categoryId] ?? 0) + expense.amount.abs();
+      final amount = Currency.inr.convertTo(expense.baseAmount, targetCurrency);
+      totalSpend += amount;
+      
+      final cat = categories[expense.categoryId];
+      if (cat == null) continue;
+
+      // Group subcategories into their parents for the breakdown
+      final rootId = (cat.parentId == null || cat.parentId == 0) ? cat.id : cat.parentId!;
+      spendingPerCategory[rootId] = (spendingPerCategory[rootId] ?? 0) + amount;
     }
 
-    final totalSpent = totals.values.fold<double>(0, (sum, value) => sum + value);
-    if (totalSpent <= 0) {
-      return const [];
-    }
-
-    final items = totals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    return items.map((entry) {
-      final category = categories[entry.key];
+    return spendingPerCategory.entries
+        .where((entry) => entry.value > 0)
+        .map<FinanceCategoryBreakdown>((entry) {
+      final cat = categories[entry.key]!;
       return FinanceCategoryBreakdown(
-        categoryId: entry.key,
-        title: category?.title ?? 'Uncategorized',
-        icon: category?.icon ?? 'more_horiz',
-        color: category?.color ?? 0xFF64748B,
+        categoryId: cat.id,
+        title: cat.title,
         amount: entry.value,
-        percentage: entry.value / totalSpent,
+        percentage: totalSpend > 0 ? (entry.value / totalSpend) : 0,
+        color: cat.color,
+        icon: cat.icon,
       );
-    }).toList();
-  }
-
-  String _currencySymbol(String currencyCode) {
-    return Currency.fromCode(currencyCode).symbol;
-  }
-
-  String _formatTransactionDate(DateTime date) {
-    final now = DateTime.now();
-    final startOfToday = DateTime(now.year, now.month, now.day);
-    final transactionDay = DateTime(date.year, date.month, date.day);
-
-    if (transactionDay == startOfToday) {
-      return 'Today, ${_formatTime(date)}';
-    }
-
-    if (transactionDay == startOfToday.subtract(const Duration(days: 1))) {
-      return 'Yesterday, ${_formatTime(date)}';
-    }
-
-    return '${_monthName(date.month)} ${date.day}, ${date.year}';
-  }
-
-  String _formatTime(DateTime date) {
-    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-    final minute = date.minute.toString().padLeft(2, '0');
-    final suffix = date.hour >= 12 ? 'PM' : 'AM';
-    return '$hour:$minute $suffix';
-  }
-
-  String _monthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
+    }).toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
   }
 }

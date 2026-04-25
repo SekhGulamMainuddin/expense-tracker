@@ -13,10 +13,10 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   // --- 1. Aggregations (Arithmetic Safe) ---
   /// Calculates total expense in cents for a given date range.
   Future<double> getTotalExpense(DateTime start, DateTime end) async {
-    final query = selectOnly(expenses)..addColumns([expenses.amount.sum()]);
+    final query = selectOnly(expenses)..addColumns([expenses.baseAmount.sum()]);
     query.where(expenses.date.isBetweenValues(start, end));
     final result = await query.getSingle();
-    return result.read(expenses.amount.sum()) ?? 0;
+    return result.read(expenses.baseAmount.sum()) ?? 0;
   }
 
   /// Compares (1st of this month -> now) vs (1st of last month -> same day last month).
@@ -168,11 +168,11 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final query = select(expenses).join([
       innerJoin(categories, categories.id.equalsExp(expenses.categoryId)),
     ]);
-    query.addColumns([categories.title, expenses.amount.sum()]);
+    query.addColumns([categories.title, expenses.baseAmount.sum()]);
     query.where(expenses.date.isBetweenValues(start, end));
     query.groupBy([categories.id]);
     query.orderBy([
-      OrderingTerm(expression: expenses.amount.sum(), mode: OrderingMode.desc),
+      OrderingTerm(expression: expenses.baseAmount.sum(), mode: OrderingMode.desc),
     ]);
     query.limit(3);
 
@@ -181,7 +181,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
         .map(
           (row) => {
             'category': row.read(categories.title),
-            'total': row.read(expenses.amount.sum()) ?? 0,
+            'total': row.read(expenses.baseAmount.sum()) ?? 0,
           },
         )
         .toList();
@@ -214,10 +214,13 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 
     final expenseTitle = title ?? "";
 
+    final baseAmount = amount * currency.rateToInr;
+
     return into(expenses).insert(
       ExpensesCompanion.insert(
         title: Value(expenseTitle),
         amount: amount,
+        baseAmount: Value(baseAmount),
         date: expenseDate,
         categoryId: categoryId,
         currency: Value(currency),
@@ -236,10 +239,13 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final expenseDate = date ?? DateTime.now();
     final expenseTitle = title ?? "";
 
+    final baseAmount = amount * currency.rateToInr;
+
     return (update(expenses)..where((t) => t.id.equals(id))).write(
       ExpensesCompanion(
         title: Value(expenseTitle),
         amount: Value(amount),
+        baseAmount: Value(baseAmount),
         date: Value(expenseDate),
         categoryId: Value(categoryId),
         currency: Value(currency),

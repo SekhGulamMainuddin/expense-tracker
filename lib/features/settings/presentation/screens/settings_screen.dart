@@ -284,7 +284,7 @@ class SettingsScreen extends StatelessWidget {
               size: 24.r,
               color: cs.onSurfaceVariant,
             ),
-            onTap: () => context.showAppBottomSheet(
+            onTap: () => context.parentContext.showAppBottomSheet(
               title: 'settings.select_currency',
               customWidget: _CurrencySheet(
                 currentCurrencyCode: snapshot.baseCurrencyCode,
@@ -309,20 +309,20 @@ class SettingsScreen extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           SegmentedButton<ThemeMode>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: ThemeMode.system,
-                label: AppTextLabelMd('settings.theme_system'),
+                label: Text(context.tr('settings.theme_system')),
                 icon: Icon(Icons.brightness_auto, size: 18),
               ),
               ButtonSegment(
                 value: ThemeMode.light,
-                label: AppTextLabelMd('settings.theme_light'),
+                label: Text(context.tr('settings.theme_light')),
                 icon: Icon(Icons.light_mode, size: 18),
               ),
               ButtonSegment(
                 value: ThemeMode.dark,
-                label: AppTextLabelMd('settings.theme_dark'),
+                label: Text(context.tr('settings.theme_dark')),
                 icon: Icon(Icons.dark_mode, size: 18),
               ),
             ],
@@ -334,7 +334,9 @@ class SettingsScreen extends StatelessWidget {
               foregroundColor: cs.onSurface,
               selectedForegroundColor: cs.onPrimary,
               selectedBackgroundColor: cs.primary,
-              textStyle: context.theme.textTheme.labelMedium,
+              textStyle: context.theme.textTheme.labelMedium?.copyWith(
+                color: cs.onPrimary
+              ),
             ),
           ),
         ],
