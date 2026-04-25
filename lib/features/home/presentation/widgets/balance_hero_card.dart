@@ -82,35 +82,6 @@ class BalanceHeroCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 16.w),
-          SizedBox(
-            width: 92.r,
-            height: 92.r,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: utilization.clamp(0.0, 1.0),
-                  strokeWidth: 10.w,
-                  backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AppTextTitleMd(
-                      '${(utilization * 100).toStringAsFixed(0)}%',
-                      color: Colors.white,
-                    ),
-                    AppTextLabelSm(
-                      'used',
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

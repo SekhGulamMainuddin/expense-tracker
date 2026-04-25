@@ -10,6 +10,7 @@ import 'package:expense_tracker/features/add_expense/data/repositories/add_expen
 import 'package:expense_tracker/features/add_expense/domain/repositories/add_expense_repository.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/home/presentation/cubit/finance_cubit.dart';
+import 'package:expense_tracker/features/home/presentation/cubit/category_chart_cubit.dart';
 import 'package:expense_tracker/features/home/data/datasources/finance_local_data_source.dart';
 import 'package:expense_tracker/features/home/data/repositories/finance_repository_impl.dart';
 import 'package:expense_tracker/features/home/domain/repositories/finance_repository.dart';
@@ -128,6 +129,7 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<LoginCubit>(() => LoginCubit(getIt(), getIt()));
   getIt.registerFactory<AddExpenseCubit>(() => AddExpenseCubit(getIt()));
   getIt.registerLazySingleton<FinanceCubit>(() => FinanceCubit(getIt()));
+  getIt.registerFactory<CategoryChartCubit>(() => CategoryChartCubit(getIt()));
   getIt.registerLazySingleton<ProfileCubit>(() => ProfileCubit(getIt(), getIt()));
   getIt.registerFactory<DeleteAccountCubit>(() => DeleteAccountCubit(getIt()));
   getIt.registerLazySingleton<SettingsCubit>(() => SettingsCubit(getIt()));

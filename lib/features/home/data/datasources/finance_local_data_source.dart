@@ -6,6 +6,7 @@ import 'package:expense_tracker/core/utils/date_helper.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_category_breakdown.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
+import 'package:expense_tracker/features/home/domain/entities/time_range.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:rxdart/rxdart.dart';
@@ -19,19 +20,21 @@ class FinanceLocalDataSource {
   /// Watches expenses, categories, and settings tables.
   /// Three tables can fire simultaneously during a single mutation, so debounce
   /// to coalesce bursts into one dashboard recomputation.
-  Stream<FinanceSnapshot> watchDashboard() {
+  Stream<FinanceSnapshot> watchDashboard({TimeRange range = TimeRange.monthly}) {
     return Rx.merge<void>([
       _expenseDao.watchAllExpenses().map<void>((_) {}),
       _expenseDao.watchAllCategories().map<void>((_) {}),
       _settingsLocalDataSource.watchSettings(),
     ])
         .debounceTime(const Duration(milliseconds: 80))
-        .asyncMap((_) => loadDashboard());
+        .asyncMap((_) => loadDashboard(range: range));
   }
 
-  Future<FinanceSnapshot> loadDashboard() async {
+  Future<FinanceSnapshot> loadDashboard({TimeRange range = TimeRange.monthly}) async {
     final settings = await _settingsLocalDataSource.loadSettings();
     final now = DateTime.now();
+    
+    // Limits and spendings for the top card (always showing these stats)
     final dailySpent = await _expenseDao.getTotalExpense(
       DateHelper.startOfToday,
       now,
@@ -45,11 +48,15 @@ class FinanceLocalDataSource {
       now,
     );
     final monthlyComparison = await _expenseDao.getMonthlyComparison();
-    final recentExpenses = await _expenseDao.getRecentTransactions(8, 0);
-    final monthlyExpenses = await _expenseDao.getExpensesInRange(
-      DateHelper.startOfThisMonth,
-      now,
+    
+    // Fetch expenses for the specific range for the breakdown
+    final (rangeStart, rangeEnd) = _getDatesForRange(range, now);
+    final rangeExpenses = await _expenseDao.getExpensesInRange(
+      rangeStart,
+      rangeEnd,
     );
+
+    final recentExpenses = await _expenseDao.getRecentTransactions(8, 0);
 
     final categoryMap = _flattenCategories(settings.categories);
     final recentTransactions = recentExpenses
@@ -60,8 +67,9 @@ class FinanceLocalDataSource {
           ),
         )
         .toList();
+        
     final breakdown = _buildCategoryBreakdown(
-      monthlyExpenses: monthlyExpenses,
+      expenses: rangeExpenses,
       categories: categoryMap,
     );
 
@@ -77,7 +85,16 @@ class FinanceLocalDataSource {
       monthlyComparison: monthlyComparison,
       recentTransactions: recentTransactions,
       categoryBreakdown: breakdown,
+      timeRange: range,
     );
+  }
+
+  (DateTime, DateTime) _getDatesForRange(TimeRange range, DateTime now) {
+    return switch (range) {
+      TimeRange.daily => (DateHelper.startOfToday, now),
+      TimeRange.weekly => (DateHelper.startOfThisWeek, now),
+      TimeRange.monthly => (DateHelper.startOfThisMonth, now),
+    };
   }
 
   Map<int, SettingsCategory> _flattenCategories(List<SettingsCategory> roots) {
@@ -115,15 +132,15 @@ class FinanceLocalDataSource {
   }
 
   List<FinanceCategoryBreakdown> _buildCategoryBreakdown({
-    required List<Expense> monthlyExpenses,
+    required List<Expense> expenses,
     required Map<int, SettingsCategory> categories,
   }) {
-    if (monthlyExpenses.isEmpty) {
+    if (expenses.isEmpty) {
       return const [];
     }
 
     final totals = <int, double>{};
-    for (final expense in monthlyExpenses) {
+    for (final expense in expenses) {
       totals[expense.categoryId] = (totals[expense.categoryId] ?? 0) + expense.amount.abs();
     }
 
@@ -145,7 +162,7 @@ class FinanceLocalDataSource {
         amount: entry.value,
         percentage: entry.value / totalSpent,
       );
-    }).take(5).toList();
+    }).toList();
   }
 
   String _currencySymbol(String currencyCode) {

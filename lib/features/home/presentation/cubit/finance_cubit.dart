@@ -14,9 +14,8 @@ class FinanceCubit extends Cubit<FinanceState> {
   StreamSubscription<void>? _subscription;
 
   /// Subscribes to the reactive dashboard stream.
-  /// Every time an expense or category changes in the DB, the
-  /// dashboard is automatically recomputed and a new state is emitted.
   void _startWatching() {
+    _subscription?.cancel();
     emit(FinanceLoading());
     _subscription = _repository.watchDashboard().listen(
       (snapshot) {
@@ -28,8 +27,7 @@ class FinanceCubit extends Cubit<FinanceState> {
     );
   }
 
-  /// Manual refresh — useful for pull-to-refresh gesture.
-  /// Reloads from the one-time Future endpoint, then re-emits.
+  /// Manual refresh.
   Future<void> refresh() async {
     emit(FinanceLoading());
     final result = await _repository.loadDashboard();

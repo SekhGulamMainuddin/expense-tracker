@@ -10,12 +10,10 @@ class RecentTransactionsSection extends StatelessWidget {
     super.key,
     required this.snapshot,
     required this.currencySymbol,
-    required this.onSeeAll,
   });
 
   final FinanceSnapshot snapshot;
   final String currencySymbol;
-  final VoidCallback onSeeAll;
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +21,10 @@ class RecentTransactionsSection extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(24.r, 8.r, 24.r, 24.r),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const AppTextHeadlineSm('home.recent_payments'),
-              TextButton(
-                onPressed: onSeeAll,
-                child: const AppTextLabelMd('home.see_all'),
-              ),
-            ],
-          ),
+          const AppTextHeadlineSm('home.recent_payments'),
+
           SizedBox(height: 16.h),
           if (snapshot.recentTransactions.isEmpty)
             Container(

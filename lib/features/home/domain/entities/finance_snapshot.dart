@@ -1,5 +1,6 @@
 import 'finance_category_breakdown.dart';
 import 'finance_transaction.dart';
+import 'time_range.dart';
 
 class FinanceSnapshot {
   FinanceSnapshot({
@@ -14,6 +15,7 @@ class FinanceSnapshot {
     required this.monthlyComparison,
     required this.recentTransactions,
     required this.categoryBreakdown,
+    this.timeRange = TimeRange.monthly,
   });
 
   final String currencyCode;
@@ -27,6 +29,7 @@ class FinanceSnapshot {
   final double monthlyComparison;
   final List<FinanceTransaction> recentTransactions;
   final List<FinanceCategoryBreakdown> categoryBreakdown;
+  final TimeRange timeRange;
 
   double get monthlyBudgetRemaining => monthlyLimit - monthlySpent;
 
