@@ -120,9 +120,25 @@ class FinanceLocalDataSource {
   }) {
     final category = categories[expense.categoryId];
     final amount = expense.amount.abs();
+
+    String displayTitle = expense.title ?? '';
+    if (displayTitle.isEmpty) {
+      if (category != null) {
+        if (category.parentId != null && category.parentId != 0) {
+          final parent = categories[category.parentId!];
+          displayTitle =
+              parent != null ? '${parent.title} | ${category.title}' : category.title;
+        } else {
+          displayTitle = category.title;
+        }
+      } else {
+        displayTitle = 'Expense';
+      }
+    }
+
     return FinanceTransaction(
       id: expense.id,
-      title: expense.title ?? category?.title ?? 'Expense',
+      title: displayTitle,
       subtitle: _formatTransactionDate(expense.date),
       amount: amount,
       icon: category?.icon ?? 'more_horiz',

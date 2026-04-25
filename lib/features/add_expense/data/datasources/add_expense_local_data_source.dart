@@ -3,6 +3,8 @@ import 'package:expense_tracker/core/database/tables/expense_table.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 
+import '../../../../core/database/app_database.dart';
+
 class AddExpenseLocalDataSource {
   AddExpenseLocalDataSource(
     this._expenseDao,
@@ -16,6 +18,10 @@ class AddExpenseLocalDataSource {
     return _settingsLocalDataSource.loadSettings();
   }
 
+  Future<Expense?> getExpense(int id) {
+    return _expenseDao.getExpenseById(id);
+  }
+
   Future<void> addExpense({
     required double amount,
     String? title,
@@ -24,6 +30,24 @@ class AddExpenseLocalDataSource {
     DateTime? date,
   }) async {
     await _expenseDao.addExpense(
+      amount: amount,
+      title: title,
+      categoryId: categoryId,
+      currency: _currencyFromCode(currencyCode),
+      date: date,
+    );
+  }
+
+  Future<void> updateExpense({
+    required int id,
+    required double amount,
+    String? title,
+    required int categoryId,
+    required String currencyCode,
+    DateTime? date,
+  }) async {
+    await _expenseDao.updateExpenseValues(
+      id: id,
       amount: amount,
       title: title,
       categoryId: categoryId,

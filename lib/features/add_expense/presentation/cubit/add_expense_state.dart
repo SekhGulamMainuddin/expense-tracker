@@ -5,24 +5,32 @@ sealed class AddExpenseState {}
 
 final class AddExpenseLoading extends AddExpenseState {}
 
+enum AddExpenseMode { create, view, edit }
+
 final class AddExpenseLoaded extends AddExpenseState {
   AddExpenseLoaded({
     required this.settings,
     required this.amount,
-    required this.title,
+    this.title,
     required this.date,
     required this.selectedCategoryId,
     required this.selectedSubcategoryId,
+    this.mode = AddExpenseMode.create,
+    this.transactionId,
+    this.generatedTitle,
     this.isSubmitting = false,
     this.errorMessage,
   });
 
   final SettingsSnapshot settings;
   final String amount;
-  final String title;
+  final String? title;
   final DateTime date;
   final int selectedCategoryId;
   final int? selectedSubcategoryId;
+  final AddExpenseMode mode;
+  final int? transactionId;
+  final String? generatedTitle;
   final bool isSubmitting;
   final String? errorMessage;
 
@@ -46,6 +54,9 @@ final class AddExpenseLoaded extends AddExpenseState {
     DateTime? date,
     int? selectedCategoryId,
     int? selectedSubcategoryId,
+    AddExpenseMode? mode,
+    int? transactionId,
+    String? generatedTitle,
     bool clearSelectedSubcategoryId = false,
     bool? isSubmitting,
     String? errorMessage,
@@ -60,6 +71,9 @@ final class AddExpenseLoaded extends AddExpenseState {
       selectedSubcategoryId: clearSelectedSubcategoryId
           ? null
           : (selectedSubcategoryId ?? this.selectedSubcategoryId),
+      mode: mode ?? this.mode,
+      transactionId: transactionId ?? this.transactionId,
+      generatedTitle: generatedTitle ?? this.generatedTitle,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage:
           clearErrorMessage ? null : (errorMessage ?? this.errorMessage),

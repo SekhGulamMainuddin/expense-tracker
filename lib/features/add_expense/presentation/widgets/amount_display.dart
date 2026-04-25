@@ -13,10 +13,12 @@ class AmountDisplay extends StatelessWidget {
     super.key,
     required this.cubit,
     required this.controller,
+    this.enabled = true,
   });
 
   final AddExpenseCubit cubit;
   final TextEditingController controller;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -53,13 +55,14 @@ class AmountDisplay extends StatelessWidget {
                   IntrinsicWidth(
                     child: TextField(
                       controller: controller,
+                      enabled: enabled,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: AppTextStyles.displayMd(context).copyWith(
                         color: cs.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
-                      autofocus: true,
+                      autofocus: enabled,
                       onChanged: (val) {
                         cubit.updateAmount(val);
                       },

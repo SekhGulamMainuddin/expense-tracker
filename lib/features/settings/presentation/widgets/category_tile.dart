@@ -76,8 +76,18 @@ class CategoryTile extends StatelessWidget {
             subtitle: Text(
               '${category.children.length} Subcategories',
             ),
-            trailing: Icon(
-              isExpanded ? Icons.expand_less : Icons.expand_more,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit_outlined, size: 20.r, color: cs.onSurfaceVariant),
+                  onPressed: onEditCategory,
+                ),
+                Icon(
+                  isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: cs.onSurfaceVariant,
+                ),
+              ],
             ),
           ),
           if (isExpanded)
@@ -97,32 +107,38 @@ class CategoryTile extends StatelessWidget {
                       margin: EdgeInsets.only(bottom: 8.h),
                       child: ListTile(
                         dense: true,
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
                         leading: Builder(
                           builder: (context) {
                             final isCustom = child.icon.startsWith('custom:');
                             return Container(
-                              width: 44.r,
-                              height: 44.r,
+                              width: 36.r,
+                              height: 36.r,
                               decoration: BoxDecoration(
                                 color: isCustom ? Colors.transparent : Color(child.color).withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(12.r),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Center(
                                 child: AppIcon(
                                   child.icon,
                                   color: Color(child.color),
-                                  size: isCustom ? 44.r : 24.r,
+                                  size: isCustom ? 36.r : 20.r,
                                 ),
                               ),
                             );
                           },
                         ),
-                        title: Text(child.title),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, size: 20),
-                          onPressed: () => onDeleteSubcategory(child.id),
+                        title: Text(
+                          child.title,
+                          style: context.theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.edit_outlined,
+                          size: 18.r,
+                          color: cs.onSurfaceVariant,
                         ),
                         onTap: () => onEditSubcategory(child),
                       ),

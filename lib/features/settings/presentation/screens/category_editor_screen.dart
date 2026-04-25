@@ -97,6 +97,50 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
             ),
             onPressed: () => context.pop(false),
           ),
+          actions: [
+            if (isEditing)
+              IconButton(
+                icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Category'),
+                      content: const Text(
+                        'Are you sure you want to delete this category? This action cannot be undone.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: Text(
+                            'Delete',
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true) {
+                    setState(() => _isSubmitting = true);
+                    final success = await _settingsCubit.deleteCategory(
+                      widget.initialCategory!.id,
+                    );
+                    if (mounted) {
+                      setState(() => _isSubmitting = false);
+                      if (success) {
+                        context.pop(true);
+                      }
+                    }
+                  }
+                },
+              ),
+            SizedBox(width: 8.w),
+          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(

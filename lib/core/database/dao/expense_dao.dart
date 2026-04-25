@@ -166,6 +166,10 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 
   // --- 5. Add Expense (Safe Fallback) ---
 
+  Future<Expense?> getExpenseById(int id) {
+    return (select(expenses)..where((t) => t.id.equals(id))).getSingleOrNull();
+  }
+
   /// Adds an expense with fallback title logic and enum currency.
   Future<int> addExpense({
     required double amount,
@@ -176,11 +180,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   }) async {
     final expenseDate = date ?? DateTime.now();
 
-    // Null-Safe Lookup to handle title fallback
-    final cat = await (select(
-      categories,
-    )..where((t) => t.id.equals(categoryId))).getSingleOrNull();
-    final expenseTitle = title ?? cat?.title ?? "Expense";
+    final expenseTitle = title ?? "";
 
     return into(expenses).insert(
       ExpensesCompanion.insert(
@@ -191,5 +191,27 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
         currency: Value(currency),
       ),
     );
+  }
+
+  Future<bool> updateExpenseValues({
+    required int id,
+    required double amount,
+    String? title,
+    required int categoryId,
+    Currency currency = Currency.inr,
+    DateTime? date,
+  }) async {
+    final expenseDate = date ?? DateTime.now();
+    final expenseTitle = title ?? "";
+
+    return (update(expenses)..where((t) => t.id.equals(id))).write(
+      ExpensesCompanion(
+        title: Value(expenseTitle),
+        amount: Value(amount),
+        date: Value(expenseDate),
+        categoryId: Value(categoryId),
+        currency: Value(currency),
+      ),
+    ).then((value) => value > 0);
   }
 }

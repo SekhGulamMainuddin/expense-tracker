@@ -47,7 +47,13 @@ final class AppRouter {
           parentNavigatorKey: parentNavigatorKey,
           path: AddExpenseScreen.routeName,
           name: AddExpenseScreen.routeName,
-          builder: (context, state) => const AddExpenseScreen(),
+          builder: (context, state) {
+            final args = state.extra as AddExpenseArgs?;
+            return AddExpenseScreen(
+              transactionId: args?.transactionId,
+              mode: args?.mode,
+            );
+          },
         ),
         GoRoute(
           parentNavigatorKey: parentNavigatorKey,

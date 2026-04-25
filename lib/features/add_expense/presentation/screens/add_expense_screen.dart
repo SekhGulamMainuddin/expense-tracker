@@ -12,10 +12,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+class AddExpenseArgs {
+  const AddExpenseArgs({
+    this.transactionId,
+    this.mode,
+  });
+
+  final int? transactionId;
+  final AddExpenseMode? mode;
+}
+
 class AddExpenseScreen extends StatefulWidget {
   static const routeName = '/add-expense';
 
-  const AddExpenseScreen({super.key});
+  const AddExpenseScreen({
+    super.key,
+    this.transactionId,
+    this.mode,
+  });
+
+  final int? transactionId;
+  final AddExpenseMode? mode;
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -32,6 +49,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     _cubit = getIt<AddExpenseCubit>();
     _titleController = TextEditingController();
     _amountController = TextEditingController(text: '0');
+    _cubit.loadFormData(
+      transactionId: widget.transactionId,
+      mode: widget.mode,
+    );
   }
 
   @override
@@ -50,10 +71,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       bloc: _cubit,
       listener: (context, state) {
         if (state is AddExpenseLoaded) {
-          if (_titleController.text != state.title) {
+          final effectiveTitle = state.title ?? '';
+          if (_titleController.text != effectiveTitle) {
             _titleController.value = TextEditingValue(
-              text: state.title,
-              selection: TextSelection.collapsed(offset: state.title.length),
+              text: effectiveTitle,
+              selection: TextSelection.collapsed(offset: effectiveTitle.length),
             );
           }
           if (_amountController.text != state.amount) {
@@ -77,7 +99,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         final failureMessage =
             state is AddExpenseFailure ? state.message : null;
         final loaded = state is AddExpenseLoaded ? state : null;
-        final canSubmit = loaded != null && !loaded.isSubmitting;
+        final isViewMode = loaded?.mode == AddExpenseMode.view;
+        final canSubmit = loaded != null && !loaded.isSubmitting && !isViewMode;
+
+        String appBarTitle = 'add_expense.title_label';
+        if (loaded != null) {
+          appBarTitle = switch (loaded.mode) {
+            AddExpenseMode.create => 'add_expense.title_label',
+            AddExpenseMode.view => 'View Expense',
+            AddExpenseMode.edit => 'Edit Expense',
+          };
+        }
 
         return Scaffold(
           appBar: AppBar(
@@ -89,26 +121,32 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               onPressed: () => context.pop(false),
             ),
-            title: const AppTextHeadlineSm('add_expense.title_label'),
+            title: AppTextHeadlineSm(appBarTitle),
             centerTitle: true,
             actions: [
-              IconButton(
-                icon: loaded?.isSubmitting == true
-                    ? SizedBox(
-                        width: 18.r,
-                        height: 18.r,
-                        child: CircularProgressIndicator(
-                           strokeWidth: 2,
+              if (isViewMode)
+                IconButton(
+                  icon: Icon(Icons.edit_outlined, color: theme.colorScheme.primary),
+                  onPressed: () => _cubit.setMode(AddExpenseMode.edit),
+                )
+              else
+                IconButton(
+                  icon: loaded?.isSubmitting == true
+                      ? SizedBox(
+                          width: 18.r,
+                          height: 18.r,
+                          child: CircularProgressIndicator(
+                             strokeWidth: 2,
+                            color: theme.colorScheme.primary,
+                          ),
+                        )
+                      : Icon(
+                          Icons.check,
                           color: theme.colorScheme.primary,
+                          size: 24.r,
                         ),
-                      )
-                    : Icon(
-                        Icons.check,
-                        color: theme.colorScheme.primary,
-                        size: 24.r,
-                      ),
-                onPressed: canSubmit ? () => _cubit.submitExpense() : null,
-              ),
+                  onPressed: canSubmit ? () => _cubit.submitExpense() : null,
+                ),
             ],
           ),
           body: isLoading
@@ -116,7 +154,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               : isFailure
                   ? _LoadFailureView(
                       message: failureMessage!,
-                      onRetry: _cubit.loadFormData,
+                      onRetry: () => _cubit.loadFormData(
+                        transactionId: widget.transactionId,
+                        mode: widget.mode,
+                      ),
                     )
                   : loaded == null
                       ? const SizedBox.shrink()
@@ -134,18 +175,46 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               AmountDisplay(
                                 cubit: _cubit,
                                 controller: _amountController,
+                                enabled: !loaded.isSubmitting && !isViewMode,
                               ),
                               _ExpenseSummaryCard(state: loaded),
                               SizedBox(height: 20.h),
                               _ExpenseTitleField(
                                 controller: _titleController,
                                 cubit: _cubit,
-                                enabled: !loaded.isSubmitting,
+                                enabled: !loaded.isSubmitting && !isViewMode,
                               ),
+                              if ((loaded.title == null || loaded.title!.isEmpty) && loaded.generatedTitle != null) ...[
+                                SizedBox(height: 8.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.info_outline, size: 16.r, color: Colors.orange[800]),
+                                      SizedBox(width: 8.w),
+                                      Expanded(
+                                        child: Text(
+                                          'Title was not provided, using "${loaded.generatedTitle}" as default.',
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            color: Colors.orange[900],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               SizedBox(height: 20.h),
                               _ExpenseDateTile(
                                 date: loaded.date,
-                                onTap: loaded.isSubmitting
+                                onTap: (loaded.isSubmitting || isViewMode)
                                     ? null
                                     : () async {
                                         final picked = await showDatePicker(
@@ -163,7 +232,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               CategorySelector(
                                 rootCategories: loaded.rootCategories,
                                 selectedCategoryId: loaded.selectedCategoryId,
-                                onCategorySelected: loaded.isSubmitting
+                                onCategorySelected: (loaded.isSubmitting || isViewMode)
                                     ? null
                                     : _cubit.selectCategory,
                               ),
@@ -172,7 +241,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 subcategories: loaded.subcategories,
                                 selectedSubcategoryId:
                                     loaded.selectedSubcategoryId,
-                                onSubcategorySelected: loaded.isSubmitting
+                                onSubcategorySelected: (loaded.isSubmitting || isViewMode)
                                     ? null
                                     : _cubit.selectSubcategory,
                               ),
