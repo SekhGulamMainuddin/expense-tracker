@@ -4,6 +4,8 @@ import 'package:expense_tracker/features/settings/domain/entities/settings_snaps
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 
 import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
+import 'package:expense_tracker/core/domain/entities/app_theme.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 
 final class SettingsRepositoryImpl implements SettingsRepository {
   SettingsRepositoryImpl(this._localDataSource);
@@ -21,9 +23,9 @@ final class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  ResultVoid updateThemeMode(String mode) async {
+  ResultVoid updateThemeMode(AppTheme theme) async {
     try {
-      await _localDataSource.updateThemeMode(mode);
+      await _localDataSource.updateThemeMode(theme);
       return const Success(null);
     } catch (e) {
       return Error(DatabaseFailure(e.toString()));
@@ -31,9 +33,9 @@ final class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  ResultVoid updateBaseCurrency(String currencyCode) async {
+  ResultVoid updateBaseCurrency(Currency currency) async {
     try {
-      await _localDataSource.updateBaseCurrency(currencyCode);
+      await _localDataSource.updateBaseCurrency(currency);
       return const Success(null);
     } catch (e) {
       return Error(DatabaseFailure(e.toString()));

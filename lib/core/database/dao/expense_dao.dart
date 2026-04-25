@@ -133,6 +133,8 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     DateTime? startDate,
     DateTime? endDate,
     List<int>? categoryIds,
+    int? limit,
+    int? offset,
   }) {
     final query = select(expenses);
     if (startDate != null && endDate != null) {
@@ -150,6 +152,10 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     query.orderBy([
       (t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc),
     ]);
+
+    if (limit != null) {
+      query.limit(limit, offset: offset);
+    }
 
     return query.get();
   }

@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/seed/database_seeder.dart';
 import 'package:expense_tracker/core/styles/app_dimensions.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
@@ -69,6 +72,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 40.h),
                   const DriveIntegrationCard(),
                   SizedBox(height: 40.h),
+                  if(kDebugMode) ...[
+                    _seedDataButton(context),
+                    SizedBox(height: 16.h),
+                  ],
                   _signOutButton(context),
                   SizedBox(height: 16.h),
                   _dangerZone(context),
@@ -153,6 +160,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: context.theme.textTheme.labelSmall!.copyWith(height: 1.45),
         ),
       ],
+    );
+  }
+
+  Widget _seedDataButton(BuildContext context) {
+    final cs = context.theme.colorScheme;
+    return OutlinedButton.icon(
+      onPressed: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Seed Mock Data?'),
+            content: const Text(
+                'This will DELETE all current data and generate 3 years of mock transactions. Are you sure?'),
+            actions: [
+              TextButton(onPressed: () => context.pop(false), child: const Text('Cancel')),
+              TextButton(onPressed: () => context.pop(true), child: const Text('Seed')),
+            ],
+          ),
+        );
+
+        if (confirmed == true) {
+          if (!context.mounted) return;
+          
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(child: CircularProgressIndicator()),
+          );
+          
+          try {
+            await DatabaseSeeder.seed(getIt<AppDatabase>());
+            if (context.mounted) {
+              context.pop(); // Close loader
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Database seeded successfully!')),
+              );
+            }
+          } catch (e) {
+            print("SEKH BRO $e");
+            if (context.mounted) {
+              context.pop(); // Close loader
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Seeding failed: $e')),
+              );
+            }
+          }
+        }
+      },
+      icon: Icon(Icons.storage, size: 18.r),
+      label: AppTextBodyMd(
+        'Seed Mock Data',
+        style: context.theme.textTheme.bodyMedium!.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        color: cs.primary,
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: cs.primary,
+        side: BorderSide(color: cs.primary.withValues(alpha: 0.3)),
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.full),
+        minimumSize: Size(double.infinity, 56.h),
+      ),
     );
   }
 }

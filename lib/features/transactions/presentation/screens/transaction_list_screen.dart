@@ -25,8 +25,41 @@ class TransactionListScreen extends StatelessWidget {
   }
 }
 
-class _TransactionListContent extends StatelessWidget {
+class _TransactionListContent extends StatefulWidget {
   const _TransactionListContent();
+
+  @override
+  State<_TransactionListContent> createState() => _TransactionListContentState();
+}
+
+class _TransactionListContentState extends State<_TransactionListContent> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_isBottom) {
+      context.read<TransactionListCubit>().loadMore();
+    }
+  }
+
+  bool get _isBottom {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    return currentScroll >= (maxScroll * 0.9);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +108,18 @@ class _TransactionListContent extends StatelessWidget {
               _ActiveFiltersRow(state: state, cubit: cubit),
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
-                  itemCount: state.transactions.length,
+                  itemCount: state.hasMore 
+                      ? state.transactions.length + 1 
+                      : state.transactions.length,
                   itemBuilder: (context, index) {
+                    if (index >= state.transactions.length) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24.h),
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
                     return TransactionTile(
                       transaction: state.transactions[index],
                       currencySymbol: state.currencySymbol,
@@ -176,7 +218,6 @@ class _FilterBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.watch<TransactionListCubit>();
     final state = cubit.state;
-    final theme = context.theme;
 
     return Container(
       padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 0),
@@ -291,7 +332,6 @@ class _CategoryFilterTileState extends State<_CategoryFilterTile> {
     final cubit = context.read<TransactionListCubit>();
     final hasChildren = widget.category.children.isNotEmpty;
     
-    // Calculate tristate value
     final allIds = [widget.category.id, ...widget.category.children.map((c) => c.id)];
     final selectedCount = allIds.where((id) => widget.selectedIds.contains(id)).length;
     
@@ -301,7 +341,7 @@ class _CategoryFilterTileState extends State<_CategoryFilterTile> {
     } else if (selectedCount == 0) {
       triValue = false;
     } else {
-      triValue = null; // Indeterminate
+      triValue = null;
     }
 
     return Column(

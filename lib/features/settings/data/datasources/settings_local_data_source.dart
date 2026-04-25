@@ -2,10 +2,13 @@ import 'package:expense_tracker/core/database/dao/expense_dao.dart';
 import 'package:expense_tracker/core/database/dao/key_value_store_dao.dart';
 import 'package:expense_tracker/core/database/dao/custom_icon_dao.dart';
 import 'package:expense_tracker/core/database/app_database.dart';
+import 'package:expense_tracker/core/database/key_value_store_keys.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
-import 'package:flutter/material.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
+import 'package:expense_tracker/core/domain/entities/app_theme.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:drift/drift.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -26,15 +29,6 @@ class SettingsLocalDataSource {
         _customIconDao.watchAllCustomIcons(),
       ]);
 
-  static const _themeKey = 'themeMode';
-  static const _currencyKey = 'baseCurrency';
-  static const _dailyLimitKey = 'dailyLimit';
-  static const _weeklyLimitKey = 'weeklyLimit';
-  static const _monthlyLimitKey = 'monthlyLimit';
-  static const _safeThresholdKey = 'safeThreshold';
-  static const _cautionThresholdKey = 'cautionThreshold';
-  static const _dangerThresholdKey = 'dangerThreshold';
-
   Future<SettingsSnapshot> loadSettings() async {
     await _ensureSeedData();
 
@@ -52,20 +46,47 @@ class SettingsLocalDataSource {
 
     return SettingsSnapshot(
       themeMode: await _readThemeMode(),
-      baseCurrencyCode: await _keyValueStoreDao.getValue<String>(
-            _currencyKey,
-            defaultValue: 'inr',
-          ) ??
-          'inr',
-      dailyLimit: await _readDouble(_dailyLimitKey, 50),
-      weeklyLimit: await _readDouble(_weeklyLimitKey, 350),
-      monthlyLimit: await _readDouble(_monthlyLimitKey, 1500),
-      safeThreshold: await _readDouble(_safeThresholdKey, 5),
-      cautionThreshold: await _readDouble(_cautionThresholdKey, 5),
-      dangerThreshold: await _readDouble(_dangerThresholdKey, 10),
+      baseCurrencyCode: await _readPreference(AppPreferences.currency).then((c) => c.name),
+      dailyLimit: await _readPreference(AppPreferences.dailyLimit),
+      weeklyLimit: await _readPreference(AppPreferences.weeklyLimit),
+      monthlyLimit: await _readPreference(AppPreferences.monthlyLimit),
+      safeThreshold: await _readPreference(AppPreferences.safeThreshold),
+      cautionThreshold: await _readPreference(AppPreferences.cautionThreshold),
+      dangerThreshold: await _readPreference(AppPreferences.dangerThreshold),
       categories: categories,
       customIcons: customIcons,
     );
+  }
+
+  Future<T> _readPreference<T>(AppPreferenceKey<T> pref) async {
+    if (pref is AppPreferenceKey<double>) {
+      final val = await _keyValueStoreDao.getValue<num>(pref.key);
+      return (val?.toDouble() ?? pref.defaultValue) as T;
+    } else if (pref is AppPreferenceKey<Currency>) {
+      final val = await _keyValueStoreDao.getValue<String>(pref.key);
+      return (val != null ? Currency.fromCode(val) : pref.defaultValue) as T;
+    } else if (pref is AppPreferenceKey<AppTheme>) {
+      final val = await _keyValueStoreDao.getValue<String>(pref.key);
+      return (val != null ? AppTheme.fromString(val) : pref.defaultValue) as T;
+    }
+    
+    return await _keyValueStoreDao.getValue<T>(pref.key) ?? pref.defaultValue;
+  }
+
+  Future<void> updateThemeMode(AppTheme theme) {
+    return _keyValueStoreDao.setValue<String>(AppPreferences.theme.key, theme.name);
+  }
+
+  Future<void> updateBaseCurrency(Currency currency) {
+    return _keyValueStoreDao.setValue<String>(AppPreferences.currency.key, currency.name);
+  }
+
+  Future<void> updateBudgetLimit(String key, double value) {
+    return _keyValueStoreDao.setValue<double>(key, value);
+  }
+
+  Future<void> updateThreshold(String key, double value) {
+    return _keyValueStoreDao.setValue<double>(key, value);
   }
 
   Future<void> addCustomIcon({
@@ -90,22 +111,6 @@ class SettingsLocalDataSource {
                   ))
               .toList(),
         );
-  }
-
-  Future<void> updateThemeMode(String mode) {
-    return _keyValueStoreDao.setValue<String>(_themeKey, mode);
-  }
-
-  Future<void> updateBaseCurrency(String currencyCode) {
-    return _keyValueStoreDao.setValue<String>(_currencyKey, currencyCode);
-  }
-
-  Future<void> updateBudgetLimit(String key, double value) {
-    return _keyValueStoreDao.setValue<double>(key, value);
-  }
-
-  Future<void> updateThreshold(String key, double value) {
-    return _keyValueStoreDao.setValue<double>(key, value);
   }
 
   Future<void> addCategory({
@@ -251,20 +256,12 @@ class SettingsLocalDataSource {
   }
 
   Future<ThemeMode> _readThemeMode() async {
-    final themeMode = await _keyValueStoreDao.getValue<String>(
-      _themeKey,
-      defaultValue: 'system',
-    );
-    return switch (themeMode) {
-      'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+    final theme = await _readPreference(AppPreferences.theme);
+    return switch (theme) {
+      AppTheme.light => ThemeMode.light,
+      AppTheme.dark => ThemeMode.dark,
+      AppTheme.system => ThemeMode.system,
     };
-  }
-
-  Future<double> _readDouble(String key, double defaultValue) async {
-    final value = await _keyValueStoreDao.getValue<num>(key);
-    return value?.toDouble() ?? defaultValue;
   }
 
   Future<void> _deleteCategoryTree(int categoryId) async {
@@ -354,7 +351,6 @@ class SettingsLocalDataSource {
       parentId: c.parentId,
     )).toList();
 
-    // Roots are categories with no parent or parentId of 0
     return all.where((c) => c.parentId == null || c.parentId == 0).map((root) {
       return root.copyWith(
         children: all.where((c) => c.parentId == root.id).toList()

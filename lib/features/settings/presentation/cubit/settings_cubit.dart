@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:expense_tracker/core/error/result.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 import 'package:expense_tracker/features/settings/domain/repositories/settings_repository.dart';
+import 'package:expense_tracker/core/domain/entities/app_theme.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +25,12 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<bool> updateThemeMode(ThemeMode mode) async {
-    final result = await _repository.updateThemeMode(_themeModeKey(mode));
+    final appTheme = switch (mode) {
+      ThemeMode.light => AppTheme.light,
+      ThemeMode.dark => AppTheme.dark,
+      ThemeMode.system => AppTheme.system,
+    };
+    final result = await _repository.updateThemeMode(appTheme);
     return _applyMutationResult(
       result,
       onSuccess: () async {
@@ -34,7 +41,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   }
 
   Future<bool> updateBaseCurrency(String currencyCode) async {
-    final result = await _repository.updateBaseCurrency(currencyCode);
+    final currency = Currency.fromCode(currencyCode);
+    final result = await _repository.updateBaseCurrency(currency);
     return _applyMutationResult(
       result,
       onSuccess: () async {
@@ -232,11 +240,4 @@ class SettingsCubit extends Cubit<SettingsState> {
     throw StateError('Settings must be loaded before updating values.');
   }
 
-  String _themeModeKey(ThemeMode mode) {
-    return switch (mode) {
-      ThemeMode.light => 'light',
-      ThemeMode.dark => 'dark',
-      ThemeMode.system => 'system',
-    };
-  }
 }

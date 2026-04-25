@@ -22,6 +22,8 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   final FinanceLocalDataSource _financeDataSource;
   final SettingsLocalDataSource _settingsDataSource;
 
+  static const int _pageSize = 20;
+
   Future<void> _init() async {
     final settings = await _settingsDataSource.loadSettings();
     final symbol = Currency.fromCode(settings.baseCurrencyCode).symbol;
@@ -35,27 +37,65 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   }
 
   Future<void> fetchTransactions() async {
-    emit(state.copyWith(isLoading: true, clearErrorMessage: true));
+    emit(state.copyWith(
+      isLoading: true, 
+      clearErrorMessage: true,
+      page: 1,
+      hasMore: true,
+    ));
     
     try {
       final (start, end) = _getDateRange();
-      
-      // If a parent category is selected, we should include all its children IDs
       final categoryIdsToQuery = _getExpandedCategoryIds();
 
       final transactions = await _financeDataSource.getTransactions(
         startDate: start,
         endDate: end,
         categoryIds: categoryIdsToQuery,
+        limit: _pageSize,
+        offset: 0,
       );
 
       emit(state.copyWith(
         transactions: transactions,
         isLoading: false,
+        hasMore: transactions.length == _pageSize,
       ));
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
+        errorMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoading || state.isLoadingMore || !state.hasMore) return;
+
+    emit(state.copyWith(isLoadingMore: true));
+
+    try {
+      final (start, end) = _getDateRange();
+      final categoryIdsToQuery = _getExpandedCategoryIds();
+      final nextPage = state.page + 1;
+
+      final moreTransactions = await _financeDataSource.getTransactions(
+        startDate: start,
+        endDate: end,
+        categoryIds: categoryIdsToQuery,
+        limit: _pageSize,
+        offset: state.transactions.length,
+      );
+
+      emit(state.copyWith(
+        transactions: [...state.transactions, ...moreTransactions],
+        isLoadingMore: false,
+        page: nextPage,
+        hasMore: moreTransactions.length == _pageSize,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoadingMore: false,
         errorMessage: e.toString(),
       ));
     }
@@ -67,7 +107,6 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     final expanded = <int>{};
     for (final id in state.selectedCategoryIds) {
       expanded.add(id);
-      // Check if this is a parent category in our list
       final parent = _findCategory(state.categories, id);
       if (parent != null) {
         for (final child in parent.children) {
@@ -112,9 +151,6 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     final newSelected = Set<int>.from(state.selectedCategoryIds);
     if (newSelected.contains(id)) {
       newSelected.remove(id);
-      
-      // If this is a child, and it was the last one, should we remove parent?
-      // Actually, let's look for the parent of this ID
       final parent = _findParentOf(state.categories, id);
       if (parent != null) {
         final allChildrenIds = parent.children.map((c) => c.id).toSet();
@@ -125,8 +161,6 @@ class TransactionListCubit extends Cubit<TransactionListState> {
       }
     } else {
       newSelected.add(id);
-      
-      // If this is a child, and now ALL children are selected, should we add parent?
       final parent = _findParentOf(state.categories, id);
       if (parent != null) {
         final allChildrenIds = parent.children.map((c) => c.id).toSet();
@@ -155,12 +189,10 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     final selectedCount = allIds.where((id) => newSelected.contains(id)).length;
 
     if (selectedCount == allIds.length) {
-      // All selected, so unselect all
       for (final id in allIds) {
         newSelected.remove(id);
       }
     } else {
-      // None or some selected, so select all
       for (final id in allIds) {
         newSelected.add(id);
       }
@@ -173,9 +205,5 @@ class TransactionListCubit extends Cubit<TransactionListState> {
   void clearCategories() {
     emit(state.copyWith(selectedCategoryIds: const {}));
     fetchTransactions();
-  }
-
-  String _currencySymbol(String currencyCode) {
-    return Currency.fromCode(currencyCode).symbol;
   }
 }

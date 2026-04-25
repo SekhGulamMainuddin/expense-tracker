@@ -93,6 +93,8 @@ class FinanceLocalDataSource {
     DateTime? startDate,
     DateTime? endDate,
     List<int>? categoryIds,
+    int? limit,
+    int? offset,
   }) async {
     final settings = await _settingsLocalDataSource.loadSettings();
     final categoryMap = _flattenCategories(settings.categories);
@@ -101,6 +103,8 @@ class FinanceLocalDataSource {
       startDate: startDate,
       endDate: endDate,
       categoryIds: categoryIds,
+      limit: limit,
+      offset: offset,
     );
 
     return expenses
