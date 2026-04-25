@@ -10,10 +10,8 @@ import 'package:iconify_flutter/icons/ri.dart';
 import 'package:iconify_flutter/icons/tabler.dart';
 import 'package:remixicon/remixicon.dart';
 
-typedef AppIconBuilder = Widget Function({
-  required Color color,
-  required double size,
-});
+typedef AppIconBuilder =
+    Widget Function({required Color color, required double size});
 
 class AppIconCatalog {
   static const allPackId = 'all';
@@ -59,22 +57,42 @@ class AppIconCatalog {
     _material('wallet', Icons.wallet, aliases: ['money', 'cash']),
     _material('credit_card', Icons.credit_card, aliases: ['card', 'payment']),
     _material('payments', Icons.payments, aliases: ['pay']),
-    _material('savings', Icons.savings, aliases: ['save', 'bank']),
+    _material('savings', Icons.savings, aliases: ['savings', 'bank']),
     _material('shopping_bag', Icons.shopping_bag, aliases: ['shop', 'store']),
     _material('shopping_cart', Icons.shopping_cart, aliases: ['cart', 'buy']),
-    _material('receipt_long', Icons.receipt_long, aliases: ['receipt', 'invoice']),
+    _material(
+      'receipt_long',
+      Icons.receipt_long,
+      aliases: ['receipt', 'invoice'],
+    ),
     _material('restaurant', Icons.restaurant, aliases: ['food', 'dining']),
     _material('flight', Icons.flight, aliases: ['travel', 'airplane']),
-    _material('directions_car', Icons.directions_car, aliases: ['car', 'vehicle']),
-    _material('local_shipping', Icons.local_shipping, aliases: ['truck', 'delivery']),
+    _material(
+      'directions_car',
+      Icons.directions_car,
+      aliases: ['car', 'vehicle'],
+    ),
+    _material(
+      'local_shipping',
+      Icons.local_shipping,
+      aliases: ['truck', 'delivery'],
+    ),
     _material('work', Icons.work, aliases: ['briefcase', 'office']),
     _material('school', Icons.school, aliases: ['education', 'study']),
     _material('settings', Icons.settings, aliases: ['gear']),
-    _material('health_and_safety', Icons.health_and_safety, aliases: ['health', 'medical']),
+    _material(
+      'health_and_safety',
+      Icons.health_and_safety,
+      aliases: ['health', 'medical'],
+    ),
     _material('camera', Icons.camera, aliases: ['photo']),
     _material('phone', Icons.phone, aliases: ['call', 'mobile']),
     _material('gift', Icons.card_giftcard, aliases: ['present', 'gift']),
-    _material('calendar_month', Icons.calendar_month, aliases: ['date', 'schedule']),
+    _material(
+      'calendar_month',
+      Icons.calendar_month,
+      aliases: ['date', 'schedule'],
+    ),
     _material('more_time', Icons.more_time, aliases: ['clock', 'time']),
     _material('bolt', Icons.bolt, aliases: ['energy', 'electric']),
     _material('wifi', Icons.wifi, aliases: ['internet', 'connection']),
@@ -91,56 +109,212 @@ class AppIconCatalog {
     _material('checkroom', Icons.checkroom, aliases: ['clothes']),
     _material('more_horiz', Icons.more_horiz, aliases: ['more']),
     // Remix (from package)
-    _remixPackage('bank', Remix.bank_line, aliases: ['finance', 'money', 'business']),
-    _remixPackage('wallet', Remix.wallet_3_line, aliases: ['money', 'cash', 'budget']),
-    _remixPackage('shopping_bag', Remix.shopping_bag_3_line, aliases: ['shop', 'store', 'buying']),
-    _remixPackage('shopping_cart', Remix.shopping_cart_2_line, aliases: ['buy', 'ecommerce']),
-    _remixPackage('restaurant', Remix.restaurant_2_line, aliases: ['food', 'dining', 'eat']),
+    _remixPackage(
+      'bank',
+      Remix.bank_line,
+      aliases: ['finance', 'money', 'business'],
+    ),
+    _remixPackage(
+      'wallet',
+      Remix.wallet_3_line,
+      aliases: ['money', 'cash', 'budget'],
+    ),
+    _remixPackage(
+      'shopping_bag',
+      Remix.shopping_bag_3_line,
+      aliases: ['shop', 'store', 'buying'],
+    ),
+    _remixPackage(
+      'shopping_cart',
+      Remix.shopping_cart_2_line,
+      aliases: ['buy', 'ecommerce'],
+    ),
+    _remixPackage(
+      'restaurant',
+      Remix.restaurant_2_line,
+      aliases: ['food', 'dining', 'eat'],
+    ),
     _remixPackage('cup', Remix.cup_line, aliases: ['coffee', 'tea', 'drink']),
-    _remixPackage('cake', Remix.cake_3_line, aliases: ['dessert', 'food', 'bakery']),
-    _remixPackage('flight', Remix.flight_takeoff_line, aliases: ['travel', 'airplane', 'holiday']),
-    _remixPackage('car', Remix.car_line, aliases: ['vehicle', 'transport', 'drive']),
-    _remixPackage('heart_pulse', Remix.heart_pulse_line, aliases: ['fitness', 'gym', 'health', 'sport']),
+    _remixPackage(
+      'cake',
+      Remix.cake_3_line,
+      aliases: ['dessert', 'food', 'bakery'],
+    ),
+    _remixPackage(
+      'flight',
+      Remix.flight_takeoff_line,
+      aliases: ['travel', 'airplane', 'holiday'],
+    ),
+    _remixPackage(
+      'car',
+      Remix.car_line,
+      aliases: ['vehicle', 'transport', 'drive'],
+    ),
+    _remixPackage(
+      'heart_pulse',
+      Remix.heart_pulse_line,
+      aliases: ['fitness', 'gym', 'health', 'sport'],
+    ),
     _remixPackage('bus', Remix.bus_line, aliases: ['transport', 'public']),
     _remixPackage('bike', Remix.bike_line, aliases: ['transport', 'exercise']),
-    _remixPackage('gas_station', Remix.gas_station_line, aliases: ['fuel', 'oil', 'car']),
-    _remixPackage('home', Remix.home_4_line, aliases: ['house', 'rent', 'mortgage']),
-    _remixPackage('lightbulb', Remix.lightbulb_line, aliases: ['electric', 'energy', 'idea']),
-    _remixPackage('water', Remix.water_flash_line, aliases: ['utility', 'bill']),
-    _remixPackage('router', Remix.router_line, aliases: ['internet', 'wifi', 'utility']),
-    _remixPackage('phone', Remix.smartphone_line, aliases: ['call', 'mobile', 'bill']),
-    _remixPackage('hospital', Remix.hospital_line, aliases: ['health', 'medical', 'doctor']),
-    _remixPackage('capsule', Remix.capsule_line, aliases: ['medicine', 'health']),
-    _remixPackage('basketball', Remix.basketball_line, aliases: ['sport', 'play']),
+    _remixPackage(
+      'gas_station',
+      Remix.gas_station_line,
+      aliases: ['fuel', 'oil', 'car'],
+    ),
+    _remixPackage(
+      'home',
+      Remix.home_4_line,
+      aliases: ['house', 'rent', 'mortgage'],
+    ),
+    _remixPackage(
+      'lightbulb',
+      Remix.lightbulb_line,
+      aliases: ['electric', 'energy', 'idea'],
+    ),
+    _remixPackage(
+      'water',
+      Remix.water_flash_line,
+      aliases: ['utility', 'bill'],
+    ),
+    _remixPackage(
+      'router',
+      Remix.router_line,
+      aliases: ['internet', 'wifi', 'utility'],
+    ),
+    _remixPackage(
+      'phone',
+      Remix.smartphone_line,
+      aliases: ['call', 'mobile', 'bill'],
+    ),
+    _remixPackage(
+      'hospital',
+      Remix.hospital_line,
+      aliases: ['health', 'medical', 'doctor'],
+    ),
+    _remixPackage(
+      'capsule',
+      Remix.capsule_line,
+      aliases: ['medicine', 'health'],
+    ),
+    _remixPackage(
+      'basketball',
+      Remix.basketball_line,
+      aliases: ['sport', 'play'],
+    ),
     _remixPackage('football', Remix.football_line, aliases: ['sport', 'play']),
-    _remixPackage('gamepad', Remix.gamepad_line, aliases: ['play', 'entertainment', 'gaming']),
-    _remixPackage('movie', Remix.movie_2_line, aliases: ['entertainment', 'cinema', 'theatre']),
-    _remixPackage('music', Remix.music_2_line, aliases: ['song', 'audio', 'entertainment']),
-    _remixPackage('book', Remix.book_3_line, aliases: ['education', 'read', 'study']),
-    _remixPackage('graduation', Remix.graduation_cap_line, aliases: ['education', 'school']),
-    _remixPackage('briefcase', Remix.briefcase_4_line, aliases: ['work', 'job', 'business']),
-    _remixPackage('handbag', Remix.handbag_line, aliases: ['clothes', 'fashion', 'luxury']),
-    _remixPackage('t_shirt', Remix.t_shirt_2_line, aliases: ['clothes', 'fashion']),
-    _remixPackage('gift', Remix.gift_line, aliases: ['present', 'reward', 'bonus']),
-    _remixPackage('heart', Remix.heart_line, aliases: ['love', 'like', 'health']),
+    _remixPackage(
+      'gamepad',
+      Remix.gamepad_line,
+      aliases: ['play', 'entertainment', 'gaming'],
+    ),
+    _remixPackage(
+      'movie',
+      Remix.movie_2_line,
+      aliases: ['entertainment', 'cinema', 'theatre'],
+    ),
+    _remixPackage(
+      'music',
+      Remix.music_2_line,
+      aliases: ['song', 'audio', 'entertainment'],
+    ),
+    _remixPackage(
+      'book',
+      Remix.book_3_line,
+      aliases: ['education', 'read', 'study'],
+    ),
+    _remixPackage(
+      'graduation',
+      Remix.graduation_cap_line,
+      aliases: ['education', 'school'],
+    ),
+    _remixPackage(
+      'briefcase',
+      Remix.briefcase_4_line,
+      aliases: ['work', 'job', 'business'],
+    ),
+    _remixPackage(
+      'handbag',
+      Remix.handbag_line,
+      aliases: ['clothes', 'fashion', 'luxury'],
+    ),
+    _remixPackage(
+      't_shirt',
+      Remix.t_shirt_2_line,
+      aliases: ['clothes', 'fashion'],
+    ),
+    _remixPackage(
+      'gift',
+      Remix.gift_line,
+      aliases: ['present', 'reward', 'bonus'],
+    ),
+    _remixPackage(
+      'heart',
+      Remix.heart_line,
+      aliases: ['love', 'like', 'health'],
+    ),
     _remixPackage('star', Remix.star_line, aliases: ['favorite', 'rating']),
     _remixPackage('flag', Remix.flag_line, aliases: ['goal', 'target']),
-    _remixPackage('notification', Remix.notification_3_line, aliases: ['bell', 'alarm']),
-    _remixPackage('coupon', Remix.coupon_3_line, aliases: ['discount', 'offer', 'voucher']),
+    _remixPackage(
+      'notification',
+      Remix.notification_3_line,
+      aliases: ['bell', 'alarm'],
+    ),
+    _remixPackage(
+      'coupon',
+      Remix.coupon_3_line,
+      aliases: ['discount', 'offer', 'voucher'],
+    ),
     _remixPackage('refund', Remix.refund_2_line, aliases: ['money', 'return']),
-    _remixPackage('exchange', Remix.exchange_funds_line, aliases: ['transfer', 'money']),
-    _remixPackage('stock', Remix.stock_line, aliases: ['invest', 'trading', 'profit']),
-    _remixPackage('coin', Remix.coin_line, aliases: ['money', 'cash', 'crypto']),
-    _remixPackage('savings', Remix.safe_2_line, aliases: ['bank', 'vault', 'save']),
-    _remixPackage('government', Remix.government_line, aliases: ['tax', 'legal', 'official']),
-    _remixPackage('hammer', Remix.hammer_line, aliases: ['tool', 'repair', 'maintenance']),
-    _remixPackage('paint_brush', Remix.paint_brush_line, aliases: ['art', 'decoration', 'hobby']),
-    _remixPackage('microscope', Remix.microscope_line, aliases: ['science', 'research']),
+    _remixPackage(
+      'exchange',
+      Remix.exchange_funds_line,
+      aliases: ['transfer', 'money'],
+    ),
+    _remixPackage(
+      'stock',
+      Remix.stock_line,
+      aliases: ['invest', 'trading', 'profit'],
+    ),
+    _remixPackage(
+      'coin',
+      Remix.coin_line,
+      aliases: ['money', 'cash', 'crypto'],
+    ),
+    _remixPackage(
+      'savings',
+      Remix.safe_2_line,
+      aliases: ['bank', 'vault', 'savings'],
+    ),
+    _remixPackage(
+      'government',
+      Remix.government_line,
+      aliases: ['tax', 'legal', 'official'],
+    ),
+    _remixPackage(
+      'hammer',
+      Remix.hammer_line,
+      aliases: ['tool', 'repair', 'maintenance'],
+    ),
+    _remixPackage(
+      'paint_brush',
+      Remix.paint_brush_line,
+      aliases: ['art', 'decoration', 'hobby'],
+    ),
+    _remixPackage(
+      'microscope',
+      Remix.microscope_line,
+      aliases: ['science', 'research'],
+    ),
     _remixPackage('cpu', Remix.cpu_line, aliases: ['tech', 'hardware']),
     _remixPackage('cloud', Remix.cloud_line, aliases: ['weather', 'storage']),
     _remixPackage('sun', Remix.sun_line, aliases: ['weather', 'day']),
     _remixPackage('moon', Remix.moon_line, aliases: ['weather', 'night']),
-    _remixPackage('leaf', Remix.leaf_line, aliases: ['nature', 'eco', 'garden']),
+    _remixPackage(
+      'leaf',
+      Remix.leaf_line,
+      aliases: ['nature', 'eco', 'garden'],
+    ),
     _remixPackage('cat', Remix.footprint_line, aliases: ['pet', 'animal']),
     // Remix (Iconify legacy)
     _remix('bank_fill', Ri.bank_fill, aliases: ['bank', 'finance']),
@@ -158,7 +332,11 @@ class AppIconCatalog {
     _remix('wallet_fill', Ri.wallet_fill, aliases: ['money']),
     _remix('bill_fill', Ri.bill_fill, aliases: ['receipt', 'invoice']),
     _remix('bank_card_line', Ri.bank_card_line, aliases: ['card', 'payment']),
-    _remix('flight_takeoff_fill', Ri.flight_takeoff_fill, aliases: ['travel', 'airplane']),
+    _remix(
+      'flight_takeoff_fill',
+      Ri.flight_takeoff_fill,
+      aliases: ['travel', 'airplane'],
+    ),
     // Tabler
     _tabler('calendar', Tabler.calendar, aliases: ['date', 'schedule']),
     _tabler('camera', Tabler.camera, aliases: ['photo']),
@@ -189,25 +367,53 @@ class AppIconCatalog {
     _heroOutline('banknotes', HeroiconsOutline.banknotes, aliases: ['cash']),
     _heroOutline('calendar', HeroiconsOutline.calendar, aliases: ['date']),
     _heroOutline('camera', HeroiconsOutline.camera, aliases: ['photo']),
-    _heroOutline('credit_card', HeroiconsOutline.credit_card, aliases: ['card', 'payment']),
+    _heroOutline(
+      'credit_card',
+      HeroiconsOutline.credit_card,
+      aliases: ['card', 'payment'],
+    ),
     _heroOutline('gift', HeroiconsOutline.gift, aliases: ['present']),
     _heroOutline('home', HeroiconsOutline.home, aliases: ['house']),
     _heroOutline('phone', HeroiconsOutline.phone, aliases: ['call']),
-    _heroOutline('receipt_percent', HeroiconsOutline.receipt_percent, aliases: ['receipt', 'discount']),
-    _heroOutline('receipt_refund', HeroiconsOutline.receipt_refund, aliases: ['invoice']),
-    _heroOutline('shopping_bag', HeroiconsOutline.shopping_bag, aliases: ['shop']),
-    _heroOutline('shopping_cart', HeroiconsOutline.shopping_cart, aliases: ['cart']),
+    _heroOutline(
+      'receipt_percent',
+      HeroiconsOutline.receipt_percent,
+      aliases: ['receipt', 'discount'],
+    ),
+    _heroOutline(
+      'receipt_refund',
+      HeroiconsOutline.receipt_refund,
+      aliases: ['invoice'],
+    ),
+    _heroOutline(
+      'shopping_bag',
+      HeroiconsOutline.shopping_bag,
+      aliases: ['shop'],
+    ),
+    _heroOutline(
+      'shopping_cart',
+      HeroiconsOutline.shopping_cart,
+      aliases: ['cart'],
+    ),
     _heroOutline('truck', HeroiconsOutline.truck, aliases: ['delivery']),
     // Heroicons solid
     _heroSolid('banknotes', HeroiconsSolid.banknotes, aliases: ['cash']),
     _heroSolid('calendar', HeroiconsSolid.calendar, aliases: ['date']),
     _heroSolid('camera', HeroiconsSolid.camera, aliases: ['photo']),
-    _heroSolid('credit_card', HeroiconsSolid.credit_card, aliases: ['card', 'payment']),
+    _heroSolid(
+      'credit_card',
+      HeroiconsSolid.credit_card,
+      aliases: ['card', 'payment'],
+    ),
     _heroSolid('gift', HeroiconsSolid.gift, aliases: ['present']),
     _heroSolid('home', HeroiconsSolid.home, aliases: ['house']),
     _heroSolid('phone', HeroiconsSolid.phone, aliases: ['call']),
     _heroSolid('shopping_bag', HeroiconsSolid.shopping_bag, aliases: ['shop']),
-    _heroSolid('shopping_cart', HeroiconsSolid.shopping_cart, aliases: ['cart']),
+    _heroSolid(
+      'shopping_cart',
+      HeroiconsSolid.shopping_cart,
+      aliases: ['cart'],
+    ),
     _heroSolid('truck', HeroiconsSolid.truck, aliases: ['delivery']),
     // Feather
     _feather('calendar', Feather.calendar, aliases: ['date']),
@@ -221,7 +427,11 @@ class AppIconCatalog {
     // Font Awesome solid
     _fontAwesome('home', FaSolid.home, aliases: ['house']),
     _fontAwesome('wallet', FaSolid.wallet, aliases: ['money', 'cash']),
-    _fontAwesome('credit_card', FaSolid.credit_card, aliases: ['card', 'payment']),
+    _fontAwesome(
+      'credit_card',
+      FaSolid.credit_card,
+      aliases: ['card', 'payment'],
+    ),
     _fontAwesome('receipt', FaSolid.receipt, aliases: ['invoice']),
     _fontAwesome('shopping_bag', FaSolid.shopping_bag, aliases: ['shop']),
     _fontAwesome('shopping_cart', FaSolid.shopping_cart, aliases: ['cart']),
@@ -232,8 +442,11 @@ class AppIconCatalog {
     _fontAwesome('gift', FaSolid.gift, aliases: ['present']),
     _fontAwesome('phone', FaSolid.phone, aliases: ['call']),
     _fontAwesome('money_bill', FaSolid.money_bill, aliases: ['cash']),
-    _fontAwesome('money_check', FaSolid.money_check, aliases: ['cash', 'payment']),
-
+    _fontAwesome(
+      'money_check',
+      FaSolid.money_check,
+      aliases: ['cash', 'payment'],
+    ),
   ];
 
   static Widget render(
@@ -255,7 +468,8 @@ class AppIconCatalog {
   }) {
     final normalizedKey = normalizeKey(key);
     for (final option in options) {
-      if (option.storageKey == normalizedKey || option.legacyKey == normalizedKey) {
+      if (option.storageKey == normalizedKey ||
+          option.legacyKey == normalizedKey) {
         return option;
       }
     }
@@ -277,22 +491,25 @@ class AppIconCatalog {
     List<CustomIconEntity> customIcons = const [],
   }) {
     final normalizedQuery = _normalize(query);
-    final results = options.where((option) {
-      final matchesPack = packId == allPackId || option.packId == packId;
-      if (!matchesPack) {
-        return false;
-      }
-      if (normalizedQuery.isEmpty) {
-        return true;
-      }
-      return option.searchIndex.contains(normalizedQuery);
-    }).toList(growable: true);
+    final results = options
+        .where((option) {
+          final matchesPack = packId == allPackId || option.packId == packId;
+          if (!matchesPack) {
+            return false;
+          }
+          if (normalizedQuery.isEmpty) {
+            return true;
+          }
+          return option.searchIndex.contains(normalizedQuery);
+        })
+        .toList(growable: true);
 
     // Add custom icons if applicable
     if (packId == allPackId || packId == customPackId) {
       for (final custom in customIcons) {
         final option = _custom(custom.name, custom.iconUrl);
-        if (normalizedQuery.isEmpty || option.searchIndex.contains(normalizedQuery)) {
+        if (normalizedQuery.isEmpty ||
+            option.searchIndex.contains(normalizedQuery)) {
           results.add(option);
         }
       }
@@ -331,7 +548,8 @@ class AppIconCatalog {
       packLabel: packLabel(materialPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Icon(icon, color: color, size: size),
+      build: ({required color, required size}) =>
+          Icon(icon, color: color, size: size),
     );
   }
 
@@ -345,7 +563,8 @@ class AppIconCatalog {
       packLabel: packLabel(remixPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Icon(icon, color: color, size: size),
+      build: ({required color, required size}) =>
+          Icon(icon, color: color, size: size),
     );
   }
 
@@ -386,11 +605,8 @@ class AppIconCatalog {
       packLabel: packLabel(remixPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -404,11 +620,8 @@ class AppIconCatalog {
       packLabel: packLabel(tablerPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -422,11 +635,8 @@ class AppIconCatalog {
       packLabel: packLabel(phosphorPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -440,11 +650,8 @@ class AppIconCatalog {
       packLabel: packLabel(heroiconsOutlinePackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -458,11 +665,8 @@ class AppIconCatalog {
       packLabel: packLabel(heroiconsSolidPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -476,11 +680,8 @@ class AppIconCatalog {
       packLabel: packLabel(featherPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 
@@ -494,20 +695,14 @@ class AppIconCatalog {
       packLabel: packLabel(fontAwesomeSolidPackId),
       iconName: name,
       aliases: aliases,
-      build: ({required color, required size}) => Iconify(
-        svg,
-        color: color,
-        size: size,
-      ),
+      build: ({required color, required size}) =>
+          Iconify(svg, color: color, size: size),
     );
   }
 }
 
 class IconPack {
-  const IconPack({
-    required this.id,
-    required this.label,
-  });
+  const IconPack({required this.id, required this.label});
 
   final String id;
   final String label;

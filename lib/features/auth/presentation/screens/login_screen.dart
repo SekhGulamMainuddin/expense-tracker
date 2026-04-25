@@ -67,8 +67,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               if (state is LoginSyncing) ...[
                                 SizedBox(height: 16.h),
-                                AppTextLabelMd(
-                                  'Syncing Cloud Backup...',
+                                  AppTextLabelMd(
+                                    'auth.syncing',
                                   color: context.theme.colorScheme.onSurfaceVariant,
                                 ),
                               ],
@@ -149,12 +149,12 @@ class _AppIdentitySection extends StatelessWidget {
           ),
         ),
         SizedBox(height: 24.h),
-        const AppTextHeadlineSm('Expense Tracker', textAlign: TextAlign.center),
+        const AppTextHeadlineSm('app.title', textAlign: TextAlign.center),
         SizedBox(height: 12.h),
         SizedBox(
           width: 280.w,
           child: AppTextBodyMd(
-            'Experience the next generation of financial intelligence and asset management.',
+            'auth.tagline',
             textAlign: TextAlign.center,
             height: 1.5,
             color: cs.onSurfaceVariant,
@@ -201,7 +201,7 @@ class _GoogleSignInButton extends StatelessWidget {
             Assets.images.googleLogo.svg(height: 20.h),
             SizedBox(width: 12.w),
             AppTextBodyMd(
-              'Continue with Google',
+              'auth.google_signin',
               style: context.theme.textTheme.bodyMedium!.copyWith(
                 fontWeight: FontWeight.w600,
               ),

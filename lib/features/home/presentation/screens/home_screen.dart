@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            title: const AppTextTitleMd('My Finances'),
+            title: const AppTextTitleMd('home.title'),
             actions: [
               IconButton(
                 onPressed: openAddExpense,
@@ -106,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                       currencySymbol: snapshot.currencySymbol,
                       onSeeAll: () {
                         context.parentContext.showAppBottomSheet(
-                          title: 'Category Breakdown',
+                          title: 'home.breakdown_title',
                           isScrollControlled: true,
                           customWidget: _BreakdownSheet(snapshot: snapshot),
                         );
@@ -117,7 +117,7 @@ class HomeScreen extends StatelessWidget {
                       currencySymbol: snapshot.currencySymbol,
                       onSeeAll: () {
                         context.parentContext.showAppBottomSheet(
-                          title: 'Recent Transactions',
+                          title: 'home.transactions_title',
                           isScrollControlled: true,
                           customWidget: _TransactionsSheet(snapshot: snapshot),
                         );
@@ -158,7 +158,7 @@ class _HomeFailureView extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           AppTextHeadlineSm(
-            'Could not load dashboard',
+            'home.error_title',
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 8.h),
@@ -170,7 +170,7 @@ class _HomeFailureView extends StatelessWidget {
           SizedBox(height: 20.h),
           FilledButton(
             onPressed: onRetry,
-            child: const Text('Retry'),
+            child: const AppTextLabelMd('common.retry', uppercase: true),
           ),
         ],
       ),
@@ -214,7 +214,7 @@ class _BreakdownSheet extends StatelessWidget {
         height: 0.3.sh,
         child: Center(
           child: AppTextBodyMd(
-            'No category data yet',
+            'home.no_data',
             color: cs.onSurfaceVariant,
           ),
         ),
@@ -261,7 +261,7 @@ class _BreakdownTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 18.r,
-            backgroundColor: Color(item.color).withAlpha(36),
+            backgroundColor: Color(item.color).withValues(alpha: 0.14),
             child: AppIcon(
               item.icon,
               color: Color(item.color),

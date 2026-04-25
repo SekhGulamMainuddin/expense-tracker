@@ -28,10 +28,10 @@ class CategoryChartSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const AppTextHeadlineSm('Category Distribution'),
+               const AppTextHeadlineSm('home.chart_title'),
               TextButton(
                 onPressed: onSeeAll,
-                child: const Text('See All'),
+                child: const AppTextLabelMd('home.see_all'),
               ),
             ],
           ),
@@ -169,14 +169,14 @@ class _EmptyChartState extends StatelessWidget {
           Icon(Icons.pie_chart_outline, size: 56.r, color: cs.onSurfaceVariant),
           SizedBox(height: 12.h),
           AppTextBodyLg(
-            'No spending yet',
+            'home.no_spending',
             style: theme.textTheme.bodyLarge!.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           SizedBox(height: 6.h),
           AppTextBodyMd(
-            'Add your first expense to see category breakdowns here.',
+            'home.no_spending_desc',
             textAlign: TextAlign.center,
             color: cs.onSurfaceVariant,
           ),

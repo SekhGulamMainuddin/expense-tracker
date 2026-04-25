@@ -142,8 +142,8 @@ class SettingsLocalDataSource {
         .then((_) {});
   }
 
-  Future<void> deleteCategory(int id) {
-    return _deleteCategoryTree(id);
+  Future<void> deleteCategory(int id) async {
+    await _deleteCategoryTree(id);
   }
 
   Future<void> _ensureSeedData() async {
@@ -344,46 +344,22 @@ class SettingsLocalDataSource {
     return depth;
   }
 
-  List<SettingsCategory> _buildCategoryTree(List<dynamic> categories) {
-    final byId = <int, SettingsCategory>{};
-    for (final category in categories) {
-      byId[category.id] = SettingsCategory(
-        id: category.id,
-        title: category.title,
-        icon: category.icon,
-        color: category.color,
-        parentId: category.parentId,
+  List<SettingsCategory> _buildCategoryTree(List<dynamic> rawCategories) {
+    final categories = rawCategories.cast<Category>();
+    final all = categories.map((c) => SettingsCategory(
+      id: c.id,
+      title: c.title,
+      icon: c.icon,
+      color: c.color,
+      parentId: c.parentId,
+    )).toList();
+
+    // Roots are categories with no parent or parentId of 0
+    return all.where((c) => c.parentId == null || c.parentId == 0).map((root) {
+      return root.copyWith(
+        children: all.where((c) => c.parentId == root.id).toList()
+          ..sort((a, b) => a.title.compareTo(b.title)),
       );
-    }
-
-    final roots = <SettingsCategory>[];
-    for (final category in byId.values) {
-      final parentId = category.parentId;
-      if (parentId == null) {
-        roots.add(category);
-        continue;
-      }
-
-      final parent = byId[parentId];
-      if (parent == null) {
-        roots.add(category);
-        continue;
-      }
-
-      byId[parentId] = parent.copyWith(
-        children: [...parent.children, category],
-      );
-    }
-
-    SettingsCategory sortCategory(SettingsCategory category) {
-      final sortedChildren = [...category.children]
-        ..sort((a, b) => a.title.compareTo(b.title));
-      return category.copyWith(
-        children: sortedChildren.map(sortCategory).toList(),
-      );
-    }
-
-    final sortedRoots = [...roots]..sort((a, b) => a.title.compareTo(b.title));
-    return sortedRoots.map(sortCategory).toList();
+    }).toList()..sort((a, b) => a.title.compareTo(b.title));
   }
 }

@@ -27,10 +27,10 @@ class RecentTransactionsSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const AppTextHeadlineSm('Recent Payments'),
+              const AppTextHeadlineSm('home.recent_payments'),
               TextButton(
                 onPressed: onSeeAll,
-                child: const Text('See All'),
+                child: const AppTextLabelMd('home.see_all'),
               ),
             ],
           ),
@@ -52,14 +52,14 @@ class RecentTransactionsSection extends StatelessWidget {
                   ),
                   SizedBox(height: 12.h),
                   AppTextBodyLg(
-                    'No transactions yet',
+                    'home.no_transactions',
                     style: context.theme.textTheme.bodyLarge!.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   SizedBox(height: 6.h),
                   AppTextBodyMd(
-                    'Your latest expenses will appear here after you add them.',
+                    'home.no_transactions_desc',
                     textAlign: TextAlign.center,
                     color: cs.onSurfaceVariant,
                   ),

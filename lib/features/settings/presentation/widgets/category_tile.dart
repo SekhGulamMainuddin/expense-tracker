@@ -33,221 +33,108 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
     final categoryColor = Color(category.color);
-    final expansionColor =
-        isExpanded ? cs.surfaceContainerHighest : cs.surfaceContainer;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: isExpanded ? cs.surfaceContainerHighest : cs.surfaceContainer,
         borderRadius: BorderRadius.circular(12.r),
-        onTap: onToggleExpanded,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            color: expansionColor,
-            borderRadius: BorderRadius.circular(12.r),
+        border: Border(
+          left: BorderSide(color: categoryColor, width: 4.w),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            onTap: onToggleExpanded,
+            leading: Builder(
+              builder: (context) {
+                final isCustom = category.icon.startsWith('custom:');
+                return Container(
+                  width: 44.r,
+                  height: 44.r,
+                  decoration: BoxDecoration(
+                    color: isCustom ? Colors.transparent : categoryColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Center(
+                    child: AppIcon(
+                      category.icon,
+                      color: categoryColor,
+                      size: isCustom ? 44.r : 24.r,
+                    ),
+                  ),
+                );
+              },
+            ),
+            title: Text(
+              category.title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              '${category.children.length} Subcategories',
+            ),
+            trailing: Icon(
+              isExpanded ? Icons.expand_less : Icons.expand_more,
+            ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-          child: Stack(
-            children: [
-              // Category color indicator
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 4.w,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: categoryColor),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 4.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                        contentPadding: EdgeInsets.fromLTRB(
-                          12.w,
-                          12.h,
-                          12.w,
-                          isExpanded ? 8.h : 12.h,
-                        ),
+          if (isExpanded)
+            Container(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (category.children.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text('No subcategories found in this category.'),
+                    ),
+                  for (final child in category.children)
+                    Card(
+                      margin: EdgeInsets.only(bottom: 8.h),
+                      child: ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
                         leading: Builder(
                           builder: (context) {
-                            final isCustom = category.icon.startsWith('custom:');
+                            final isCustom = child.icon.startsWith('custom:');
                             return Container(
                               width: 44.r,
                               height: 44.r,
                               decoration: BoxDecoration(
-                                color: isCustom ? Colors.transparent : categoryColor.withValues(alpha: 0.12),
+                                color: isCustom ? Colors.transparent : Color(child.color).withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: Center(
                                 child: AppIcon(
-                                  category.icon,
-                                  color: categoryColor,
+                                  child.icon,
+                                  color: Color(child.color),
                                   size: isCustom ? 44.r : 24.r,
                                 ),
                               ),
                             );
                           },
                         ),
-                         title: AppAutoSizeTextBodyLg(
-                          category.title,
-                          style: context.theme.textTheme.bodyLarge!.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        title: Text(child.title),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, size: 20),
+                          onPressed: () => onDeleteSubcategory(child.id),
                         ),
-                        subtitle: Padding(
-                          padding: EdgeInsets.only(top: 4.h),
-                          child: AppTextBodyMd(
-                            '${category.children.length} Subcategories',
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _CategoryMenu(
-                              onEdit: onEditCategory,
-                              onAddSubcategory: onAddSubcategory,
-                              onDelete: onDeleteCategory,
-                            ),
-                            Icon(
-                              isExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
-                              color: cs.onSurfaceVariant,
-                              size: 24.r,
-                            ),
-                          ],
-                        ),
+                        onTap: () => onEditSubcategory(child),
                       ),
-                      if (isExpanded)
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (category.children.isEmpty)
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 12.h),
-                                  child: Container(
-                                    padding: EdgeInsets.all(12.r),
-                                    decoration: BoxDecoration(
-                                      color: cs.surfaceContainerLow,
-                                      borderRadius: BorderRadius.circular(12.r),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.info_outline, size: 16.r, color: cs.onSurfaceVariant),
-                                        SizedBox(width: 8.w),
-                                        Expanded(
-                                          child: AppTextLabelSm(
-                                            'This category has no subcategories yet.',
-                                            color: cs.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              else
-                                Padding(
-                                  padding: EdgeInsets.only(bottom: 12.h),
-                                  child: Wrap(
-                                    spacing: 8.w,
-                                    runSpacing: 10.h,
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    children: [
-                                      for (final child in category.children)
-                                        InputChip(
-                                          avatar: Builder(
-                                            builder: (context) {
-                                              final isCustom = child.icon.startsWith('custom:');
-                                              return CircleAvatar(
-                                                backgroundColor: isCustom 
-                                                    ? Colors.transparent 
-                                                    : Color(child.color).withValues(alpha: 0.16),
-                                                child: AppIcon(
-                                                  child.icon,
-                                                  size: isCustom ? 24.r : 14.r,
-                                                  color: Color(child.color),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          label: AppAutoSizeTextLabelSm(child.title),
-                                          deleteIcon: Icon(Icons.close, size: 14.r),
-                                          onPressed: () => onEditSubcategory(child),
-                                          onDeleted: () =>
-                                              onDeleteSubcategory(child.id),
-                                          backgroundColor: cs.surfaceContainerLow,
-                                          side: BorderSide.none,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(10.r),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              _AddSubcategoryButton(
-                                onTap: onAddSubcategory,
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
+                    ),
+                  SizedBox(height: 8.h),
+                  _AddSubcategoryButton(
+                    onTap: onAddSubcategory,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AddSubcategoryButton extends StatelessWidget {
-  const _AddSubcategoryButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = context.theme.colorScheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: CustomPaint(
-          painter: DashedRectPainter(
-            color: cs.outlineVariant,
-            strokeWidth: 1.2,
-            gap: 4.r,
-            borderRadius: 12.r,
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.add_circle_outline, size: 18.r, color: cs.primary),
-                SizedBox(width: 8.w),
-                AppTextLabelMd(
-                  'Add New Subcategory',
-                  color: cs.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ],
-            ),
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -274,10 +161,12 @@ class DashedRectPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     final Path path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Radius.circular(borderRadius),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          Radius.circular(borderRadius),
+        ),
+      );
 
     final Path dashedPath = Path();
     for (final PathMetric measure in path.computeMetrics()) {
@@ -331,19 +220,63 @@ class _CategoryMenu extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'edit',
-          child: Text('Edit Category'),
+          child: AppTextBodyMd('settings.edit_category'),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'add',
-          child: Text('Add Subcategory'),
+          child: AppTextBodyMd('settings.add_subcategory'),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
-          child: Text('Delete Category'),
+          child: AppTextBodyMd(
+            'settings.delete_category',
+            color: context.theme.colorScheme.error,
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _AddSubcategoryButton extends StatelessWidget {
+  const _AddSubcategoryButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.theme.colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: CustomPaint(
+          painter: DashedRectPainter(
+            color: cs.outlineVariant,
+            strokeWidth: 1.2,
+            gap: 4.r,
+            borderRadius: 12.r,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add_circle_outline, size: 18.r, color: cs.primary),
+                SizedBox(width: 8.w),
+                AppTextLabelMd(
+                  'settings.add_new_subcategory',
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,13 +1,105 @@
 {
-  "app.title": "Expense Tracker",
-  "overview.hero": "Track every rupee with clarity",
-  "overview.subtitle": "A clean starter dashboard is ready for budgets, categories, and transaction history.",
-  "overview.title": "Monthly spending snapshot",
-  "overview.body": "You are on track this month. Add transactions, budgets, and reports on top of this base architecture.",
-  "overview.cta": "Open starter notes",
-  "overview.sheet_title": "Starter notes",
-  "overview.sheet_body": "This project already includes MVVM plus Cubit structure, GoRouter navigation, shared overlays, ScreenUtil, localization, launcher icon tooling, and native splash tooling.",
-  "overview.error": "Unable to load your dashboard preview.",
-  "common.retry": "Retry",
-  "common.ok": "OK"
+  "app": {
+    "title": "Expense Tracker"
+  },
+  "common": {
+    "retry": "Retry",
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "usd": "US Dollar",
+    "inr": "Indian Rupee",
+    "eur": "Euro",
+    "months": {
+      "jan": "Jan",
+      "feb": "Feb",
+      "mar": "Mar",
+      "apr": "Apr",
+      "may": "May",
+      "jun": "Jun",
+      "jul": "Jul",
+      "aug": "Aug",
+      "sep": "Sep",
+      "oct": "Oct",
+      "nov": "Nov",
+      "dec": "Dec"
+    }
+  },
+  "overview": {
+    "hero": "Track every rupee with clarity",
+    "subtitle": "A clean starter dashboard is ready for budgets, categories, and transaction history.",
+    "title": "Monthly spending snapshot",
+    "body": "You are on track this month. Add transactions, budgets, and reports on top of this base architecture.",
+    "cta": "Open starter notes",
+    "sheet_title": "Starter notes",
+    "sheet_body": "This project already includes MVVM plus Cubit structure, GoRouter navigation, shared overlays, ScreenUtil, localization, launcher icon tooling, and native splash tooling.",
+    "error": "Unable to load your dashboard preview."
+  },
+  "home": {
+    "title": "My Finances",
+    "error_title": "Could not load dashboard",
+    "breakdown_title": "Category Breakdown",
+    "transactions_title": "Recent Transactions",
+    "chart_title": "Category Distribution",
+    "recent_payments": "Recent Payments",
+    "no_data": "No category data yet",
+    "see_all": "See All",
+    "no_spending": "No spending yet",
+    "no_spending_desc": "Add your first expense to see category breakdowns here.",
+    "no_transactions": "No transactions yet",
+    "no_transactions_desc": "Your latest expenses will appear here after you add them."
+  },
+  "settings": {
+    "title": "Settings",
+    "edit_category": "Edit Category",
+    "add_subcategory": "Add Subcategory",
+    "delete_category": "Delete Category",
+    "add_new_subcategory": "Add New Subcategory",
+    "no_subcategories": "This category has no subcategories yet.",
+    "subcategory_count": "{count} Subcategories",
+    "category_mgmt": "Category Management",
+    "budget_limits": "Budget Limits",
+    "preferences": "Global Preferences",
+    "base_currency": "Base Currency",
+    "select_currency": "Select Base Currency",
+    "app_theme": "App Theme",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "currency_usd": "US Dollar (USD)",
+    "currency_inr": "Indian Rupee (INR)",
+    "currency_eur": "Euro (EUR)",
+    "delete_title": "Delete category?",
+    "delete_sub_title": "Delete subcategory?",
+    "delete_desc": "This will remove \"{}\" and move any linked expenses to another category.",
+    "delete_move_notice": "Expenses in this category will be moved to another category automatically.",
+    "category_name": "Category Name",
+    "select_icon": "Select Icon",
+    "accent_color": "Accent Color",
+    "edit_subcategory": "Edit Subcategory",
+    "add_category": "Add Category",
+    "save_changes": "Save Changes"
+  },
+  "add_expense": {
+    "error_load": "Could not load expense form",
+    "hint": "Use the keypad below to enter the amount and tap the checkmark when you are ready to save.",
+    "title_label": "Expense Title",
+    "title_hint": "Lunch, cab, internet bill, etc.",
+    "date_label": "Expense Date",
+    "summary_desc": "Confirm your category, subcategory, and date before saving.",
+    "no_subcategory": "No subcategory"
+  },
+  "profile": {
+    "title": "Profile",
+    "sign_out": "Sign Out",
+    "delete_account": "Delete Account",
+    "delete_warning": "Permanently delete your account and all associated ledger data. This action cannot be undone."
+  },
+  "auth": {
+    "syncing": "Syncing Cloud Backup...",
+    "tagline": "Experience the next generation of financial intelligence and asset management.",
+    "google_signin": "Continue with Google"
+  }
 }

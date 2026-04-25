@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
@@ -77,7 +78,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ),
               onPressed: () => context.pop(false),
             ),
-            title: const AppTextHeadlineSm('Add Expense'),
+            title: const AppTextHeadlineSm('add_expense.title'),
             centerTitle: true,
             actions: [
               IconButton(
@@ -166,8 +167,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     ),
                                     SizedBox(height: 24.h),
                                     _FormHint(
-                                      text:
-                                          'Use the keypad below to enter the amount and tap the checkmark when you are ready to save.',
+                                      text: 'add_expense.hint',
                                     ),
                                     SizedBox(height: 20.h),
                                   ],
@@ -203,7 +203,7 @@ class _ExpenseTitleField extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
           child: AppTextLabelMd(
-            'Expense Title',
+            'add_expense.title_label',
             uppercase: true,
             color: cs.onSurfaceVariant,
           ),
@@ -214,7 +214,7 @@ class _ExpenseTitleField extends StatelessWidget {
           textCapitalization: TextCapitalization.sentences,
           onChanged: cubit.updateTitle,
           decoration: InputDecoration(
-            hintText: 'Lunch, cab, internet bill, etc.',
+            hintText: context.tr('add_expense.title_hint'),
             filled: true,
             fillColor: cs.surfaceContainerLow,
             border: OutlineInputBorder(
@@ -241,7 +241,7 @@ class _ExpenseDateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
-    final formatted = '${monthName(date.month)} ${date.day}, ${date.year}';
+    final formatted = '${monthName(context, date.month)} ${date.day}, ${date.year}';
 
     return Material(
       color: cs.surfaceContainerLow,
@@ -260,7 +260,7 @@ class _ExpenseDateTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppTextLabelMd(
-                      'Expense Date',
+                      'add_expense.date_label',
                       uppercase: true,
                       color: cs.onSurfaceVariant,
                     ),
@@ -334,10 +334,10 @@ class _ExpenseSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextHeadlineSm('Saving to'),
+                    AppTextHeadlineSm('add_expense.saving_to'),
                     SizedBox(height: 4.h),
                     AppTextBodyMd(
-                      'Confirm your category, subcategory, and date before saving.',
+                      'add_expense.summary_desc',
                       color: cs.onSurfaceVariant,
                     ),
                   ],
@@ -352,19 +352,19 @@ class _ExpenseSummaryCard extends StatelessWidget {
             children: [
               _SummaryChip(
                 icon: Icons.category_outlined,
-                label: category?.title ?? 'Category',
+                label: category?.title ?? context.tr('add_expense.category'),
                 backgroundColor: categoryColor.withValues(alpha: 0.14),
                 foregroundColor: categoryColor,
               ),
               _SummaryChip(
                 icon: Icons.subdirectory_arrow_right,
-                label: subcategory?.title ?? 'No subcategory',
+                label: subcategory?.title ?? context.tr('add_expense.no_subcategory'),
                 backgroundColor: cs.surfaceContainerHigh,
                 foregroundColor: cs.onSurfaceVariant,
               ),
               _SummaryChip(
                 icon: Icons.calendar_month,
-                label: '${monthName(state.date.month)} ${state.date.day}',
+                label: '${monthName(context, state.date.month)} ${state.date.day}',
                 backgroundColor: cs.surfaceContainerHigh,
                 foregroundColor: cs.onSurfaceVariant,
               ),
@@ -376,22 +376,22 @@ class _ExpenseSummaryCard extends StatelessWidget {
   }
 }
 
-String monthName(int month) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+String monthName(BuildContext context, int month) {
+  final keys = [
+    'common.months.jan',
+    'common.months.feb',
+    'common.months.mar',
+    'common.months.apr',
+    'common.months.may',
+    'common.months.jun',
+    'common.months.jul',
+    'common.months.aug',
+    'common.months.sep',
+    'common.months.oct',
+    'common.months.nov',
+    'common.months.dec',
   ];
-  return months[month - 1];
+  return context.tr(keys[month - 1]);
 }
 
 class _SummaryChip extends StatelessWidget {
@@ -479,7 +479,7 @@ class _LoadFailureView extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             AppTextHeadlineSm(
-              'Could not load expense form',
+              'add_expense.error_load',
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8.h),
@@ -491,7 +491,7 @@ class _LoadFailureView extends StatelessWidget {
             SizedBox(height: 20.h),
             FilledButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: const AppTextLabelMd('common.retry', uppercase: true),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
@@ -42,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
                   size: 24.r,
                 ),
               ),
-              title: const AppTextHeadlineSm('Settings'),
+              title: const AppTextHeadlineSm('settings.title'),
             ),
             body: const Center(child: CircularProgressIndicator()),
           );
@@ -59,7 +60,7 @@ class SettingsScreen extends StatelessWidget {
                   size: 24.r,
                 ),
               ),
-              title: const AppTextHeadlineSm('Settings'),
+              title: const AppTextHeadlineSm('settings.title'),
             ),
             body: Center(
               child: Padding(
@@ -74,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16.h),
                     AppTextHeadlineSm(
-                      'Could not load settings',
+                      'settings.error_load',
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: 8.h),
@@ -86,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
                     SizedBox(height: 20.h),
                     FilledButton(
                       onPressed: () => settingsCubit.loadSettings(),
-                      child: const Text('Retry'),
+                      child: const AppTextLabelMd('common.retry', uppercase: true),
                     ),
                   ],
                 ),
@@ -107,14 +108,14 @@ class SettingsScreen extends StatelessWidget {
                 size: 24.r,
               ),
             ),
-            title: const AppTextHeadlineSm('Settings'),
+            title: const AppTextHeadlineSm('settings.title'),
           ),
           body: SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 100.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle('Category Management'),
+                _sectionTitle('settings.category_mgmt'),
                 SizedBox(height: 16.h),
                 CategoryList(
                   categories: snapshot.categories,
@@ -154,7 +155,7 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: 32.h),
-                _sectionTitle('Budget Limits'),
+                _sectionTitle('settings.budget_limits'),
                 SizedBox(height: 16.h),
                 BudgetSection(
                   snapshot: snapshot,
@@ -178,7 +179,7 @@ class SettingsScreen extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: 32.h),
-                _sectionTitle('Global Preferences'),
+                _sectionTitle('settings.preferences'),
                 SizedBox(height: 16.h),
                 _preferencesTile(context, snapshot, settingsCubit),
               ],
@@ -217,9 +218,8 @@ class SettingsScreen extends StatelessWidget {
     final isRoot = category.parentId == null;
     context.showAppAlertDialog(
       dialogId: 'delete-category-${category.id}',
-      title: isRoot ? 'Delete category?' : 'Delete subcategory?',
-      subtitle:
-          'This will remove "${category.title}" and move any linked expenses to another category.',
+      title: isRoot ? 'settings.delete_title' : 'settings.delete_sub_title',
+      subtitle: context.tr('settings.delete_desc', args: [category.title]),
       isDismissible: true,
       content: _DeleteCategoryDialogContent(
         category: category,
@@ -270,13 +270,13 @@ class SettingsScreen extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             leading: Icon(Icons.currency_exchange, color: cs.primary, size: 24.r),
             title: AppTextBodyLg(
-              'Base Currency',
+              'settings.base_currency',
               style: context.theme.textTheme.bodyLarge!.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             subtitle: AppTextBodyMd(
-              _currencyLabel(snapshot.baseCurrencyCode),
+              _currencyLabel(context, snapshot.baseCurrencyCode),
               color: cs.onSurfaceVariant,
             ),
             trailing: Icon(
@@ -285,7 +285,7 @@ class SettingsScreen extends StatelessWidget {
               color: cs.onSurfaceVariant,
             ),
             onTap: () => context.showAppBottomSheet(
-              title: 'Select Base Currency',
+              title: 'settings.select_currency',
               customWidget: _CurrencySheet(
                 currentCurrencyCode: snapshot.baseCurrencyCode,
                 onSelected: (currencyCode) {
@@ -300,7 +300,7 @@ class SettingsScreen extends StatelessWidget {
               Icon(Icons.brightness_6, color: cs.primary, size: 24.r),
               SizedBox(width: 16.w),
               AppTextBodyLg(
-                'App Theme',
+                'settings.app_theme',
                 style: context.theme.textTheme.bodyLarge!.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -312,17 +312,17 @@ class SettingsScreen extends StatelessWidget {
             segments: const [
               ButtonSegment(
                 value: ThemeMode.system,
-                label: Text('System'),
+                label: AppTextLabelMd('settings.theme_system'),
                 icon: Icon(Icons.brightness_auto, size: 18),
               ),
               ButtonSegment(
                 value: ThemeMode.light,
-                label: Text('Light'),
+                label: AppTextLabelMd('settings.theme_light'),
                 icon: Icon(Icons.light_mode, size: 18),
               ),
               ButtonSegment(
                 value: ThemeMode.dark,
-                label: Text('Dark'),
+                label: AppTextLabelMd('settings.theme_dark'),
                 icon: Icon(Icons.dark_mode, size: 18),
               ),
             ],
@@ -342,11 +342,11 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _currencyLabel(String currencyCode) {
+  String _currencyLabel(BuildContext context, String currencyCode) {
     return switch (currencyCode.toLowerCase()) {
-      'usd' => 'US Dollar (USD)',
-      'inr' => 'Indian Rupee (INR)',
-      'eur' => 'Euro (EUR)',
+      'usd' => context.tr('common.usd'),
+      'inr' => context.tr('common.inr'),
+      'eur' => context.tr('common.eur'),
       _ => currencyCode.toUpperCase(),
     };
   }
@@ -378,7 +378,7 @@ class _DeleteCategoryDialogContentState
       mainAxisSize: MainAxisSize.min,
       children: [
         AppTextBodyMd(
-          'Expenses in this category will be moved to another category automatically.',
+          'settings.delete_move_notice',
           color: cs.onSurfaceVariant,
         ),
         SizedBox(height: 20.h),
@@ -394,7 +394,7 @@ class _DeleteCategoryDialogContentState
                               'delete-category-${widget.category.id}',
                         );
                       },
-                child: const Text('Cancel'),
+                child: const AppTextLabelMd('common.cancel', uppercase: true),
               ),
             ),
             SizedBox(width: 12.w),
@@ -423,7 +423,7 @@ class _DeleteCategoryDialogContentState
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Delete'),
+                    : const AppTextLabelMd('common.delete', uppercase: true),
               ),
             ),
           ],
@@ -445,9 +445,9 @@ class _CurrencySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = const [
-      ('inr', 'Indian Rupee', Icons.currency_rupee),
-      ('usd', 'US Dollar', Icons.attach_money),
-      ('eur', 'Euro', Icons.euro),
+      ('inr', 'common.inr', Icons.currency_rupee),
+      ('usd', 'common.usd', Icons.attach_money),
+      ('eur', 'common.eur', Icons.euro),
     ];
 
     return Column(
@@ -456,8 +456,8 @@ class _CurrencySheet extends StatelessWidget {
         for (final option in options)
           ListTile(
             leading: Icon(option.$3),
-            title: Text(option.$2),
-            subtitle: Text(option.$1.toUpperCase()),
+            title: AppTextBodyMd(option.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: AppTextLabelSm(option.$1.toUpperCase()),
             trailing: currentCurrencyCode == option.$1
                 ? Icon(Icons.check, color: context.theme.colorScheme.primary)
                 : null,

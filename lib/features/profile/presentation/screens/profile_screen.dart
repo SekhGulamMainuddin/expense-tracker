@@ -90,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       icon: Icon(Icons.logout, size: 18.r),
       label: AppTextBodyMd(
-        'Sign Out',
+        'profile.sign_out',
         style: context.theme.textTheme.bodyMedium!.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         icon: Icon(Icons.arrow_back, color: cs.onSurface, size: 24.r),
         onPressed: () => context.pop(),
       ),
-      title: const AppTextHeadlineSm('Profile'),
+      title: const AppTextHeadlineSm('profile.title'),
     );
   }
 
@@ -129,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
           icon: Icon(Icons.delete_forever, size: 18.r),
           label: AppTextBodyMd(
-            'Delete Account',
+            'profile.delete_account',
 
             style: context.theme.textTheme.bodyMedium!.copyWith(
               fontWeight: FontWeight.w600,
@@ -146,8 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 16.h),
         AppTextLabelSm(
-          'Permanently delete your account and all associated '
-              'ledger data. This action cannot be undone.',
+          'profile.delete_warning',
 
           textAlign: TextAlign.center,
           color: cs.onSurfaceVariant,

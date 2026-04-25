@@ -73,10 +73,10 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
     final isEditing = widget.initialCategory != null;
     final title = isEditing
         ? (widget.initialCategory!.parentId == null
-            ? 'Edit Category'
-            : 'Edit Subcategory')
+            ? 'settings.edit_category'
+            : 'settings.edit_subcategory')
         : (widget.parentCategory == null
-            ? 'Add Category'
+            ? 'settings.add_category'
             : 'Add Subcategory for ${widget.parentCategory}');
 
     return BlocListener<SettingsCubit, SettingsState>(
@@ -104,7 +104,7 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _fieldLabel(context, 'Category Name'),
+                _fieldLabel(context, 'settings.category_name'),
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
@@ -126,14 +126,14 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                _fieldLabel(context, 'Select Icon'),
+                _fieldLabel(context, 'settings.select_icon'),
                 IconGridSelector(
                   selectedIcon: _selectedIcon,
                   selectedColor: _selectedColor,
                   onIconSelected: (icon) => setState(() => _selectedIcon = icon),
                 ),
                 SizedBox(height: 24.h),
-                _fieldLabel(context, 'Accent Color'),
+                _fieldLabel(context, 'settings.accent_color'),
                 ColorPickerRow(
                   selectedColor: _selectedColor,
                   onColorSelected: (color) =>
@@ -170,7 +170,7 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
           child: TextButton(
             onPressed: _isSubmitting ? null : () => context.pop(false),
             child: AppTextBodyMd(
-              'Cancel',
+              'common.cancel',
               color: cs.onSurfaceVariant,
               style: context.theme.textTheme.bodyMedium!.copyWith(
                 fontWeight: FontWeight.w600,
@@ -233,10 +233,10 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
                   )
                 : AppTextBodyMd(
                     isEditing
-                        ? 'Save Changes'
+                        ? 'settings.save_changes'
                         : (widget.parentCategory == null
-                            ? 'Add Category'
-                            : 'Add Subcategory'),
+                            ? 'settings.add_category'
+                            : 'settings.add_subcategory'),
                     style: context.theme.textTheme.bodyMedium!.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

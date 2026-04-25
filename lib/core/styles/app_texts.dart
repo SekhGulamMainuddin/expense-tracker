@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker/core/styles/app_text_styles.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
-/// Prefer these widgets for UI copy so typography stays on-system.
-/// Set [translate] false for dynamic / non-locale strings.
-
+// AutoSizeText widgets with optional arguments
 class AppAutoSizeTextBodyLg extends StatelessWidget {
   const AppAutoSizeTextBodyLg(
     this.text, {
@@ -15,9 +13,13 @@ class AppAutoSizeTextBodyLg extends StatelessWidget {
     this.textAlign,
     this.maxLines = 1,
     this.minFontSize = 10,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -28,7 +30,7 @@ class AppAutoSizeTextBodyLg extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.bodyLg(context);
     return AutoSizeText(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       minFontSize: minFontSize,
@@ -49,9 +51,13 @@ class AppAutoSizeTextLabelSm extends StatelessWidget {
     this.letterSpacing = 0.05,
     this.uppercase = false,
     this.fontWeight,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -63,7 +69,7 @@ class AppAutoSizeTextLabelSm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final raw = context.tr(text);
+    final raw = context.tr(text, args: args, namedArgs: namedArgs);
     final display = uppercase ? raw.toUpperCase() : raw;
     final base = AppTextStyles.labelSm(context);
     return AutoSizeText(
@@ -71,7 +77,9 @@ class AppAutoSizeTextLabelSm extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       minFontSize: minFontSize,
-      style: base.merge(style).copyWith(
+      style: base
+          .merge(style)
+          .copyWith(
             color: color ?? base.color,
             letterSpacing: letterSpacing,
             fontWeight: fontWeight ?? base.fontWeight,
@@ -80,6 +88,7 @@ class AppAutoSizeTextLabelSm extends StatelessWidget {
   }
 }
 
+// Regular Text widgets (no auto size)
 class AppTextDisplayLg extends StatelessWidget {
   const AppTextDisplayLg(
     this.text, {
@@ -89,9 +98,13 @@ class AppTextDisplayLg extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -102,7 +115,7 @@ class AppTextDisplayLg extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.displayLg(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -120,9 +133,13 @@ class AppTextDisplayMd extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -133,7 +150,7 @@ class AppTextDisplayMd extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.displayMd(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -151,9 +168,13 @@ class AppTextDisplaySm extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -164,7 +185,7 @@ class AppTextDisplaySm extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.displaySm(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -182,9 +203,13 @@ class AppTextHeadlineLg extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -195,7 +220,7 @@ class AppTextHeadlineLg extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.headlineLg(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -213,9 +238,13 @@ class AppTextHeadlineSm extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -226,7 +255,7 @@ class AppTextHeadlineSm extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.headlineSm(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -244,9 +273,13 @@ class AppTextTitleMd extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -257,7 +290,7 @@ class AppTextTitleMd extends StatelessWidget {
   Widget build(BuildContext context) {
     final base = AppTextStyles.titleMd(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
@@ -278,9 +311,13 @@ class AppTextLabelMd extends StatelessWidget {
     this.letterSpacing = 0.05,
     this.uppercase = false,
     this.fontWeight,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -292,7 +329,7 @@ class AppTextLabelMd extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final raw = context.tr(text);
+    final raw = context.tr(text, args: args, namedArgs: namedArgs);
     final display = uppercase ? raw.toUpperCase() : raw;
     final base = AppTextStyles.labelMd(context);
     return Text(
@@ -300,7 +337,9 @@ class AppTextLabelMd extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
-      style: base.merge(style).copyWith(
+      style: base
+          .merge(style)
+          .copyWith(
             color: color ?? base.color,
             letterSpacing: letterSpacing,
             fontWeight: fontWeight ?? base.fontWeight,
@@ -321,9 +360,13 @@ class AppTextLabelSm extends StatelessWidget {
     this.letterSpacing = 0.05,
     this.uppercase = false,
     this.fontWeight,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
   final TextStyle? style;
   final Color? color;
   final TextAlign? textAlign;
@@ -335,7 +378,7 @@ class AppTextLabelSm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final raw = context.tr(text);
+    final raw = context.tr(text, args: args, namedArgs: namedArgs);
     final display = uppercase ? raw.toUpperCase() : raw;
     final base = AppTextStyles.labelSm(context);
     return Text(
@@ -343,7 +386,9 @@ class AppTextLabelSm extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
-      style: base.merge(style).copyWith(
+      style: base
+          .merge(style)
+          .copyWith(
             color: color ?? base.color,
             letterSpacing: letterSpacing,
             fontWeight: fontWeight ?? base.fontWeight,
@@ -362,6 +407,8 @@ class AppTextBodyMd extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.height,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
@@ -371,19 +418,18 @@ class AppTextBodyMd extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final double? height;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
 
   @override
   Widget build(BuildContext context) {
     final base = AppTextStyles.bodyMd(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
-      style: base.merge(style).copyWith(
-            color: color ?? base.color,
-            height: height,
-          ),
+      style: base.merge(style).copyWith(color: color ?? base.color, height: height),
     );
   }
 }
@@ -398,6 +444,8 @@ class AppTextBodyLg extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.height,
+    this.args,
+    this.namedArgs,
   });
 
   final String text;
@@ -407,19 +455,18 @@ class AppTextBodyLg extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final double? height;
+  final List<String>? args;
+  final Map<String, String>? namedArgs;
 
   @override
   Widget build(BuildContext context) {
     final base = AppTextStyles.bodyLg(context);
     return Text(
-      context.tr(text),
+      context.tr(text, args: args, namedArgs: namedArgs),
       textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
-      style: base.merge(style).copyWith(
-            color: color ?? base.color,
-            height: height,
-          ),
+      style: base.merge(style).copyWith(color: color ?? base.color, height: height),
     );
   }
 }
