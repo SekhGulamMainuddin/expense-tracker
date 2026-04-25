@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:expense_tracker/core/database/tables/expense_table.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:expense_tracker/core/database/tables/key_value_store_table.dart';
 import 'package:expense_tracker/core/database/tables/custom_icons_table.dart';
 import 'package:path/path.dart' as p;

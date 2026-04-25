@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../app_database.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import '../tables/expense_table.dart';
 
 part 'expense_dao.g.dart';
@@ -126,6 +127,31 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
             (t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc),
           ]))
         .get();
+  }
+
+  Future<List<Expense>> getFilteredTransactions({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<int>? categoryIds,
+  }) {
+    final query = select(expenses);
+    if (startDate != null && endDate != null) {
+      query.where((t) => t.date.isBetweenValues(startDate, endDate));
+    } else if (startDate != null) {
+      query.where((t) => t.date.isBiggerOrEqualValue(startDate));
+    } else if (endDate != null) {
+      query.where((t) => t.date.isSmallerOrEqualValue(endDate));
+    }
+
+    if (categoryIds != null && categoryIds.isNotEmpty) {
+      query.where((t) => t.categoryId.isIn(categoryIds));
+    }
+
+    query.orderBy([
+      (t) => OrderingTerm(expression: t.date, mode: OrderingMode.desc),
+    ]);
+
+    return query.get();
   }
 
   /// Returns the top 3 categories by total amount spent.

@@ -1,5 +1,5 @@
 import 'package:expense_tracker/core/database/dao/expense_dao.dart';
-import 'package:expense_tracker/core/database/tables/expense_table.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 
@@ -57,10 +57,6 @@ class AddExpenseLocalDataSource {
   }
 
   Currency _currencyFromCode(String currencyCode) {
-    return switch (currencyCode.toLowerCase()) {
-      'usd' => Currency.usd,
-      'eur' => Currency.eur,
-      _ => Currency.inr,
-    };
+    return Currency.fromCode(currencyCode);
   }
 }

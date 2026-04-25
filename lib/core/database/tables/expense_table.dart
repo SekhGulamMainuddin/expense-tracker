@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 
 @TableIndex(name: 'idx_expenses_date', columns: {#date})
 @TableIndex(name: 'idx_expenses_category', columns: {#categoryId})
@@ -36,22 +37,11 @@ class CurrencyConverter extends TypeConverter<Currency, String> {
 
   @override
   Currency fromSql(String fromDb) {
-    // Looks up the enum by name.
-    // Using .values.byName handles the conversion safely.
-    return Currency.values.byName(fromDb);
+    return Currency.fromCode(fromDb);
   }
 
   @override
   String toSql(Currency value) {
-    return value.name; // Stores 'usd', 'inr', 'eur' in the DB
+    return value.name;
   }
-}
-
-enum Currency {
-  usd(symbol: '\$'),
-  inr(symbol: '₹'),
-  eur(symbol: '€');
-
-  final String symbol;
-  const Currency({required this.symbol});
 }

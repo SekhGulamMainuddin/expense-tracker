@@ -9,6 +9,7 @@ import 'package:expense_tracker/features/home/domain/entities/finance_transactio
 import 'package:expense_tracker/features/home/domain/entities/time_range.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FinanceLocalDataSource {
@@ -49,14 +50,13 @@ class FinanceLocalDataSource {
     );
     final monthlyComparison = await _expenseDao.getMonthlyComparison();
     
-    // Fetch expenses for the specific range for the breakdown
     final (rangeStart, rangeEnd) = _getDatesForRange(range, now);
     final rangeExpenses = await _expenseDao.getExpensesInRange(
       rangeStart,
       rangeEnd,
     );
 
-    final recentExpenses = await _expenseDao.getRecentTransactions(8, 0);
+    final recentExpenses = await _expenseDao.getRecentTransactions(10, 0);
 
     final categoryMap = _flattenCategories(settings.categories);
     final recentTransactions = recentExpenses
@@ -75,7 +75,7 @@ class FinanceLocalDataSource {
 
     return FinanceSnapshot(
       currencyCode: settings.baseCurrencyCode,
-      currencySymbol: _currencySymbol(settings.baseCurrencyCode),
+      currencySymbol: Currency.fromCode(settings.baseCurrencyCode).symbol,
       dailySpent: dailySpent,
       weeklySpent: weeklySpent,
       monthlySpent: monthlySpent,
@@ -87,6 +87,30 @@ class FinanceLocalDataSource {
       categoryBreakdown: breakdown,
       timeRange: range,
     );
+  }
+
+  Future<List<FinanceTransaction>> getTransactions({
+    DateTime? startDate,
+    DateTime? endDate,
+    List<int>? categoryIds,
+  }) async {
+    final settings = await _settingsLocalDataSource.loadSettings();
+    final categoryMap = _flattenCategories(settings.categories);
+
+    final expenses = await _expenseDao.getFilteredTransactions(
+      startDate: startDate,
+      endDate: endDate,
+      categoryIds: categoryIds,
+    );
+
+    return expenses
+        .map(
+          (e) => _toTransaction(
+            expense: e,
+            categories: categoryMap,
+          ),
+        )
+        .toList();
   }
 
   (DateTime, DateTime) _getDatesForRange(TimeRange range, DateTime now) {
@@ -182,12 +206,7 @@ class FinanceLocalDataSource {
   }
 
   String _currencySymbol(String currencyCode) {
-    return switch (currencyCode.toLowerCase()) {
-      'usd' => '\$',
-      'eur' => '€',
-      'inr' => '₹',
-      _ => currencyCode.toUpperCase(),
-    };
+    return Currency.fromCode(currencyCode).symbol;
   }
 
   String _formatTransactionDate(DateTime date) {

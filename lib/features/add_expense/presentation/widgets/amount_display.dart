@@ -3,6 +3,7 @@ import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_cubit.dart';
 import 'package:expense_tracker/features/add_expense/presentation/cubit/add_expense_state.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,11 +101,6 @@ class AmountDisplay extends StatelessWidget {
   }
 
   String _currencySymbol(String currencyCode) {
-    return switch (currencyCode.toLowerCase()) {
-      'usd' => '\$',
-      'eur' => '€',
-      'inr' => '₹',
-      _ => currencyCode.toUpperCase(),
-    };
+    return Currency.fromCode(currencyCode).symbol;
   }
 }

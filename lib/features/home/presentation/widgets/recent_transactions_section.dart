@@ -4,6 +4,7 @@ import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.d
 import 'package:expense_tracker/features/home/presentation/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 class RecentTransactionsSection extends StatelessWidget {
   const RecentTransactionsSection({
@@ -23,7 +24,24 @@ class RecentTransactionsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppTextHeadlineSm('home.recent_payments'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const AppTextHeadlineSm('home.recent_payments'),
+              if (snapshot.recentTransactions.isNotEmpty)
+                TextButton(
+                  onPressed: () {
+                    // Navigate to transactions screen
+                    GoRouter.of(context).push('/transactions');
+                  },
+                  child: AppTextLabelMd(
+                    'home.view_all',
+                    color: cs.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
+          ),
 
           SizedBox(height: 16.h),
           if (snapshot.recentTransactions.isEmpty)

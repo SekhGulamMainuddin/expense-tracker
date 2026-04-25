@@ -6,6 +6,7 @@ import 'package:expense_tracker/features/home/presentation/screens/home_screen.d
 import 'package:expense_tracker/features/profile/presentation/screens/profile_screen.dart';
 import 'package:expense_tracker/features/settings/presentation/screens/category_editor_screen.dart';
 import 'package:expense_tracker/features/settings/presentation/screens/settings_screen.dart';
+import 'package:expense_tracker/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -67,6 +68,12 @@ final class AppRouter {
               initialCategory: args?.initialCategory,
             );
           },
+        ),
+        GoRoute(
+          parentNavigatorKey: parentNavigatorKey,
+          path: TransactionListScreen.routeName,
+          name: TransactionListScreen.routeName,
+          builder: (context, state) => const TransactionListScreen(),
         ),
         GoRoute(
           parentNavigatorKey: parentNavigatorKey,
