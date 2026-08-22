@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:expense_tracker/core/di/cubit_scope.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
@@ -39,14 +40,21 @@ class AddExpenseScreen extends StatefulWidget {
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
-  late final AddExpenseCubit _cubit;
+  String? _scopeName;
+
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
+
+  /// Resolved from the screen's GetIt scope, never passed down a constructor.
+  AddExpenseCubit get _cubit => getIt<AddExpenseCubit>();
 
   @override
   void initState() {
     super.initState();
-    _cubit = getIt<AddExpenseCubit>();
+    _scopeName = CubitScope.open<AddExpenseCubit>(
+      scopeName: 'add_expense_scope',
+      create: () => AddExpenseCubit(getIt()),
+    );
     _titleController = TextEditingController();
     _amountController = TextEditingController(text: '0');
     _cubit.loadFormData(
@@ -59,8 +67,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void dispose() {
     _titleController.dispose();
     _amountController.dispose();
-    _cubit.close();
+    CubitScope.close(_scopeName);
     super.dispose();
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final theme = context.theme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: AppTextHeadlineSm('add_expense.delete_title'),
+        content: AppTextBodyMd('add_expense.delete_desc'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: AppTextLabelMd('common.cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: AppTextLabelMd(
+              'common.delete',
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _cubit.deleteExpense();
+    }
   }
 
   @override
@@ -90,6 +126,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         } else if (state is AddExpenseFailure) {
           context.showAppSnackBar(state.message);
         } else if (state is AddExpenseSuccess) {
+          context.pop(true);
+        } else if (state is AddExpenseDeleted) {
+          context.showAppSnackBar('add_expense.deleted');
           context.pop(true);
         }
       },
@@ -124,6 +163,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             title: AppTextHeadlineSm(appBarTitle),
             centerTitle: true,
             actions: [
+              if (loaded?.transactionId != null)
+                IconButton(
+                  tooltip: context.tr('add_expense.delete'),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: theme.colorScheme.error,
+                    size: 24.r,
+                  ),
+                  onPressed: loaded?.isSubmitting == true
+                      ? null
+                      : () => _confirmDelete(context),
+                ),
               if (isViewMode)
                 IconButton(
                   icon: Icon(Icons.edit_outlined, color: theme.colorScheme.primary),
@@ -173,7 +224,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               AmountDisplay(
-                                cubit: _cubit,
                                 controller: _amountController,
                                 enabled: !loaded.isSubmitting && !isViewMode,
                               ),
@@ -181,7 +231,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               SizedBox(height: 20.h),
                               _ExpenseTitleField(
                                 controller: _titleController,
-                                cubit: _cubit,
                                 enabled: !loaded.isSubmitting && !isViewMode,
                               ),
                               if ((loaded.title == null || loaded.title!.isEmpty) && loaded.generatedTitle != null) ...[
@@ -258,17 +307,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 class _ExpenseTitleField extends StatelessWidget {
   const _ExpenseTitleField({
     required this.controller,
-    required this.cubit,
     required this.enabled,
   });
 
   final TextEditingController controller;
-  final AddExpenseCubit cubit;
   final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
+    final cubit = getIt<AddExpenseCubit>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -4,6 +4,7 @@ import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.d
 import 'package:expense_tracker/features/home/presentation/widgets/transaction_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:expense_tracker/features/transactions/presentation/screens/transaction_list_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class RecentTransactionsSection extends StatelessWidget {
@@ -30,10 +31,8 @@ class RecentTransactionsSection extends StatelessWidget {
               const AppTextHeadlineSm('home.recent_payments'),
               if (snapshot.recentTransactions.isNotEmpty)
                 TextButton(
-                  onPressed: () {
-                    // Navigate to transactions screen
-                    GoRouter.of(context).push('/transactions');
-                  },
+                  onPressed: () => GoRouter.of(context)
+                      .push(TransactionListScreen.routeName),
                   child: AppTextLabelMd(
                     'home.view_all',
                     color: cs.primary,

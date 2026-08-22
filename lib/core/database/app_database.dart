@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:meta/meta.dart';
 import 'package:expense_tracker/core/database/tables/expense_table.dart';
 import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:expense_tracker/core/database/tables/key_value_store_table.dart';
@@ -21,6 +22,11 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+
+  /// Lets tests drive the schema against an in-memory database instead of the
+  /// app documents directory.
+  @visibleForTesting
+  AppDatabase.forTesting(super.executor);
 
   @override
   int get schemaVersion => 4;

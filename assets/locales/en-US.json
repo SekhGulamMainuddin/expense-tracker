@@ -80,7 +80,16 @@
     "accent_color": "Accent Color",
     "edit_subcategory": "Edit Subcategory",
     "add_category": "Add Category",
-    "save_changes": "Save Changes"
+    "save_changes": "Save Changes",
+    "exchange_rates": "Exchange Rates",
+    "refresh_rates": "Refresh exchange rates",
+    "rates_syncing": "Syncing latest rates…",
+    "rates_approximate": "Using approximate rates — tap to sync",
+    "rates_updated": "Updated {when}",
+    "rates_just_now": "just now",
+    "rates_minutes_ago": "{count} min ago",
+    "rates_hours_ago": "{count} h ago",
+    "rates_days_ago": "{count} d ago"
   },
   "add_expense": {
     "saving_to": "Saving to",
@@ -90,7 +99,11 @@
     "title_hint": "Lunch, cab, internet bill, etc.",
     "date_label": "Expense Date",
     "summary_desc": "Confirm your category, subcategory, and date before saving.",
-    "no_subcategory": "No subcategory"
+    "no_subcategory": "No subcategory",
+    "delete": "Delete",
+    "delete_title": "Delete this expense?",
+    "delete_desc": "This expense will be permanently removed. This cannot be undone.",
+    "deleted": "Expense deleted"
   },
   "profile": {
     "title": "Profile",
@@ -102,5 +115,23 @@
     "syncing": "Syncing Cloud Backup...",
     "tagline": "Experience the next generation of financial intelligence and asset management.",
     "google_signin": "Continue with Google"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "search_hint": "Search transactions",
+    "deleted": "Expense deleted",
+    "delete_failed": "Could not delete expense",
+    "none_found": "No transactions found",
+    "adjust_filters": "Try adjusting your filters",
+    "clear_filters": "Clear All Filters",
+    "filter_title": "Filter Transactions",
+    "reset": "Reset",
+    "date_range": "Date Range",
+    "categories": "Categories",
+    "apply_filters": "Apply Filters",
+    "filter_today": "Today",
+    "filter_7_days": "Last 7 Days",
+    "filter_30_days": "Last 30 Days",
+    "filter_custom": "Custom Range"
   }
 }

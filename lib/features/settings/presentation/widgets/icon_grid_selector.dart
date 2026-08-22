@@ -9,10 +9,6 @@ import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:expense_tracker/features/settings/domain/entities/custom_icon_entity.dart';
-import 'package:expense_tracker/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 
 class IconGridSelector extends StatefulWidget {
   const IconGridSelector({

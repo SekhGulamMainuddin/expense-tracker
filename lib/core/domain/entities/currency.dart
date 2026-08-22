@@ -1,22 +1,48 @@
+/// Supported currencies.
+///
+/// [fallbackRateToInr] is a hardcoded approximation used only before the first
+/// successful rate sync, or when the device has been offline long enough that
+/// no cached rates exist. Live rates come from [ExchangeRates]; never do
+/// arithmetic against the fallback when a rates table is available.
 enum Currency {
-  usd(symbol: '\$', rateToInr: 83.0),
-  inr(symbol: '₹', rateToInr: 1.0),
-  eur(symbol: '€', rateToInr: 90.0);
+  inr(symbol: '₹', displayName: 'Indian Rupee', fallbackRateToInr: 1.0),
+  usd(symbol: '\$', displayName: 'US Dollar', fallbackRateToInr: 86.0),
+  eur(symbol: '€', displayName: 'Euro', fallbackRateToInr: 93.0),
+  gbp(symbol: '£', displayName: 'British Pound', fallbackRateToInr: 110.0),
+  jpy(symbol: '¥', displayName: 'Japanese Yen', fallbackRateToInr: 0.57),
+  aud(symbol: 'A\$', displayName: 'Australian Dollar', fallbackRateToInr: 55.0),
+  cad(symbol: 'C\$', displayName: 'Canadian Dollar', fallbackRateToInr: 61.0),
+  chf(symbol: 'CHF', displayName: 'Swiss Franc', fallbackRateToInr: 98.0),
+  sgd(symbol: 'S\$', displayName: 'Singapore Dollar', fallbackRateToInr: 64.0),
+  cny(symbol: 'CN¥', displayName: 'Chinese Yuan', fallbackRateToInr: 12.0),
+  nzd(symbol: 'NZ\$', displayName: 'New Zealand Dollar', fallbackRateToInr: 50.0),
+  hkd(symbol: 'HK\$', displayName: 'Hong Kong Dollar', fallbackRateToInr: 11.0),
+  zar(symbol: 'R', displayName: 'South African Rand', fallbackRateToInr: 4.7);
+
+  const Currency({
+    required this.symbol,
+    required this.displayName,
+    required this.fallbackRateToInr,
+  });
 
   final String symbol;
-  final double rateToInr;
-  const Currency({required this.symbol, required this.rateToInr});
+  final String displayName;
+  final double fallbackRateToInr;
 
-  double convertTo(double amount, Currency target) {
-    if (this == target) return amount;
-    // (Amount in This) * (This -> INR) / (Target -> INR) = (Amount in Target)
-    return (amount * rateToInr) / target.rateToInr;
-  }
+  /// Upper-case ISO 4217 code, e.g. `USD`.
+  String get code => name.toUpperCase();
 
   static Currency fromCode(String code) {
     return Currency.values.firstWhere(
       (c) => c.name.toLowerCase() == code.toLowerCase(),
-      orElse: () => Currency.usd,
+      orElse: () => Currency.inr,
     );
+  }
+
+  static Currency? tryFromCode(String code) {
+    for (final c in Currency.values) {
+      if (c.name.toLowerCase() == code.toLowerCase()) return c;
+    }
+    return null;
   }
 }

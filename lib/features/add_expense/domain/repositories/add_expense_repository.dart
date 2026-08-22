@@ -1,11 +1,11 @@
-import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/error/result.dart';
+import 'package:expense_tracker/features/add_expense/domain/entities/editable_expense.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_snapshot.dart';
 
 abstract interface class AddExpenseRepository {
   ResultFuture<SettingsSnapshot> loadFormData();
   
-  ResultFuture<Expense> getExpense(int id);
+  ResultFuture<EditableExpense> getExpense(int id);
 
   ResultVoid addExpense({
     required double amount,
@@ -14,6 +14,8 @@ abstract interface class AddExpenseRepository {
     required String currencyCode,
     DateTime? date,
   });
+
+  ResultVoid deleteExpense(int id);
 
   ResultVoid updateExpense({
     required int id,

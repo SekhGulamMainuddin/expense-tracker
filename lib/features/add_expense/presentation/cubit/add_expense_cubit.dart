@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:expense_tracker/features/add_expense/domain/repositories/add_expense_repository.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,80 +5,94 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expense_state.dart';
 
 class AddExpenseCubit extends Cubit<AddExpenseState> {
-  AddExpenseCubit(this._repository) : super(AddExpenseLoading()) {
-    unawaited(loadFormData());
-  }
+  AddExpenseCubit(this._repository) : super(AddExpenseLoading());
 
   final AddExpenseRepository _repository;
 
+  /// Loads the form. The screen calls this once with the route's arguments;
+  /// it is deliberately NOT started from the constructor, because a
+  /// create-mode load racing a view-mode load could land last and blank out
+  /// an existing transaction.
+  ///
+  /// Every branch is awaited so callers can rely on the state being settled
+  /// when this future completes.
   Future<void> loadFormData({int? transactionId, AddExpenseMode? mode}) async {
     emit(AddExpenseLoading());
+
     final settingsResult = await _repository.loadFormData();
-    
-    settingsResult.fold(
-      (settings) async {
-        if (settings.categories.isEmpty) {
-          emit(AddExpenseFailure('No categories available yet.'));
-          return;
-        }
+    if (settingsResult.isFailure) {
+      emit(AddExpenseFailure(settingsResult.failureOrNull!.message));
+      return;
+    }
 
-        if (transactionId != null) {
-          final expenseResult = await _repository.getExpense(transactionId);
-          expenseResult.fold(
-            (expense) {
-              // Map expense category to root and sub
-              int? rootId;
-              int? subId;
-              
-              // Search for the category in the hierarchy
-              final category = _findCategoryInSettings(settings.categories, expense.categoryId);
-              if (category != null) {
-                if (category.parentId != null && category.parentId != 0) {
-                  rootId = category.parentId;
-                  subId = category.id;
-                } else {
-                  rootId = category.id;
-                  subId = null;
-                }
-              }
+    final settings = settingsResult.dataOrNull!;
+    if (settings.categories.isEmpty) {
+      emit(AddExpenseFailure('No categories available yet.'));
+      return;
+    }
 
-              final root = rootId != null ? _findCategoryInSettings(settings.categories, rootId) : null;
-              final sub = subId != null ? _findCategoryInSettings(settings.categories, subId) : null;
+    if (transactionId == null) {
+      final firstRoot = settings.categories.first;
+      final firstSub =
+          firstRoot.children.isNotEmpty ? firstRoot.children.first : null;
+      emit(
+        AddExpenseLoaded(
+          settings: settings,
+          amount: '0',
+          title: '',
+          date: DateTime.now(),
+          selectedCategoryId: firstRoot.id,
+          selectedSubcategoryId: firstSub?.id,
+          mode: AddExpenseMode.create,
+          generatedTitle: _generateTitle(firstRoot, firstSub),
+        ),
+      );
+      return;
+    }
 
-              emit(
-                AddExpenseLoaded(
-                  settings: settings,
-                  amount: expense.amount.toString(),
-                  title: expense.title,
-                  date: expense.date,
-                  selectedCategoryId: rootId ?? settings.categories.first.id,
-                  selectedSubcategoryId: subId,
-                  mode: mode ?? AddExpenseMode.view,
-                  transactionId: transactionId,
-                  generatedTitle: _generateTitle(root, sub),
-                ),
-              );
-            },
-            (failure) => emit(AddExpenseFailure(failure.message)),
-          );
-        } else {
-          final firstRoot = settings.categories.first;
-          final firstSub = firstRoot.children.isNotEmpty ? firstRoot.children.first : null;
-          emit(
-            AddExpenseLoaded(
-              settings: settings,
-              amount: '0',
-              title: '',
-              date: DateTime.now(),
-              selectedCategoryId: firstRoot.id,
-              selectedSubcategoryId: firstSub?.id,
-              mode: AddExpenseMode.create,
-              generatedTitle: _generateTitle(firstRoot, firstSub),
-            ),
-          );
-        }
-      },
-      (failure) => emit(AddExpenseFailure(failure.message)),
+    final expenseResult = await _repository.getExpense(transactionId);
+    if (expenseResult.isFailure) {
+      emit(AddExpenseFailure(expenseResult.failureOrNull!.message));
+      return;
+    }
+
+    final expense = expenseResult.dataOrNull!;
+
+    // An expense is attached to the deepest node, so a stored subcategory has
+    // to be split back into (root, sub) for the two selectors.
+    final category =
+        _findCategoryInSettings(settings.categories, expense.categoryId);
+    int? rootId;
+    int? subId;
+    if (category != null) {
+      final parentId = category.parentId;
+      if (parentId != null && parentId != 0) {
+        rootId = parentId;
+        subId = category.id;
+      } else {
+        rootId = category.id;
+      }
+    }
+
+    final root = rootId == null
+        ? null
+        : _findCategoryInSettings(settings.categories, rootId);
+    final sub = subId == null
+        ? null
+        : _findCategoryInSettings(settings.categories, subId);
+
+    emit(
+      AddExpenseLoaded(
+        settings: settings,
+        amount: expense.amount.toStringAsFixed(2),
+        title: expense.title,
+        date: expense.date,
+        selectedCategoryId: rootId ?? settings.categories.first.id,
+        selectedSubcategoryId: subId,
+        mode: mode ?? AddExpenseMode.view,
+        transactionId: transactionId,
+        generatedTitle: _generateTitle(root, sub),
+      ),
     );
   }
 
@@ -105,7 +117,30 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
     final current = _loadedStateOrNull();
     if (current == null) return;
 
-    emit(current.copyWith(amount: value, clearErrorMessage: true));
+    emit(current.copyWith(
+      amount: _sanitizeAmount(value),
+      clearErrorMessage: true,
+    ));
+  }
+
+  /// Keeps only digits and a single decimal point, capped at
+  /// [_maxDecimalPlaces] fraction digits. The text field's input formatter is
+  /// best-effort; this is the authoritative guard because paste and
+  /// programmatic edits can bypass it.
+  static String _sanitizeAmount(String value) {
+    final digitsAndDot = value.replaceAll(RegExp(r'[^0-9.]'), '');
+    if (digitsAndDot.isEmpty) return '';
+
+    final firstDot = digitsAndDot.indexOf('.');
+    if (firstDot == -1) return digitsAndDot;
+
+    final whole = digitsAndDot.substring(0, firstDot);
+    final fraction =
+        digitsAndDot.substring(firstDot + 1).replaceAll('.', '');
+    final capped = fraction.length > _maxDecimalPlaces
+        ? fraction.substring(0, _maxDecimalPlaces)
+        : fraction;
+    return '$whole.$capped';
   }
 
   void updateTitle(String value) {
@@ -225,6 +260,33 @@ class AddExpenseCubit extends Cubit<AddExpenseState> {
             errorMessage: failure.message,
           ),
         );
+        return false;
+      },
+    );
+  }
+
+  /// Removes the expense currently loaded in [AddExpenseMode.view] or
+  /// [AddExpenseMode.edit]. No-op while creating, since there is no row yet.
+  Future<bool> deleteExpense() async {
+    final current = _loadedStateOrNull();
+    final id = current?.transactionId;
+    if (current == null || id == null || current.isSubmitting) {
+      return false;
+    }
+
+    emit(current.copyWith(isSubmitting: true, clearErrorMessage: true));
+
+    final result = await _repository.deleteExpense(id);
+    return result.fold(
+      (_) {
+        emit(AddExpenseDeleted());
+        return true;
+      },
+      (failure) {
+        emit(current.copyWith(
+          isSubmitting: false,
+          errorMessage: failure.message,
+        ));
         return false;
       },
     );

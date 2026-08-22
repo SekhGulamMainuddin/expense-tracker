@@ -83,6 +83,8 @@ final class AddExpenseLoaded extends AddExpenseState {
 
 final class AddExpenseSuccess extends AddExpenseState {}
 
+final class AddExpenseDeleted extends AddExpenseState {}
+
 final class AddExpenseFailure extends AddExpenseState {
   AddExpenseFailure(this.message);
 

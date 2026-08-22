@@ -3,20 +3,27 @@ import 'dart:async';
 import 'package:expense_tracker/core/database/app_database.dart';
 import 'package:expense_tracker/core/database/dao/expense_dao.dart';
 import 'package:expense_tracker/core/utils/date_helper.dart';
+import 'package:expense_tracker/features/home/data/mappers/finance_transaction_mapper.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_category_breakdown.dart';
 import 'package:expense_tracker/features/home/domain/entities/finance_snapshot.dart';
-import 'package:expense_tracker/features/home/domain/entities/finance_transaction.dart';
 import 'package:expense_tracker/features/home/domain/entities/time_range.dart';
 import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
 import 'package:expense_tracker/core/domain/entities/currency.dart';
+import 'package:expense_tracker/core/exchange/domain/entities/exchange_rates.dart';
+import 'package:expense_tracker/core/exchange/domain/repositories/exchange_rate_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class FinanceLocalDataSource {
-  FinanceLocalDataSource(this._expenseDao, this._settingsLocalDataSource);
+  FinanceLocalDataSource(
+    this._expenseDao,
+    this._settingsLocalDataSource,
+    this._exchangeRateRepository,
+  );
 
   final ExpenseDao _expenseDao;
   final SettingsLocalDataSource _settingsLocalDataSource;
+  final ExchangeRateRepository _exchangeRateRepository;
 
   /// Watches expenses, categories, and settings tables.
   /// Three tables can fire simultaneously during a single mutation, so debounce
@@ -34,6 +41,7 @@ class FinanceLocalDataSource {
   Future<FinanceSnapshot> loadDashboard({TimeRange range = TimeRange.monthly}) async {
     final settings = await _settingsLocalDataSource.loadSettings();
     final baseCurrency = Currency.fromCode(settings.baseCurrencyCode);
+    final rates = await _exchangeRateRepository.currentRates();
     final now = DateTime.now();
     
     // spendings are returned in INR from DAO (sum of baseAmount)
@@ -59,13 +67,14 @@ class FinanceLocalDataSource {
 
     final recentExpenses = await _expenseDao.getRecentTransactions(10, 0);
 
-    final categoryMap = _flattenCategories(settings.categories);
+    final categoryMap = flattenCategories(settings.categories);
     final recentTransactions = recentExpenses
         .map(
-          (expense) => _toTransaction(
+          (expense) => mapExpenseToTransaction(
             expense: expense,
             categories: categoryMap,
             targetCurrency: baseCurrency,
+            rates: rates,
           ),
         )
         .toList();
@@ -74,14 +83,15 @@ class FinanceLocalDataSource {
       expenses: rangeExpenses,
       categories: categoryMap,
       targetCurrency: baseCurrency,
+      rates: rates,
     );
 
     return FinanceSnapshot(
       currencyCode: settings.baseCurrencyCode,
       currencySymbol: baseCurrency.symbol,
-      dailySpent: Currency.inr.convertTo(dailySpentInr, baseCurrency),
-      weeklySpent: Currency.inr.convertTo(weeklySpentInr, baseCurrency),
-      monthlySpent: Currency.inr.convertTo(monthlySpentInr, baseCurrency),
+      dailySpent: rates.fromBase(dailySpentInr, baseCurrency),
+      weeklySpent: rates.fromBase(weeklySpentInr, baseCurrency),
+      monthlySpent: rates.fromBase(monthlySpentInr, baseCurrency),
       dailyLimit: settings.dailyLimit,
       weeklyLimit: settings.weeklyLimit,
       monthlyLimit: settings.monthlyLimit,
@@ -90,33 +100,6 @@ class FinanceLocalDataSource {
       categoryBreakdown: breakdown,
       timeRange: range,
     );
-  }
-
-  Future<List<FinanceTransaction>> getTransactions({
-    DateTime? startDate,
-    DateTime? endDate,
-    List<int>? categoryIds,
-    int? limit,
-    int? offset,
-  }) async {
-    final settings = await _settingsLocalDataSource.loadSettings();
-    final baseCurrency = Currency.fromCode(settings.baseCurrencyCode);
-    final categoryMap = _flattenCategories(settings.categories);
-    final expenses = await _expenseDao.getFilteredTransactions(
-      startDate: startDate,
-      endDate: endDate,
-      categoryIds: categoryIds,
-      limit: limit,
-      offset: offset,
-    );
-
-    return expenses
-        .map((e) => _toTransaction(
-              expense: e,
-              categories: categoryMap,
-              targetCurrency: baseCurrency,
-            ))
-        .toList();
   }
 
   (DateTime, DateTime) _getDatesForRange(TimeRange range, DateTime now) {
@@ -129,71 +112,24 @@ class FinanceLocalDataSource {
     };
   }
 
-  Map<int, SettingsCategory> _flattenCategories(List<SettingsCategory> list) {
-    final result = <int, SettingsCategory>{};
-    for (final cat in list) {
-      result[cat.id] = cat;
-      for (final child in cat.children) {
-        result[child.id] = child;
-      }
-    }
-
-    return result;
-  }
-
-  FinanceTransaction _toTransaction({
-    required Expense expense,
-    required Map<int, SettingsCategory> categories,
-    required Currency targetCurrency,
-  }) {
-    final category = categories[expense.categoryId];
-    
-    // We convert baseAmount (INR) to the target currency
-    final amount = Currency.inr.convertTo(expense.baseAmount, targetCurrency).abs();
-
-    String displayTitle = expense.title ?? '';
-    if (displayTitle.isEmpty) {
-      if (category != null) {
-        if (category.parentId != null && category.parentId != 0) {
-          final parent = categories[category.parentId!];
-          displayTitle =
-              parent != null ? '${parent.title} | ${category.title}' : category.title;
-        } else {
-          displayTitle = category.title;
-        }
-      } else {
-        displayTitle = 'Expense';
-      }
-    }
-
-    return FinanceTransaction(
-      id: expense.id,
-      title: displayTitle,
-      subtitle: DateHelper.formatTransactionDate(expense.date),
-      amount: amount,
-      icon: category?.icon ?? 'receipt_long',
-      color: category?.color ?? 0xFF64748B,
-      date: expense.date,
-    );
-  }
-
   List<FinanceCategoryBreakdown> _buildCategoryBreakdown({
     required List<Expense> expenses,
     required Map<int, SettingsCategory> categories,
     required Currency targetCurrency,
+    required ExchangeRates rates,
   }) {
     final spendingPerCategory = <int, double>{};
     double totalSpend = 0;
 
     for (final expense in expenses) {
-      final amount = Currency.inr.convertTo(expense.baseAmount, targetCurrency);
+      final amount = rates.fromBase(expense.baseAmount, targetCurrency);
       totalSpend += amount;
       
       final cat = categories[expense.categoryId];
       if (cat == null) continue;
 
       // Group subcategories into their parents for the breakdown
-      final rootId = (cat.parentId == null || cat.parentId == 0) ? cat.id : cat.parentId!;
+      final rootId = rootCategoryIdOf(cat);
       spendingPerCategory[rootId] = (spendingPerCategory[rootId] ?? 0) + amount;
     }
 

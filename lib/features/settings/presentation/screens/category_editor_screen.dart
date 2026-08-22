@@ -126,17 +126,15 @@ class _CategoryEditorScreenState extends State<CategoryEditorScreen> {
                     ),
                   );
 
-                  if (confirmed == true) {
-                    setState(() => _isSubmitting = true);
-                    final success = await _settingsCubit.deleteCategory(
-                      widget.initialCategory!.id,
-                    );
-                    if (mounted) {
-                      setState(() => _isSubmitting = false);
-                      if (success) {
-                        context.pop(true);
-                      }
-                    }
+                  if (confirmed != true) return;
+                  setState(() => _isSubmitting = true);
+                  final success = await _settingsCubit.deleteCategory(
+                    widget.initialCategory!.id,
+                  );
+                  if (!context.mounted) return;
+                  setState(() => _isSubmitting = false);
+                  if (success) {
+                    context.pop(true);
                   }
                 },
               ),

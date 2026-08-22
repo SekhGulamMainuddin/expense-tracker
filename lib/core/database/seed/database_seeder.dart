@@ -167,7 +167,7 @@ class DatabaseSeeder {
           ExpensesCompanion.insert(
             title: Value(title),
             amount: amount,
-            baseAmount: Value(amount * Currency.inr.rateToInr),
+            baseAmount: Value(amount),
             date: txDate,
             categoryId: categoryId,
             currency: const Value(Currency.inr),

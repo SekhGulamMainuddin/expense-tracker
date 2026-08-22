@@ -1,72 +1,64 @@
 import 'dart:async';
-import 'package:expense_tracker/features/home/data/datasources/finance_local_data_source.dart';
-import 'package:expense_tracker/features/settings/data/datasources/settings_local_data_source.dart';
-import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+
 import 'package:expense_tracker/core/domain/entities/currency.dart';
+import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
+import 'package:expense_tracker/features/transactions/domain/entities/transaction_filter.dart';
+import 'package:expense_tracker/features/transactions/domain/repositories/transaction_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'transaction_list_state.dart';
 
 class TransactionListCubit extends Cubit<TransactionListState> {
-  TransactionListCubit(this._financeDataSource, this._settingsDataSource)
-      : super(TransactionListState(
-          transactions: const [],
-          categories: const [],
-          dateFilter: DateFilterType.last30Days,
-          selectedCategoryIds: const {},
-          isLoading: true,
-          currencySymbol: '\$',
-        )) {
-    _init();
+  TransactionListCubit(this._repository)
+      : super(TransactionListState.initial()) {
+    unawaited(_init());
   }
 
-  final FinanceLocalDataSource _financeDataSource;
-  final SettingsLocalDataSource _settingsDataSource;
+  final TransactionRepository _repository;
 
   static const int _pageSize = 20;
+  static const _searchDebounce = Duration(milliseconds: 300);
+
+  Timer? _searchDebounceTimer;
 
   Future<void> _init() async {
-    final settings = await _settingsDataSource.loadSettings();
-    final symbol = Currency.fromCode(settings.baseCurrencyCode).symbol;
-    
-    emit(state.copyWith(
-      categories: settings.categories,
-      currencySymbol: symbol,
-    ));
-    
+    final result = await _repository.loadFilterOptions();
+    result.fold(
+      (settings) => emit(state.copyWith(
+        categories: settings.categories,
+        currencySymbol: Currency.fromCode(settings.baseCurrencyCode).symbol,
+      )),
+      (failure) => emit(state.copyWith(errorMessage: failure.message)),
+    );
     await fetchTransactions();
   }
 
   Future<void> fetchTransactions() async {
     emit(state.copyWith(
-      isLoading: true, 
+      isLoading: true,
       clearErrorMessage: true,
-      page: 1,
       hasMore: true,
     ));
-    
-    try {
-      final (start, end) = _getDateRange();
-      final categoryIdsToQuery = _getExpandedCategoryIds();
 
-      final transactions = await _financeDataSource.getTransactions(
-        startDate: start,
-        endDate: end,
-        categoryIds: categoryIdsToQuery,
-        limit: _pageSize,
-        offset: 0,
-      );
+    final result = await _repository.getTransactions(
+      filter: state.filter,
+      limit: _pageSize,
+      offset: 0,
+    );
 
-      emit(state.copyWith(
+    result.fold(
+      (transactions) => emit(state.copyWith(
         transactions: transactions,
         isLoading: false,
         hasMore: transactions.length == _pageSize,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
+      )),
+      (failure) => emit(state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
-      ));
-    }
+        transactions: const [],
+        hasMore: false,
+        errorMessage: failure.message,
+      )),
+    );
   }
 
   Future<void> loadMore() async {
@@ -74,107 +66,119 @@ class TransactionListCubit extends Cubit<TransactionListState> {
 
     emit(state.copyWith(isLoadingMore: true));
 
-    try {
-      final (start, end) = _getDateRange();
-      final categoryIdsToQuery = _getExpandedCategoryIds();
-      final nextPage = state.page + 1;
+    final result = await _repository.getTransactions(
+      filter: state.filter,
+      limit: _pageSize,
+      offset: state.transactions.length,
+    );
 
-      final moreTransactions = await _financeDataSource.getTransactions(
-        startDate: start,
-        endDate: end,
-        categoryIds: categoryIdsToQuery,
-        limit: _pageSize,
-        offset: state.transactions.length,
-      );
-
-      emit(state.copyWith(
-        transactions: [...state.transactions, ...moreTransactions],
+    result.fold(
+      (more) => emit(state.copyWith(
+        transactions: [...state.transactions, ...more],
         isLoadingMore: false,
-        page: nextPage,
-        hasMore: moreTransactions.length == _pageSize,
-      ));
-    } catch (e) {
-      emit(state.copyWith(
+        hasMore: more.length == _pageSize,
+      )),
+      (failure) => emit(state.copyWith(
         isLoadingMore: false,
-        errorMessage: e.toString(),
-      ));
-    }
+        hasMore: false,
+        errorMessage: failure.message,
+      )),
+    );
   }
 
-  List<int>? _getExpandedCategoryIds() {
-    if (state.selectedCategoryIds.isEmpty) return null;
-    
-    final expanded = <int>{};
-    for (final id in state.selectedCategoryIds) {
-      expanded.add(id);
-      final parent = _findCategory(state.categories, id);
-      if (parent != null) {
-        for (final child in parent.children) {
-          expanded.add(child.id);
-        }
-      }
-    }
-    return expanded.toList();
+  /// Removes the row, then drops it from the visible page optimistically so
+  /// the list does not jump back to the top for a single deletion.
+  Future<bool> deleteTransaction(int id) async {
+    final result = await _repository.deleteTransaction(id);
+    return result.fold(
+      (_) {
+        emit(state.copyWith(
+          transactions:
+              state.transactions.where((tx) => tx.id != id).toList(),
+          clearErrorMessage: true,
+        ));
+        return true;
+      },
+      (failure) {
+        emit(state.copyWith(errorMessage: failure.message));
+        return false;
+      },
+    );
   }
 
-  SettingsCategory? _findCategory(List<SettingsCategory> categories, int id) {
-    for (final cat in categories) {
-      if (cat.id == id) return cat;
-      final found = _findCategory(cat.children, id);
-      if (found != null) return found;
-    }
-    return null;
+  void search(String query) {
+    _searchDebounceTimer?.cancel();
+    emit(state.copyWith(filter: state.filter.copyWith(searchQuery: query)));
+    _searchDebounceTimer = Timer(_searchDebounce, fetchTransactions);
   }
 
-  (DateTime?, DateTime?) _getDateRange() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    return switch (state.dateFilter) {
-      DateFilterType.today => (today, now),
-      DateFilterType.last7Days => (today.subtract(const Duration(days: 7)), now),
-      DateFilterType.last30Days => (today.subtract(const Duration(days: 30)), now),
-      DateFilterType.custom => (state.customStartDate, state.customEndDate),
-    };
-  }
-
-  void setDateFilter(DateFilterType filter, {DateTime? start, DateTime? end}) {
+  void setDateFilter(DateFilterType type, {DateTime? start, DateTime? end}) {
     emit(state.copyWith(
-      dateFilter: filter,
-      customStartDate: start,
-      customEndDate: end,
+      filter: TransactionFilter(
+        dateFilter: type,
+        // A non-custom range must forget any previously picked dates.
+        customStartDate: type == DateFilterType.custom ? start : null,
+        customEndDate: type == DateFilterType.custom ? end : null,
+        categoryIds: state.filter.categoryIds,
+        searchQuery: state.filter.searchQuery,
+      ),
     ));
-    fetchTransactions();
+    unawaited(fetchTransactions());
   }
 
+  /// Toggles a single node. A parent is marked selected only while every one
+  /// of its children is selected, so the tri-state checkbox stays honest.
   void toggleCategory(int id) {
-    final newSelected = Set<int>.from(state.selectedCategoryIds);
-    if (newSelected.contains(id)) {
-      newSelected.remove(id);
-      final parent = _findParentOf(state.categories, id);
-      if (parent != null) {
-        final allChildrenIds = parent.children.map((c) => c.id).toSet();
-        final selectedChildrenCount = allChildrenIds.where((childId) => newSelected.contains(childId)).length;
-        if (selectedChildrenCount == 0) {
-          newSelected.remove(parent.id);
-        }
-      }
+    final selected = Set<int>.from(state.filter.categoryIds);
+    final parent = _findParentOf(state.categories, id);
+
+    if (selected.contains(id)) {
+      selected.remove(id);
+      if (parent != null) selected.remove(parent.id);
     } else {
-      newSelected.add(id);
-      final parent = _findParentOf(state.categories, id);
+      selected.add(id);
       if (parent != null) {
-        final allChildrenIds = parent.children.map((c) => c.id).toSet();
-        final selectedChildrenCount = allChildrenIds.where((childId) => newSelected.contains(childId)).length;
-        if (selectedChildrenCount == allChildrenIds.length) {
-          newSelected.add(parent.id);
-        }
+        final childIds = parent.children.map((c) => c.id).toSet();
+        if (childIds.every(selected.contains)) selected.add(parent.id);
       }
     }
-    emit(state.copyWith(selectedCategoryIds: newSelected));
-    fetchTransactions();
+
+    _applyCategorySelection(selected);
   }
 
-  SettingsCategory? _findParentOf(List<SettingsCategory> categories, int childId) {
+  void toggleParentGroup(SettingsCategory category) {
+    final selected = Set<int>.from(state.filter.categoryIds);
+    final allIds = [category.id, ...category.children.map((c) => c.id)];
+
+    if (allIds.every(selected.contains)) {
+      selected.removeAll(allIds);
+    } else {
+      selected.addAll(allIds);
+    }
+
+    _applyCategorySelection(selected);
+  }
+
+  void clearCategories() => _applyCategorySelection(const {});
+
+  void resetFilters() {
+    emit(state.copyWith(
+      filter: TransactionFilter(searchQuery: state.filter.searchQuery),
+    ));
+    unawaited(fetchTransactions());
+  }
+
+  void _applyCategorySelection(Set<int> selected) {
+    emit(state.copyWith(
+      filter: state.filter.copyWith(categoryIds: selected),
+    ));
+    unawaited(fetchTransactions());
+  }
+
+  SettingsCategory? _findParentOf(
+    List<SettingsCategory> categories,
+    int childId,
+  ) {
     for (final cat in categories) {
       if (cat.children.any((c) => c.id == childId)) return cat;
       final found = _findParentOf(cat.children, childId);
@@ -183,27 +187,9 @@ class TransactionListCubit extends Cubit<TransactionListState> {
     return null;
   }
 
-  void toggleParentGroup(SettingsCategory category) {
-    final newSelected = Set<int>.from(state.selectedCategoryIds);
-    final allIds = [category.id, ...category.children.map((c) => c.id)];
-    final selectedCount = allIds.where((id) => newSelected.contains(id)).length;
-
-    if (selectedCount == allIds.length) {
-      for (final id in allIds) {
-        newSelected.remove(id);
-      }
-    } else {
-      for (final id in allIds) {
-        newSelected.add(id);
-      }
-    }
-
-    emit(state.copyWith(selectedCategoryIds: newSelected));
-    fetchTransactions();
-  }
-
-  void clearCategories() {
-    emit(state.copyWith(selectedCategoryIds: const {}));
-    fetchTransactions();
+  @override
+  Future<void> close() {
+    _searchDebounceTimer?.cancel();
+    return super.close();
   }
 }

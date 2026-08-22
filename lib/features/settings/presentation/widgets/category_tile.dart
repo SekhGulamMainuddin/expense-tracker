@@ -207,55 +207,6 @@ class DashedRectPainter extends CustomPainter {
       borderRadius != oldDelegate.borderRadius;
 }
 
-class _CategoryMenu extends StatelessWidget {
-  const _CategoryMenu({
-    required this.onEdit,
-    required this.onAddSubcategory,
-    required this.onDelete,
-  });
-
-  final VoidCallback onEdit;
-  final VoidCallback onAddSubcategory;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert,
-        size: 20.r,
-        color: context.theme.colorScheme.onSurfaceVariant,
-      ),
-      onSelected: (value) {
-        if (value == 'edit') {
-          onEdit();
-        } else if (value == 'add') {
-          onAddSubcategory();
-        } else if (value == 'delete') {
-          onDelete();
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'edit',
-          child: AppTextBodyMd('settings.edit_category'),
-        ),
-        PopupMenuItem(
-          value: 'add',
-          child: AppTextBodyMd('settings.add_subcategory'),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: AppTextBodyMd(
-            'settings.delete_category',
-            color: context.theme.colorScheme.error,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _AddSubcategoryButton extends StatelessWidget {
   const _AddSubcategoryButton({required this.onTap});
 

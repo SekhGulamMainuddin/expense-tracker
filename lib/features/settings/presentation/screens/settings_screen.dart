@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:expense_tracker/core/di/service_locator.dart';
+import 'package:expense_tracker/core/domain/entities/currency.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
 import 'package:expense_tracker/features/settings/domain/entities/settings_category.dart';
@@ -8,6 +9,7 @@ import 'package:expense_tracker/features/settings/presentation/cubit/settings_cu
 import 'package:expense_tracker/features/settings/presentation/cubit/settings_state.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/budget_section.dart';
 import 'package:expense_tracker/features/settings/presentation/widgets/category_list.dart';
+import 'package:expense_tracker/features/settings/presentation/widgets/exchange_rate_row.dart';
 import 'package:expense_tracker/features/settings/presentation/screens/category_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -295,6 +297,8 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           Divider(color: cs.outlineVariant, height: 32.h),
+          const ExchangeRateRow(),
+          Divider(color: cs.outlineVariant, height: 32.h),
           Row(
             children: [
               Icon(Icons.brightness_6, color: cs.primary, size: 24.r),
@@ -345,12 +349,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _currencyLabel(BuildContext context, String currencyCode) {
-    return switch (currencyCode.toLowerCase()) {
-      'usd' => context.tr('common.usd'),
-      'inr' => context.tr('common.inr'),
-      'eur' => context.tr('common.eur'),
-      _ => currencyCode.toUpperCase(),
-    };
+    final currency = Currency.fromCode(currencyCode);
+    return '${currency.displayName} (${currency.code})';
   }
 }
 
@@ -446,29 +446,42 @@ class _CurrencySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final options = const [
-      ('inr', 'common.inr', Icons.currency_rupee),
-      ('usd', 'common.usd', Icons.attach_money),
-      ('eur', 'common.eur', Icons.euro),
-    ];
+    final cs = context.theme.colorScheme;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final option in options)
-          ListTile(
-            leading: Icon(option.$3),
-            title: AppTextBodyMd(option.$2, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: AppTextLabelSm(option.$1.toUpperCase()),
-            trailing: currentCurrencyCode == option.$1
-                ? Icon(Icons.check, color: context.theme.colorScheme.primary)
-                : null,
-            onTap: () {
-              onSelected(option.$1);
-              Navigator.pop(context);
-            },
-          ),
-      ],
+    // Driven off the enum so adding a currency needs no UI change.
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 0.6.sh),
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          for (final currency in Currency.values)
+            ListTile(
+              leading: SizedBox(
+                width: 32.w,
+                child: Center(
+                  child: AppTextBodyLg(
+                    currency.symbol,
+                    style: context.theme.textTheme.bodyLarge!
+                        .copyWith(fontWeight: FontWeight.w700),
+                    color: cs.primary,
+                  ),
+                ),
+              ),
+              title: AppTextBodyMd(
+                currency.displayName,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: AppTextLabelSm(currency.code),
+              trailing: currentCurrencyCode.toLowerCase() == currency.name
+                  ? Icon(Icons.check, color: cs.primary)
+                  : null,
+              onTap: () {
+                onSelected(currency.name);
+                Navigator.pop(context);
+              },
+            ),
+        ],
+      ),
     );
   }
 }

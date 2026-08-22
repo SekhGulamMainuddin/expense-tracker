@@ -198,7 +198,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             }
           } catch (e) {
-            print("SEKH BRO $e");
             if (context.mounted) {
               context.pop(); // Close loader
               ScaffoldMessenger.of(context).showSnackBar(

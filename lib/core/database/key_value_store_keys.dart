@@ -15,6 +15,13 @@ final class CurrencyPreferenceKey extends AppPreferenceKey<Currency> {
   const CurrencyPreferenceKey() : super('baseCurrency', Currency.inr);
 }
 
+/// Cached exchange-rate payload. Has no meaningful default: absence means
+/// "never synced", which the repository handles explicitly.
+final class ExchangeRatesPreferenceKey
+    extends AppPreferenceKey<Map<String, dynamic>?> {
+  const ExchangeRatesPreferenceKey() : super('exchangeRates', null);
+}
+
 final class DailyLimitPreferenceKey extends AppPreferenceKey<double> {
   const DailyLimitPreferenceKey() : super('dailyLimit', 50.0);
 }
@@ -42,6 +49,7 @@ final class DangerThresholdPreferenceKey extends AppPreferenceKey<double> {
 class AppPreferences {
   static const theme = ThemePreferenceKey();
   static const currency = CurrencyPreferenceKey();
+  static const exchangeRates = ExchangeRatesPreferenceKey();
   static const dailyLimit = DailyLimitPreferenceKey();
   static const weeklyLimit = WeeklyLimitPreferenceKey();
   static const monthlyLimit = MonthlyLimitPreferenceKey();

@@ -129,7 +129,9 @@ class DriveRepositoryImpl implements DriveRepository {
   Future<String?> _findFileId(String fileName) async {
     final escaped = fileName.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
     final response = await _remoteDataSource.findFile(
-      query: "name = '$escaped'",
+      // Trashed files still match a name query and would be resurrected as
+      // the "existing" backup target, so exclude them explicitly.
+      query: "name = '$escaped' and trashed = false",
     );
     if (response.files.isEmpty) return null;
     return response.files.first.id;

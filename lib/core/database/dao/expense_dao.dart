@@ -24,9 +24,18 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final now = DateTime.now();
     final thisMonthStart = DateTime(now.year, now.month, 1);
 
-    // Calculate equivalent day last month
+    // Equivalent day last month. `now.day` can overflow a shorter month
+    // (e.g. Mar 31 -> Feb 31), so clamp it to that month's last day.
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
-    final lastMonthEquivalent = DateTime(now.year, now.month - 1, now.day);
+    final lastMonthLastDay = DateTime(now.year, now.month, 0).day;
+    final lastMonthEquivalent = DateTime(
+      now.year,
+      now.month - 1,
+      now.day > lastMonthLastDay ? lastMonthLastDay : now.day,
+      now.hour,
+      now.minute,
+      now.second,
+    );
 
     final thisMonthTotal = await getTotalExpense(thisMonthStart, now);
     final lastMonthTotal = await getTotalExpense(
@@ -133,6 +142,7 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     DateTime? startDate,
     DateTime? endDate,
     List<int>? categoryIds,
+    String? searchQuery,
     int? limit,
     int? offset,
   }) {
@@ -147,6 +157,11 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
 
     if (categoryIds != null && categoryIds.isNotEmpty) {
       query.where((t) => t.categoryId.isIn(categoryIds));
+    }
+
+    if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+      final term = '%${searchQuery.trim()}%';
+      query.where((t) => t.title.like(term));
     }
 
     query.orderBy([
@@ -202,9 +217,11 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     return (select(expenses)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
-  /// Adds an expense with fallback title logic and enum currency.
+  /// Adds an expense. [baseAmount] is the INR-normalized value and is
+  /// computed by the caller, which is the layer that owns exchange rates.
   Future<int> addExpense({
     required double amount,
+    required double baseAmount,
     String? title,
     required int categoryId,
     Currency currency = Currency.inr,
@@ -213,8 +230,6 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     final expenseDate = date ?? DateTime.now();
 
     final expenseTitle = title ?? "";
-
-    final baseAmount = amount * currency.rateToInr;
 
     return into(expenses).insert(
       ExpensesCompanion.insert(
@@ -228,9 +243,13 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
     );
   }
 
+  Future<int> deleteExpense(int id) =>
+      (delete(expenses)..where((t) => t.id.equals(id))).go();
+
   Future<bool> updateExpenseValues({
     required int id,
     required double amount,
+    required double baseAmount,
     String? title,
     required int categoryId,
     Currency currency = Currency.inr,
@@ -238,8 +257,6 @@ class ExpenseDao extends DatabaseAccessor<AppDatabase> with _$ExpenseDaoMixin {
   }) async {
     final expenseDate = date ?? DateTime.now();
     final expenseTitle = title ?? "";
-
-    final baseAmount = amount * currency.rateToInr;
 
     return (update(expenses)..where((t) => t.id.equals(id))).write(
       ExpensesCompanion(

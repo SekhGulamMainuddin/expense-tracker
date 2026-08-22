@@ -1,3 +1,4 @@
+import 'package:expense_tracker/core/di/service_locator.dart';
 import 'package:expense_tracker/core/styles/app_text_styles.dart';
 import 'package:expense_tracker/core/styles/app_texts.dart';
 import 'package:expense_tracker/core/utils/ui_extensions.dart';
@@ -12,18 +13,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class AmountDisplay extends StatelessWidget {
   const AmountDisplay({
     super.key,
-    required this.cubit,
     required this.controller,
     this.enabled = true,
   });
 
-  final AddExpenseCubit cubit;
   final TextEditingController controller;
   final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     final cs = context.theme.colorScheme;
+    final cubit = getIt<AddExpenseCubit>();
     return BlocBuilder<AddExpenseCubit, AddExpenseState>(
       bloc: cubit,
       builder: (context, state) {
